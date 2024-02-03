@@ -1,10 +1,10 @@
-package parkourbeat.levels.dao;
+package ru.sortix.parkourbeat.levels.dao;
 
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
-import parkourbeat.levels.settings.WorldSettings;
-import parkourbeat.location.Position;
-import parkourbeat.location.Region;
+import org.bukkit.util.Vector;
+import ru.sortix.parkourbeat.levels.settings.WorldSettings;
+import ru.sortix.parkourbeat.location.Region;
 
 public class WorldSettingsDAO {
 
@@ -16,7 +16,7 @@ public class WorldSettingsDAO {
     }
 
     public WorldSettings load(FileConfiguration config, World world) {
-        Position spawn = config.getSerializable("spawn", Position.class);
+        Vector spawn = config.getSerializable("spawn", Vector.class);
         Region startRegion = config.getSerializable("start_region", Region.class);
         Region gameRegion = config.getSerializable("game_region", Region.class);
         Region finishRegion = config.getSerializable("finish_region", Region.class);

@@ -1,8 +1,6 @@
-package parkourbeat.levels.settings;
+package ru.sortix.parkourbeat.levels.settings;
 
 import org.bukkit.World;
-import parkourbeat.levels.settings.GameSettings;
-import parkourbeat.levels.settings.WorldSettings;
 
 public class LevelSettings {
 

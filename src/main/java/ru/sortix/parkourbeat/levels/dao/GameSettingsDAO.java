@@ -1,7 +1,7 @@
-package parkourbeat.levels.dao;
+package ru.sortix.parkourbeat.levels.dao;
 
 import org.bukkit.configuration.file.FileConfiguration;
-import parkourbeat.levels.settings.GameSettings;
+import ru.sortix.parkourbeat.levels.settings.GameSettings;
 
 public class GameSettingsDAO {
 

@@ -1,13 +1,13 @@
-package parkourbeat.levels.dao;
+package ru.sortix.parkourbeat.levels.dao;
 
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import parkourbeat.levels.settings.GameSettings;
-import parkourbeat.levels.settings.LevelSettings;
-import parkourbeat.levels.settings.WorldSettings;
+import ru.sortix.parkourbeat.levels.settings.GameSettings;
+import ru.sortix.parkourbeat.levels.settings.LevelSettings;
+import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 
 import java.io.File;
 import java.io.IOException;

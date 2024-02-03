@@ -1,4 +1,4 @@
-package parkourbeat.game;
+package ru.sortix.parkourbeat.game;
 
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;

@@ -76,6 +76,7 @@
             <groupId>me.bomb</groupId>
             <artifactId>amusic</artifactId>
             <version>0.12</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

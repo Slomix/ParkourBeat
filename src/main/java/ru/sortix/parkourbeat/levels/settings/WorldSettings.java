@@ -1,9 +1,9 @@
-package parkourbeat.levels.settings;
+package ru.sortix.parkourbeat.levels.settings;
 
 import org.bukkit.Location;
 import org.bukkit.World;
-import parkourbeat.location.Position;
-import parkourbeat.location.Region;
+import org.bukkit.util.Vector;
+import ru.sortix.parkourbeat.location.Region;
 
 public class WorldSettings {
 
@@ -11,9 +11,9 @@ public class WorldSettings {
     private final Location spawn;
     private final Region startRegion, gameRegion, finishRegion;
 
-    public WorldSettings(World world, Position spawn, Region startRegion, Region gameRegion, Region finishRegion) {
+    public WorldSettings(World world, Vector spawn, Region startRegion, Region gameRegion, Region finishRegion) {
         this.world = world;
-        this.spawn = spawn.getInWorld(world);
+        this.spawn = spawn.toLocation(world);
         this.startRegion = startRegion;
         this.gameRegion = gameRegion;
         this.finishRegion = finishRegion;

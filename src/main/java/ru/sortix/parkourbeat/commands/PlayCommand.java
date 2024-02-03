@@ -1,13 +1,13 @@
-package parkourbeat.commands;
+package ru.sortix.parkourbeat.commands;
 
-import parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.ParkourBeat;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import parkourbeat.game.Game;
-import parkourbeat.game.GameManager;
-import parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.game.Game;
+import ru.sortix.parkourbeat.game.GameManager;
+import ru.sortix.parkourbeat.levels.LevelsManager;
 
 import java.util.Random;
 
@@ -28,7 +28,7 @@ public class PlayCommand implements CommandExecutor {
                 return true;
             }
 
-            String worldId = args[0].toLowerCase();
+            String worldId = args[0];
             Game game = GameManager.getCurrentGame(player);
 
             if (game != null) {

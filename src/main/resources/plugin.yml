@@ -1,7 +1,7 @@
 name: ParkourBeat
-main: me.bomb.parkourbeat.ParkourBeat
+main: ru.sortix.parkourbeat.ParkourBeat
 version: 0.5
-author: Bomb
+author: Sortix, Bomb
 depend: [AMusic]
 commands:
   tptoworld:

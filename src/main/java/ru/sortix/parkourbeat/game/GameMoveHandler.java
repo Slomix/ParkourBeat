@@ -1,4 +1,4 @@
-package parkourbeat.game;
+package ru.sortix.parkourbeat.game;
 
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -9,10 +9,10 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
-import parkourbeat.ParkourBeat;
-import parkourbeat.levels.settings.LevelSettings;
-import parkourbeat.levels.settings.WorldSettings;
-import parkourbeat.location.Region;
+import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.levels.settings.LevelSettings;
+import ru.sortix.parkourbeat.levels.settings.WorldSettings;
+import ru.sortix.parkourbeat.location.Region;
 
 public class GameMoveHandler {
 
@@ -25,8 +25,8 @@ public class GameMoveHandler {
         WorldSettings worldSettings = game.getLevelSettings().getWorldSettings();
         Region startRegion = worldSettings.getStartRegion();
         Region finishRegion = worldSettings.getFinishRegion();
-        startLoc = startRegion.getCenter().getInWorld(worldSettings.getWorld());
-        finishLoc = finishRegion.getCenter().getInWorld(worldSettings.getWorld());
+        startLoc = startRegion.getCenter().toLocation(worldSettings.getWorld());
+        finishLoc = finishRegion.getCenter().toLocation(worldSettings.getWorld());
     }
 
     public void onPreparingState(PlayerMoveEvent event) {
@@ -75,12 +75,15 @@ public class GameMoveHandler {
     }
 
     private void startDamageTask(Player player, int damage, String reason) {
-        Bukkit.getScheduler().runTaskTimer(ParkourBeat.getInstance(), () -> {
-            if (!player.isOnline()) {
+        task = Bukkit.getScheduler().runTaskTimer(ParkourBeat.getInstance(), () -> {
+            if (!player.isOnline() || game.getCurrentState() != Game.State.RUNNING) {
                 task.cancel();
                 return;
             }
             damagePlayer(player, damage, reason);
+            if (player.isDead() || player.getHealth() <= 0) {
+                task.cancel();
+            }
         }, 0, 5);
     }
 

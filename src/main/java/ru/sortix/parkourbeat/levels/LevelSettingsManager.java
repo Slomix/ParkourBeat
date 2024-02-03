@@ -1,9 +1,8 @@
-package parkourbeat.levels;
+package ru.sortix.parkourbeat.levels;
 
 import org.jetbrains.annotations.NotNull;
-import parkourbeat.levels.dao.LevelSettingDAO;
-import parkourbeat.levels.settings.LevelSettings;
-import parkourbeat.levels.settings.WorldSettings;
+import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
+import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,16 +1,14 @@
-package parkourbeat.location;
+package ru.sortix.parkourbeat.location;
 
 import org.bukkit.Location;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
+import org.bukkit.util.Vector;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class Region implements ConfigurationSerializable {
     private final int minX, minY, minZ, maxX, maxY, maxZ;
-    private final int sizeX, sizeY, sizeZ;
-
     public Region(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
         this.minX = minX;
         this.minY = minY;
@@ -18,21 +16,18 @@ public class Region implements ConfigurationSerializable {
         this.maxX = maxX;
         this.maxY = maxY;
         this.maxZ = maxZ;
-        this.sizeX = maxX - minX;
-        this.sizeY = maxY - minY;
-        this.sizeZ = maxZ - minZ;
     }
 
-    public Position getCenter() {
-        return new Position((minX + maxX) / 2.0, (minY + maxY) / 2.0, (minZ + maxZ) / 2.0);
+    public Vector getCenter() {
+        return new Vector((minX + maxX) / 2.0, (minY + maxY) / 2.0, (minZ + maxZ) / 2.0);
     }
 
     public boolean isOutside(double x, double y, double z) {
-        return x < minX || x > maxX || y < minY || y > maxY || z < minZ || z > maxZ;
+        return !isInside(x, y, z);
     }
 
     public boolean isInside(double x, double y, double z) {
-        return !isOutside(x, y, z);
+        return x >= minX && x <= maxX + 1 && y >= minY && y <= maxY + 1 && z >= minZ && z <= maxZ + 1;
     }
 
     public boolean isOutside(Location location) {

@@ -1,17 +1,18 @@
-package parkourbeat.game;
+package ru.sortix.parkourbeat.game;
 
 import me.bomb.amusic.AMusic;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import parkourbeat.ParkourBeat;
-import parkourbeat.data.Settings;
-import parkourbeat.levels.settings.GameSettings;
-import parkourbeat.levels.settings.LevelSettings;
-import parkourbeat.levels.settings.WorldSettings;
+import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.levels.settings.GameSettings;
+import ru.sortix.parkourbeat.levels.settings.LevelSettings;
+import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 
 public class Game {
 
@@ -30,12 +31,16 @@ public class Game {
         GameSettings gameSettings = levelSettings.getGameSettings();
 
         player.teleport(worldSettings.getSpawn());
+        this.gameMoveHandler = new GameMoveHandler(this);
 
         if (!gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
-            AMusic.loadPack(player, gameSettings.getSongPlayListName(), false);
+            Bukkit.getScheduler().scheduleSyncDelayedTask(ParkourBeat.getInstance(), () -> {
+                AMusic.loadPack(player, gameSettings.getSongPlayListName(), false);
+            }, 20L);
+
         }
 
-        this.gameMoveHandler = new GameMoveHandler(this);
+
     }
 
     public void start() {
@@ -44,6 +49,7 @@ public class Game {
         }
         GameSettings gameSettings = levelSettings.getGameSettings();
         player.sendMessage("Game start!");
+
         AMusic.setRepeatMode(player, null);
         AMusic.playSound(player, gameSettings.getSongName());
         currentState = State.RUNNING;
@@ -77,6 +83,7 @@ public class Game {
         } else if (reason == StopReason.FINISH) {
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§aВы прошли уровень"));
         }
+        AMusic.stopSound(player);
         currentState = State.READY;
     }
 

@@ -1,6 +1,6 @@
-package parkourbeat.levels.dao;
+package ru.sortix.parkourbeat.levels.dao;
 
-import parkourbeat.levels.settings.LevelSettings;
+import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 public interface LevelSettingDAO {
 

@@ -1,19 +1,10 @@
-package parkourbeat.data;
+package ru.sortix.parkourbeat.data;
 
 import org.bukkit.configuration.file.FileConfiguration;
-import parkourbeat.ParkourBeat;
-import parkourbeat.location.Region;
+import ru.sortix.parkourbeat.ParkourBeat;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.java.JavaPlugin;
-import parkourbeat.levels.settings.GameSettings;
-
-import java.io.*;
-import java.util.*;
 
 public class Settings {
     private static Location exitLocation;

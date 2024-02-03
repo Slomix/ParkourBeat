@@ -1,4 +1,4 @@
-package parkourbeat.levels.settings;
+package ru.sortix.parkourbeat.levels.settings;
 
 import org.bukkit.Location;
 

@@ -1,4 +1,4 @@
-package parkourbeat.levels;
+package ru.sortix.parkourbeat.levels;
 
 import org.bukkit.Bukkit;
 import org.bukkit.World;
@@ -7,9 +7,9 @@ import org.bukkit.WorldType;
 import org.bukkit.generator.ChunkGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import parkourbeat.data.Settings;
-import parkourbeat.levels.dao.LevelSettingDAO;
-import parkourbeat.levels.settings.LevelSettings;
+import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
+import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 import java.io.File;
 import java.util.*;

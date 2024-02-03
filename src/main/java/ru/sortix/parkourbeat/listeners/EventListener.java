@@ -1,12 +1,11 @@
-package parkourbeat.listeners;
+package ru.sortix.parkourbeat.listeners;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import parkourbeat.ParkourBeat;
-import parkourbeat.data.Settings;
-import parkourbeat.game.Game;
-import parkourbeat.game.GameManager;
-import org.bukkit.Location;
+import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.game.Game;
+import ru.sortix.parkourbeat.game.GameManager;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

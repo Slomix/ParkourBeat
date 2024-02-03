@@ -1,20 +1,18 @@
-package parkourbeat.commands;
+package ru.sortix.parkourbeat.commands;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import parkourbeat.ParkourBeat;
-import parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.data.Settings;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class TpToWorldCommand implements CommandExecutor, TabCompleter {
 
