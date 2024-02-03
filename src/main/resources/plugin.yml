@@ -1,0 +1,8 @@
+name: ParkourBeat
+main: me.bomb.parkourbeat.ParkourBeat
+version: 0.5
+author: Bomb
+depend: [AMusic]
+commands:
+  tptoworld:
+  play:
