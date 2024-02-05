@@ -8,9 +8,15 @@ import ru.sortix.parkourbeat.game.GameManager;
 
 public class SprintListener implements Listener {
 
+    private final GameManager gameManager;
+
+    public SprintListener(GameManager gameManager) {
+        this.gameManager = gameManager;
+    }
+
     @EventHandler
     public void onSprint(PlayerToggleSprintEvent event) {
-        Game game = GameManager.getCurrentGame(event.getPlayer());
+        Game game = gameManager.getCurrentGame(event.getPlayer());
         if (game == null) {
             return;
         }

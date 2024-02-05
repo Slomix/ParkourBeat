@@ -1,6 +1,5 @@
 package ru.sortix.parkourbeat.commands;
 
-import ru.sortix.parkourbeat.ParkourBeat;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -9,13 +8,14 @@ import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
-import java.util.Random;
-
 public class PlayCommand implements CommandExecutor {
 
-    private final Random random = new Random();
+    private final GameManager gameManager;
+    private final LevelsManager levelsManager;
 
-    public PlayCommand() {
+    public PlayCommand(GameManager gameManager, LevelsManager levelsManager) {
+        this.gameManager = gameManager;
+        this.levelsManager = levelsManager;
     }
 
     @Override
@@ -29,20 +29,19 @@ public class PlayCommand implements CommandExecutor {
             }
 
             String worldId = args[0];
-            Game game = GameManager.getCurrentGame(player);
+            Game game = gameManager.getCurrentGame(player);
 
             if (game != null) {
                 if (game.getLevelSettings().getWorldSettings().getWorld().getName().equals(worldId)) {
                     player.sendMessage("You are already in this level!");
                     return true;
                 } else {
-                    GameManager.removeGame(player);
+                    gameManager.removeGame(player);
                 }
             }
 
-            LevelsManager levelsManager = ParkourBeat.getLevelsManager();
             if (levelsManager.getAllLevels().contains(worldId)) {
-                GameManager.createNewGame(player, worldId);
+                gameManager.createNewGame(player, worldId);
             } else {
                 player.sendMessage("Level not found!");
             }

@@ -10,48 +10,60 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
+import ru.sortix.parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 
 public class Game {
 
-    private Player player;
+    private final LevelsManager levelsManager;
     private LevelSettings levelSettings;
+    private Player player;
     private State currentState;
     private GameMoveHandler gameMoveHandler;
+
+    public Game(LevelsManager levelsManager) {
+        currentState = State.PREPARING;
+        player = null;
+        levelSettings = null;
+        gameMoveHandler = null;
+        this.levelsManager = levelsManager;
+    }
 
     public void prepare(Player player, String levelName) {
         currentState = State.PREPARING;
         this.player = player;
 
-        World world = ParkourBeat.getLevelsManager().loadLevel(levelName);
-        levelSettings = ParkourBeat.getLevelsManager().loadLevelSettings(world);
+        World world = levelsManager.loadLevel(levelName);
+        levelSettings = levelsManager.loadLevelSettings(world);
         WorldSettings worldSettings = levelSettings.getWorldSettings();
         GameSettings gameSettings = levelSettings.getGameSettings();
+        ParticleController particleController = levelSettings.getParticleController();
+
+        if (!gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(ParkourBeat.getPlugin(), () ->
+                    AMusic.loadPack(player, gameSettings.getSongPlayListName(), false), 20L);
+        }
+
+        if (!particleController.isLoaded()) {
+            particleController.loadParticleLocations(worldSettings.getParticlePoints());
+        }
 
         player.teleport(worldSettings.getSpawn());
         this.gameMoveHandler = new GameMoveHandler(this);
-
-        if (!gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(ParkourBeat.getInstance(), () -> {
-                AMusic.loadPack(player, gameSettings.getSongPlayListName(), false);
-            }, 20L);
-
-        }
-
-
     }
 
     public void start() {
         if (currentState != State.READY) {
             return;
         }
-        GameSettings gameSettings = levelSettings.getGameSettings();
-        player.sendMessage("Game start!");
-
+        levelSettings.getParticleController().startSpawnParticles(player);
         AMusic.setRepeatMode(player, null);
-        AMusic.playSound(player, gameSettings.getSongName());
+        AMusic.playSound(player, levelSettings.getGameSettings().getSongName());
+
         currentState = State.RUNNING;
     }
 
@@ -69,7 +81,12 @@ public class Game {
         return currentState;
     }
 
+    public Player getPlayer() {
+        return player;
+    }
+
     public void setCurrentState(State currentState) {
+        player.sendMessage("State: " + currentState);
         this.currentState = currentState;
     }
 
@@ -84,6 +101,8 @@ public class Game {
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§aВы прошли уровень"));
         }
         AMusic.stopSound(player);
+        levelSettings.getParticleController().stopSpawnParticles(player);
+        gameMoveHandler.getAccuracyChecker().reset();
         currentState = State.READY;
     }
 
@@ -91,7 +110,8 @@ public class Game {
         player.teleport(Settings.getExitLocation());
         World world = levelSettings.getWorldSettings().getWorld();
         if (world.getPlayers().isEmpty())
-            ParkourBeat.getLevelsManager().unloadLevel(world.getName());
+            levelsManager.unloadLevel(world.getName());
+        levelSettings.getParticleController().stopSpawnParticles(player);
     }
 
     public enum State {
@@ -103,8 +123,7 @@ public class Game {
     public enum StopReason {
         FINISH,
         LOOSE,
-        WRONG_DIRECTION,
-        LEAVE
+        WRONG_DIRECTION
     }
 
 }

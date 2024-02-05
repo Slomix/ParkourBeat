@@ -8,9 +8,15 @@ import ru.sortix.parkourbeat.game.GameManager;
 
 public class ResourcePackListener implements Listener {
 
+    private final GameManager gameManager;
+
+    public ResourcePackListener(GameManager gameManager) {
+        this.gameManager = gameManager;
+    }
+
     @EventHandler
     public void onResourcePack(PlayerResourcePackStatusEvent event) {
-        Game game = GameManager.getCurrentGame(event.getPlayer());
+        Game game = gameManager.getCurrentGame(event.getPlayer());
         if (game == null) {
             return;
         }

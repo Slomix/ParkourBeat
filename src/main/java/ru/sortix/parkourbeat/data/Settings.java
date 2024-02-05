@@ -1,10 +1,10 @@
 package ru.sortix.parkourbeat.data;
 
 import org.bukkit.configuration.file.FileConfiguration;
-import ru.sortix.parkourbeat.ParkourBeat;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.sortix.parkourbeat.ParkourBeat;
 
 public class Settings {
     private static Location exitLocation;
@@ -15,7 +15,7 @@ public class Settings {
             Bukkit.getLogger().warning("Settings already loaded!");
             return;
         }
-        JavaPlugin plugin = ParkourBeat.getInstance();
+        JavaPlugin plugin = ParkourBeat.getPlugin();
         plugin.saveDefaultConfig();
         FileConfiguration config = plugin.getConfig();
         String world = config.getString("spawn.world", "world");

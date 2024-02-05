@@ -39,7 +39,7 @@ public class LevelsManager {
         if (levels.contains(name)) {
             return null;
         }
-        World world = Bukkit.createWorld(new WorldCreator(name).type(type).generator(new VoidGenerator()));
+        World world = Bukkit.createWorld(new WorldCreator(name).type(type));
         world.setAutoSave(false);
         levels.add(name);
         levelsSettings.addLevelSettings(name, LevelSettings.create(world));
@@ -117,16 +117,6 @@ public class LevelsManager {
         List<String> worldNames = Bukkit.getWorlds().stream().map(World::getName).collect(Collectors.toList());
         worldNames.remove(Settings.getExitLocation().getWorld().getName());
         return worldNames;
-    }
-
-    public static class VoidGenerator extends ChunkGenerator {
-
-        @Override
-        public byte[][] generateBlockSections(World world, Random random, int chunkX, int chunkZ, BiomeGrid biomeGrid){
-            byte[][] result = new byte[world.getMaxHeight() / 16][];
-            return result;
-        }
-
     }
 
 }

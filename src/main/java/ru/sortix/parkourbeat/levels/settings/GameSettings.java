@@ -1,7 +1,5 @@
 package ru.sortix.parkourbeat.levels.settings;
 
-import org.bukkit.Location;
-
 public class GameSettings {
 
     protected final String songPlayListName, songName, regionName;

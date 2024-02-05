@@ -6,15 +6,21 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.game.GameManager;
-import ru.sortix.parkourbeat.game.GameMoveHandler;
+import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
 
 public class MoveListener implements Listener {
+
+    private final GameManager gameManager;
+
+    public MoveListener(GameManager gameManager) {
+        this.gameManager = gameManager;
+    }
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
         Player player = event.getPlayer();
 
-        Game game = GameManager.getCurrentGame(player);
+        Game game = gameManager.getCurrentGame(player);
         if (game == null) {
             return;
         }

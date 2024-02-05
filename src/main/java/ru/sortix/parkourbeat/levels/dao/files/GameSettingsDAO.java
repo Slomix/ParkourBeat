@@ -1,4 +1,4 @@
-package ru.sortix.parkourbeat.levels.dao;
+package ru.sortix.parkourbeat.levels.dao.files;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;

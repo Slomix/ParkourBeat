@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.listeners;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.game.Game;
@@ -21,6 +22,12 @@ import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
 public final class EventListener implements Listener {
 
+    private final GameManager gameManager;
+
+    public EventListener(GameManager gameManager) {
+        this.gameManager = gameManager;
+    }
+
     @EventHandler
     public void onSpawnLocation(PlayerSpawnLocationEvent event) {
         event.setSpawnLocation(Settings.getExitLocation());
@@ -36,13 +43,13 @@ public final class EventListener implements Listener {
     @EventHandler
     public void onChunkUnload(ChunkUnloadEvent event) {
         if (event.getWorld() == Settings.getExitLocation().getWorld()) {
-            event.setCancelled(true);
+
         }
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        GameManager.removeGame(event.getPlayer());
+        gameManager.removeGame(event.getPlayer());
     }
 
     @EventHandler
@@ -62,23 +69,23 @@ public final class EventListener implements Listener {
             return;
         }
         Player player = (Player) event.getEntity();
-        Game game = GameManager.getCurrentGame(player);
+        Game game = gameManager.getCurrentGame(player);
         if (game == null) {
             return;
         }
         if (game.getCurrentState() != Game.State.RUNNING) {
             if (event.getCause() == DamageCause.VOID) {
-                event.setCancelled(true);
                 game.stopGame(Game.StopReason.LOOSE);
             }
+            event.setCancelled(true);
         }
     }
 
     @EventHandler
     public void onDeath(PlayerDeathEvent event) {
-        Bukkit.getScheduler().scheduleSyncDelayedTask(ParkourBeat.getInstance(), () -> {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(ParkourBeat.getPlugin(), () -> {
             event.getEntity().spigot().respawn();
-            Game game = GameManager.getCurrentGame(event.getEntity());
+            Game game = gameManager.getCurrentGame(event.getEntity());
             if (game != null) {
                 game.stopGame(Game.StopReason.LOOSE);
             } else {
