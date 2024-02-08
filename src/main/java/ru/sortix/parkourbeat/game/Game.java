@@ -9,8 +9,8 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.ParkourBeat;
-import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
+import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
@@ -37,23 +37,25 @@ public class Game {
         currentState = State.PREPARING;
         this.player = player;
 
-        World world = levelsManager.loadLevel(levelName);
-        levelSettings = levelsManager.loadLevelSettings(world);
+        Level level = levelsManager.loadLevel(levelName);
+        levelSettings = level.getLevelSettings();
         WorldSettings worldSettings = levelSettings.getWorldSettings();
         GameSettings gameSettings = levelSettings.getGameSettings();
         ParticleController particleController = levelSettings.getParticleController();
 
-        if (!gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
-            Bukkit.getScheduler().scheduleSyncDelayedTask(ParkourBeat.getPlugin(), () ->
-                    AMusic.loadPack(player, gameSettings.getSongPlayListName(), false), 20L);
-        }
-
         if (!particleController.isLoaded()) {
-            particleController.loadParticleLocations(worldSettings.getParticlePoints());
+            particleController.loadParticleLocations(worldSettings.getWaypoints());
         }
 
         player.teleport(worldSettings.getSpawn());
         this.gameMoveHandler = new GameMoveHandler(this);
+
+        if (!gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
+            Bukkit.getScheduler().scheduleSyncDelayedTask(ParkourBeat.getPlugin(), () ->
+                    AMusic.loadPack(player, gameSettings.getSongPlayListName(), false), 20L);
+        } else {
+            currentState = State.READY;
+        }
     }
 
     public void start() {
@@ -92,6 +94,7 @@ public class Game {
 
     public void stopGame(StopReason reason) {
         player.teleport(levelSettings.getWorldSettings().getSpawn());
+        player.setHealth(20);
         player.setGameMode(GameMode.ADVENTURE);
         if (reason == StopReason.WRONG_DIRECTION) {
             player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§cНельзя бежать назад"));
@@ -107,9 +110,14 @@ public class Game {
     }
 
     public void endGame() {
-        player.teleport(Settings.getExitLocation());
+        endGame(true);
+    }
+
+    public void endGame(boolean unloadLevel) {
+        player.setHealth(20);
+        AMusic.stopSound(player);
         World world = levelSettings.getWorldSettings().getWorld();
-        if (world.getPlayers().isEmpty())
+        if (unloadLevel && world.getPlayers().isEmpty())
             levelsManager.unloadLevel(world.getName());
         levelSettings.getParticleController().stopSpawnParticles(player);
     }

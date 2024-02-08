@@ -13,12 +13,11 @@ import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
-import ru.sortix.parkourbeat.location.Region;
 
 public class GameMoveHandler {
 
     private final Game game;
-    private final Location startLoc, finishLoc;
+    private final Location startBorder, finishBorder;
     private BukkitTask task;
     private final MovementAccuracyChecker accuracyChecker;
 
@@ -27,15 +26,12 @@ public class GameMoveHandler {
 
         WorldSettings worldSettings = game.getLevelSettings().getWorldSettings();
         this.accuracyChecker = new MovementAccuracyChecker(
-                worldSettings.getParticlePoints(),
+                worldSettings.getWaypoints(),
                 game.getLevelSettings().getDirectionChecker()
         );
 
-        Region startRegion = worldSettings.getStartRegion();
-        Region finishRegion = worldSettings.getFinishRegion();
-
-        startLoc = startRegion.getCenter().toLocation(worldSettings.getWorld());
-        finishLoc = finishRegion.getCenter().toLocation(worldSettings.getWorld());
+        startBorder = worldSettings.getStartBorder().toLocation(worldSettings.getWorld());
+        finishBorder = worldSettings.getFinishBorder().toLocation(worldSettings.getWorld());
     }
 
     public MovementAccuracyChecker getAccuracyChecker() {
@@ -49,8 +45,7 @@ public class GameMoveHandler {
     public void onReadyState(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         LevelSettings settings = game.getLevelSettings();
-        WorldSettings worldSettings = settings.getWorldSettings();
-        if (worldSettings.getStartRegion().isInside(player.getLocation())) {
+        if (settings.getDirectionChecker().isCorrectDirection(startBorder, player.getLocation())) {
             game.start();
         }
     }
@@ -58,8 +53,7 @@ public class GameMoveHandler {
     public void onRunningState(PlayerMoveEvent event) {
         Player player = event.getPlayer();
         LevelSettings settings = game.getLevelSettings();
-        WorldSettings worldSettings = settings.getWorldSettings();
-        if (worldSettings.getFinishRegion().isInside(player.getLocation())) {
+        if (settings.getDirectionChecker().isCorrectDirection(finishBorder, player.getLocation())) {
             game.stopGame(Game.StopReason.FINISH);
             return;
         }
@@ -84,7 +78,7 @@ public class GameMoveHandler {
 
     private boolean isLookingAtFinish(Player player) {
         Vector playerDir = player.getLocation().getDirection();
-        Vector targetDir = finishLoc.toVector().subtract(startLoc.toVector());
+        Vector targetDir = finishBorder.toVector().subtract(startBorder.toVector());
         double angle = playerDir.angle(targetDir);
         return Math.toDegrees(angle) < 100;
     }

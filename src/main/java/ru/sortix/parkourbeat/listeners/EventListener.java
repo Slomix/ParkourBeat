@@ -2,9 +2,9 @@ package ru.sortix.parkourbeat.listeners;
 
 import org.bukkit.Bukkit;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.plugin.java.JavaPlugin;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.game.GameManager;
 import org.bukkit.entity.EntityType;
@@ -16,16 +16,16 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.world.ChunkLoadEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 
 public final class EventListener implements Listener {
 
     private final GameManager gameManager;
+    private final LevelEditorsManager levelEditorsManager;
 
-    public EventListener(GameManager gameManager) {
+    public EventListener(GameManager gameManager, LevelEditorsManager levelEditorsManager) {
         this.gameManager = gameManager;
+        this.levelEditorsManager = levelEditorsManager;
     }
 
     @EventHandler
@@ -34,22 +34,9 @@ public final class EventListener implements Listener {
     }
 
     @EventHandler
-    public void onChunkLoad(ChunkLoadEvent event) {
-        if (event.isNewChunk()) {
-            event.getChunk().unload(false);
-        }
-    }
-
-    @EventHandler
-    public void onChunkUnload(ChunkUnloadEvent event) {
-        if (event.getWorld() == Settings.getExitLocation().getWorld()) {
-
-        }
-    }
-
-    @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         gameManager.removeGame(event.getPlayer());
+        levelEditorsManager.removeEditorSession(event.getPlayer());
     }
 
     @EventHandler

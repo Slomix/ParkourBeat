@@ -1,7 +1,6 @@
 package ru.sortix.parkourbeat.game;
 
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
@@ -34,9 +33,13 @@ public class GameManager {
     }
 
     public void removeGame(Player player) {
+        removeGame(player, true);
+    }
+
+    public void removeGame(Player player, boolean unloadLevel) {
         Game game = currentGames.remove(player);
         if (game != null) {
-            game.endGame();
+            game.endGame(unloadLevel);
         }
     }
 }

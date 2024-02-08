@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 public class LevelsManager {
 
     private final Set<String> levels = new HashSet<>();
+    private final Map<String, Level> loadedLevels = new HashMap<>();
     private final LevelSettingsManager levelsSettings;
 
     public LevelsManager(LevelSettingDAO worldSettingDAO) {
@@ -35,20 +36,18 @@ public class LevelsManager {
         }
     }
 
-    public World createLevel(String name, WorldType type) {
+    public Level createLevel(String name, World.Environment environment) {
         if (levels.contains(name)) {
             return null;
         }
-        World world = Bukkit.createWorld(new WorldCreator(name).type(type));
+        World world = Bukkit.createWorld(new WorldCreator(name).environment(environment));
         world.setAutoSave(false);
         levels.add(name);
-        levelsSettings.addLevelSettings(name, LevelSettings.create(world));
-        return world;
-    }
-
-    @NotNull
-    public LevelSettings loadLevelSettings(World world) {
-        return levelsSettings.loadLevelSettings(world.getName());
+        LevelSettings levelSettings = LevelSettings.create(world);
+        levelsSettings.addLevelSettings(name, levelSettings);
+        Level level = new Level(name, world, levelSettings);
+        level.setEditing(true);
+        return level;
     }
 
     @Nullable
@@ -65,14 +64,16 @@ public class LevelsManager {
         levelsSettings.deleteLevelSettings(name);
     }
 
-    public World loadLevel(String name) {
+    public Level loadLevel(String name) {
         if (isLevelLoaded(name)) {
             return getLevelWorld(name);
         }
         World world = Bukkit.createWorld(new WorldCreator(name));
         world.setAutoSave(false);
         levelsSettings.loadLevelSettings(name);
-        return world;
+        Level loadedLevel = new Level(name, world, levelsSettings.getLevelSettings(name));
+        loadedLevels.put(name, loadedLevel);
+        return loadedLevel;
     }
 
     public void unloadLevel(String name) {
@@ -83,19 +84,18 @@ public class LevelsManager {
         Bukkit.unloadWorld(name, false);
     }
 
-    public void saveLevel(World world) {
-        world.save();
-        String name = world.getName();
-        levelsSettings.saveWorldSettings(name);
+    public void saveLevel(Level level) {
+        level.getWorld().save();
+        levelsSettings.saveWorldSettings(level.getName());
     }
 
     public boolean isLevelLoaded(String name) {
-        return Bukkit.getWorld(name) != null;
+        return loadedLevels.containsKey(name);
     }
 
     @Nullable
-    public World getLevelWorld(String name) {
-        return Bukkit.getWorld(name);
+    public Level getLevelWorld(String name) {
+        return loadedLevels.get(name);
     }
 
     @NotNull

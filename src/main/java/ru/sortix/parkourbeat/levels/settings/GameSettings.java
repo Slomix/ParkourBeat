@@ -2,12 +2,11 @@ package ru.sortix.parkourbeat.levels.settings;
 
 public class GameSettings {
 
-    protected final String songPlayListName, songName, regionName;
+    protected final String songPlayListName, songName;
 
-    public GameSettings(String songPlayListName, String songName, String regionName) {
+    public GameSettings(String songPlayListName, String songName) {
         this.songPlayListName = songPlayListName;
         this.songName = songName;
-        this.regionName = regionName;
     }
 
     public String getSongPlayListName() {
@@ -18,7 +17,4 @@ public class GameSettings {
         return songName;
     }
 
-    public String getRegionName() {
-        return regionName;
-    }
 }

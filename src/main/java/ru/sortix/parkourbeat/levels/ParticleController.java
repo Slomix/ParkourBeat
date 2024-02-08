@@ -5,29 +5,37 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.location.Waypoint;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ParticleController {
-    private final DirectionChecker directionChecker;
-    private final List<Location> particleLocations = new ArrayList<>();
+    private DirectionChecker directionChecker;
+    private final ConcurrentLinkedQueue<Location> particleLocations = new ConcurrentLinkedQueue<>();
     private final Map<Double, Color> colorsChangeLocations = new LinkedHashMap<>();
     private final Map<Player, BukkitTask> particleTasks = new HashMap<>();
     private static final double SEGMENT_LENGTH = 0.25;
-    private Iterator<Map.Entry<Double, Color>> colorIterator;
-    private Map.Entry<Double, Color> currentEntry;
     private boolean isLoaded = false;
 
     public ParticleController(DirectionChecker directionChecker) {
         this.directionChecker = directionChecker;
     }
 
+    public void setDirectionChecker(DirectionChecker directionChecker) {
+        this.directionChecker = directionChecker;
+    }
+
     public void loadParticleLocations(ArrayList<Waypoint> waypoints) {
+        if (directionChecker == null || waypoints == null) {
+            return;
+        }
+        if (isLoaded)
+            particleLocations.clear();
+
         Color previousColor = null;
         for (int i = 0; i < waypoints.size() - 1; i++) {
             Waypoint currentPoint = waypoints.get(i);
@@ -51,12 +59,15 @@ public class ParticleController {
     }
 
     public void startSpawnParticles(Player player) {
-        particleTasks.put(player, Bukkit.getScheduler().runTaskTimer(ParkourBeat.getPlugin(), () -> {
+        if (particleTasks.containsKey(player)) {
+            return;
+        }
+        particleTasks.put(player, Bukkit.getScheduler().runTaskTimerAsynchronously(ParkourBeat.getPlugin(), () -> {
             for (Location location : particleLocations) {
                 Color color = getCurrentColor(player.getLocation());
                 player.spawnParticle(Particle.REDSTONE, location, 0, color.getRed() / 255.0, color.getGreen() / 255.0, color.getBlue() / 255.0, 1);
             }
-        }, 0, 20));
+        }, 0, 5));
     }
 
     public void stopSpawnParticles(Player player) {
@@ -71,14 +82,15 @@ public class ParticleController {
     }
 
     private Color getCurrentColor(Location location) {
-        if (colorIterator == null) {
-            colorIterator = colorsChangeLocations.entrySet().iterator();
+        Color lastColor = null;
+        for (Map.Entry<Double, Color> entry : colorsChangeLocations.entrySet()) {
+            if (lastColor == null || directionChecker.isAheadDirection(location, entry.getKey())) {
+                lastColor = entry.getValue();
+                continue;
+            }
+            break;
         }
-        if (currentEntry == null || directionChecker.isAheadDirection(location, currentEntry.getKey())) {
-            if (currentEntry == null || colorIterator.hasNext())
-                currentEntry = colorIterator.next();
-        }
-        return currentEntry.getValue();
+        return lastColor;
     }
 
     private List<Location> createStraightPath(Location start, Location end) {
@@ -146,6 +158,4 @@ public class ParticleController {
 
         return p;
     }
-
-
 }

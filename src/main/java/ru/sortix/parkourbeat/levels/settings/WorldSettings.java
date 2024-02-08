@@ -2,25 +2,25 @@ package ru.sortix.parkourbeat.levels.settings;
 
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.location.Waypoint;
-import ru.sortix.parkourbeat.location.Region;
 
 import java.util.*;
 
 public class WorldSettings {
 
     private final World world;
-    private final Location spawn;
-    private final Region startRegion, gameRegion, finishRegion;
+    private Location spawn;
+    private Vector startBorder;
+    private Vector finishBorder;
     private final ArrayList<Waypoint> waypoint;
 
-    public WorldSettings(World world, Location spawn, Region startRegion, Region gameRegion, Region finishRegion, ArrayList<Waypoint> waypoint) {
+    public WorldSettings(World world, Location spawn, Vector startRegion, Vector finishRegion, ArrayList<Waypoint> waypoint) {
         this.world = world;
         this.spawn = spawn;
-        this.startRegion = startRegion;
-        this.gameRegion = gameRegion;
-        this.finishRegion = finishRegion;
+        this.startBorder = startRegion;
+        this.finishBorder = finishRegion;
         this.waypoint = waypoint;
     }
 
@@ -32,32 +32,46 @@ public class WorldSettings {
         return spawn;
     }
 
-    public Region getStartRegion() {
-        return startRegion;
-    }
-
-    public Region getGameRegion() {
-        return gameRegion;
-    }
-
-    public Region getFinishRegion() {
-        return finishRegion;
-    }
-
-    public ArrayList<Waypoint> getParticlePoints() {
+    public ArrayList<Waypoint> getWaypoints() {
         return waypoint;
     }
 
+    public void setSpawn(Location spawn) {
+        this.spawn = spawn;
+    }
+
+    public Vector getStartBorder() {
+        return startBorder;
+    }
+
+    public Vector getFinishBorder() {
+        return finishBorder;
+    }
+
     public DirectionChecker.Direction getDirection() {
-        if (startRegion.getCenter().getX() < finishRegion.getCenter().getX()) {
-            return DirectionChecker.Direction.POSITIVE_X;
-        } else if (startRegion.getCenter().getX() > finishRegion.getCenter().getX()) {
-            return DirectionChecker.Direction.NEGATIVE_X;
-        } else if (startRegion.getCenter().getZ() < finishRegion.getCenter().getZ()) {
-            return DirectionChecker.Direction.POSITIVE_Z;
-        } else if (startRegion.getCenter().getZ() > finishRegion.getCenter().getZ()) {
-            return DirectionChecker.Direction.NEGATIVE_Z;
+        if (startBorder == null || finishBorder == null) {
+            return null;
         }
-        return null;
+        if (Math.abs(startBorder.getX() - finishBorder.getX()) > Math.abs(startBorder.getZ() - finishBorder.getZ())) {
+            if (startBorder.getX() < finishBorder.getX()) {
+                return DirectionChecker.Direction.POSITIVE_X;
+            } else {
+                return DirectionChecker.Direction.NEGATIVE_X;
+            }
+        } else {
+            if (startBorder.getZ() < finishBorder.getZ()) {
+                return DirectionChecker.Direction.POSITIVE_Z;
+            } else {
+                return DirectionChecker.Direction.NEGATIVE_Z;
+            }
+        }
+    }
+
+    public void setStartBorder(Vector startPoint) {
+        this.startBorder = startPoint;
+    }
+
+    public void setFinishBorder(Vector finishPoint) {
+        this.finishBorder = finishPoint;
     }
 }

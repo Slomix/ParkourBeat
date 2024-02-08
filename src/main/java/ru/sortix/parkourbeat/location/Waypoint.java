@@ -11,7 +11,7 @@ public class Waypoint implements ConfigurationSerializable {
 
     private final Location location;
     private final Color color;
-    private final double height;
+    private double height;
 
     public Waypoint(Location location, Color color, double height) {
         this.location = location;
@@ -47,4 +47,7 @@ public class Waypoint implements ConfigurationSerializable {
         return new Waypoint(location, color, height);
     }
 
+    public void setHeight(double height) {
+        this.height = height;
+    }
 }

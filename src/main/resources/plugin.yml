@@ -6,3 +6,4 @@ depend: [AMusic]
 commands:
   tptoworld:
   play:
+  editor:

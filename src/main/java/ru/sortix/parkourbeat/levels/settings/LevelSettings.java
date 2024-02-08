@@ -1,9 +1,6 @@
 package ru.sortix.parkourbeat.levels.settings;
 
-import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.plugin.java.JavaPlugin;
-import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.ParticleController;
 
@@ -12,7 +9,7 @@ public class LevelSettings {
     private final WorldSettings worldSettings;
     private final GameSettings gameSettings;
     private final ParticleController particleController;
-    private final DirectionChecker directionChecker;
+    private DirectionChecker directionChecker;
 
     public LevelSettings(WorldSettings worldSettings, GameSettings gameSettings) {
         this.worldSettings = worldSettings;
@@ -34,11 +31,16 @@ public class LevelSettings {
     }
 
     public static LevelSettings create(World world) {
-        return new LevelSettings(new WorldSettings(world, null, null, null, null, null),
-                new GameSettings(null, null, null));
+        return new LevelSettings(new WorldSettings(world, null, null, null, null),
+                new GameSettings(null, null));
     }
 
     public DirectionChecker getDirectionChecker() {
         return directionChecker;
+    }
+
+    public void updateDirectionChecker() {
+        directionChecker = new DirectionChecker(worldSettings.getDirection());
+        particleController.setDirectionChecker(directionChecker);
     }
 }
