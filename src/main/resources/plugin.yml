@@ -7,3 +7,8 @@ commands:
   tptoworld:
   play:
   editor:
+
+
+    ###Вывести команды в главный класс для инициализации и/или создать отдельный, чтобы не вписывать их в конфигурацию.
+    ### Конфигурацию с руссификацией и прочими языками, можно вынести в ../resources/translations/ru_RU.properties
+    ### Удалите файл lang.yml и проведите путь к ../resources/translations/ru_RU.properties
