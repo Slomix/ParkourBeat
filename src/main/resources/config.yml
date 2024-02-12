@@ -1,3 +1,4 @@
+worlds:
 spawn:
   x: 0
   y: 0
@@ -5,3 +6,11 @@ spawn:
   yaw: 0
   pitch: 0
   world: world
+
+post-world:
+xinboshin:
+  x: 0
+  y: 0
+  z: 0
+  yaw: 0
+  pitch: 0
