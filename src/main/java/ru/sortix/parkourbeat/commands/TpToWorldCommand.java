@@ -9,7 +9,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.GameManager;
+import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
 import java.util.ArrayList;
@@ -19,10 +21,12 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
 
     private final LevelsManager levelsManager;
     private final GameManager gameManager;
+    private final LevelEditorsManager levelEditorsManager;
 
-    public TpToWorldCommand(GameManager gameManager, LevelsManager levelsManager) {
+    public TpToWorldCommand(LevelEditorsManager levelEditorsManager, GameManager gameManager, LevelsManager levelsManager) {
         this.levelsManager = levelsManager;
         this.gameManager = gameManager;
+        this.levelEditorsManager = levelEditorsManager;
     }
 
     @Override
@@ -30,22 +34,26 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             if (args.length > 0) {
-                String worldId = args[0].toLowerCase();
+                String worldId = args[0];
 
-                World world = Bukkit.getWorld(worldId);
-                if (world == null) {
+                if (!levelsManager.getLoadedLevels().contains(worldId)) {
                     sender.sendMessage("World not loaded!");
                     return true;
                 }
-                player.teleport(world.getSpawnLocation());
+                Level level = levelsManager.getLevelWorld(worldId);
+                if (level.getWorld().equals(player.getWorld())) {
+                    sender.sendMessage("You are already in this world!");
+                    return true;
+                }
+                player.teleport(level.getLevelSettings().getWorldSettings().getSpawn());
                 player.setGameMode(GameMode.SPECTATOR);
-                player.sendMessage("Teleported to parkourbeat level " + world.getName());
+                player.sendMessage("Teleported to parkourbeat level " + level.getName());
             } else {
-                player.teleport(Settings.getExitLocation());
+                player.teleport(Settings.getLobbySpawn());
                 player.sendMessage("Teleported to lobby");
                 player.setGameMode(GameMode.ADVENTURE);
             }
-            gameManager.removeGame(player);
+            gameManager.removeGame(player, !levelEditorsManager.removeEditorSession(player));
         } else {
             sender.sendMessage("Command only for players!");
         }

@@ -5,6 +5,7 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -50,7 +51,7 @@ public class Game {
         player.teleport(worldSettings.getSpawn());
         this.gameMoveHandler = new GameMoveHandler(this);
 
-        if (!gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
+        if (gameSettings.getSongName() != null && !gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(ParkourBeat.getPlugin(), () ->
                     AMusic.loadPack(player, gameSettings.getSongPlayListName(), false), 20L);
         } else {
@@ -63,8 +64,10 @@ public class Game {
             return;
         }
         levelSettings.getParticleController().startSpawnParticles(player);
-        AMusic.setRepeatMode(player, null);
-        AMusic.playSound(player, levelSettings.getGameSettings().getSongName());
+        if (levelSettings.getGameSettings().getSongName() != null) {
+            AMusic.setRepeatMode(player, null);
+            AMusic.playSound(player, levelSettings.getGameSettings().getSongName());
+        }
 
         currentState = State.RUNNING;
     }
@@ -97,13 +100,14 @@ public class Game {
         player.setHealth(20);
         player.setGameMode(GameMode.ADVENTURE);
         if (reason == StopReason.WRONG_DIRECTION) {
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§cНельзя бежать назад"));
+            player.sendTitle("§cНельзя бежать назад", null, 10, 10, 10);
         } else if (reason == StopReason.LOOSE) {
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§cВы проиграли"));
+            player.sendTitle("§cВы проиграли", null, 10, 10, 10);
         } else if (reason == StopReason.FINISH) {
-            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText("§aВы прошли уровень"));
+            player.sendTitle("§aВы прошли уровень", null, 10, 10, 10);
         }
         AMusic.stopSound(player);
+        player.playSound(player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
         levelSettings.getParticleController().stopSpawnParticles(player);
         gameMoveHandler.getAccuracyChecker().reset();
         currentState = State.READY;

@@ -11,6 +11,7 @@ import java.util.Map;
 public class ItemsContainer {
 
     private final Map<ItemStack, EditorItem> editorItems;
+    private final Map<Class<? extends EditorItem>, EditorItem> editorItemsByClass = new HashMap<>();
     private final Player player;
 
     public ItemsContainer(Player player, Level level, GameManager gameManager) {
@@ -25,6 +26,11 @@ public class ItemsContainer {
         editorItems.put(startFinishItem.getItemStack(), startFinishItem);
         editorItems.put(spawnItem.getItemStack(), spawnItem);
         editorItems.put(testItem.getItemStack(), testItem);
+
+        editorItemsByClass.put(ParticleItem.class, particleItem);
+        editorItemsByClass.put(StartFinishItem.class, startFinishItem);
+        editorItemsByClass.put(SpawnItem.class, spawnItem);
+        editorItemsByClass.put(TestItem.class, testItem);
     }
 
     public void giveToPlayer() {
@@ -35,6 +41,10 @@ public class ItemsContainer {
 
     public Map<ItemStack, EditorItem> getEditorItems() {
         return editorItems;
+    }
+
+    public <T extends EditorItem> T getEditorItem(Class<T> editorItemClass) {
+        return (T) editorItemsByClass.get(editorItemClass);
     }
 
     public void updateEditorItem(ItemStack prevItem, ItemStack newItem) {

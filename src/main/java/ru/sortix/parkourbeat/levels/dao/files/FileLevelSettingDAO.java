@@ -47,7 +47,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         worldSettingsDAO.set(worldSettings, worldSettingsConfig);
 
         saveConfig(gameSettingsConfig, gameSettingFile);
-
+        saveConfig(worldSettingsConfig, worldSettingsFile);
     }
 
     @NotNull

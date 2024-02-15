@@ -1,8 +1,12 @@
 package ru.sortix.parkourbeat.levels.settings;
 
+import org.bukkit.Location;
 import org.bukkit.World;
+import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.ParticleController;
+
+import java.util.ArrayList;
 
 public class LevelSettings {
 
@@ -30,9 +34,11 @@ public class LevelSettings {
         return particleController;
     }
 
-    public static LevelSettings create(World world) {
-        return new LevelSettings(new WorldSettings(world, null, null, null, null),
-                new GameSettings(null, null));
+    public static LevelSettings create(World world, String owner) {
+        Location defaultSpawn = Settings.getDefaultWorldSpawn().clone();
+        defaultSpawn.setWorld(world);
+        return new LevelSettings(new WorldSettings(world, defaultSpawn, null, null, new ArrayList<>()),
+                new GameSettings(null, null, owner));
     }
 
     public DirectionChecker getDirectionChecker() {

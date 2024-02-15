@@ -33,8 +33,10 @@ public class ParticleController {
         if (directionChecker == null || waypoints == null) {
             return;
         }
-        if (isLoaded)
+        if (isLoaded) {
             particleLocations.clear();
+            colorsChangeLocations.clear();
+        }
 
         Color previousColor = null;
         for (int i = 0; i < waypoints.size() - 1; i++) {

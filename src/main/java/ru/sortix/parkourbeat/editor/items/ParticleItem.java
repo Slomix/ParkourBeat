@@ -1,6 +1,7 @@
 package ru.sortix.parkourbeat.editor.items;
 
 import org.bukkit.Color;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -15,6 +16,7 @@ import ru.sortix.parkourbeat.location.Waypoint;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ParticleItem extends EditorItem {
 
@@ -45,7 +47,7 @@ public class ParticleItem extends EditorItem {
 
     @Override
     public void onClick(Action action, Block block) {
-        boolean change = false;
+        AtomicBoolean change = new AtomicBoolean(false);
 
         ArrayList<Waypoint> waypoints = level.getLevelSettings().getWorldSettings().getWaypoints();
         if (player.isSneaking() && (action == Action.RIGHT_CLICK_AIR || action == Action.LEFT_CLICK_AIR)) {
@@ -53,29 +55,33 @@ public class ParticleItem extends EditorItem {
             if (startSegment != null) {
                 if (action == Action.RIGHT_CLICK_AIR) {
                     currentHeight = Math.min(255 - startSegment.getLocation().getY(), startSegment.getHeight() + 0.5);
-                    startSegment.setHeight(currentHeight);
-                    change = true;
                 } else {
                     currentHeight = Math.max(0, startSegment.getHeight() - 0.5);
-                    startSegment.setHeight(currentHeight);
-                    change = true;
                 }
+                startSegment.setHeight(currentHeight);
+                change.set(true);
             }
         }
         if (!player.isSneaking()) {
+            Location particleLoc = block.getLocation().add(0.5, 1, 0.5);
             if (action == Action.RIGHT_CLICK_BLOCK) {
-                waypoints.removeIf(waypoint -> waypoint.getLocation().distance(player.getLocation()) < 2);
-                player.sendMessage("Вы успешно удалили точку.");
-                change = true;
+                waypoints.stream()
+                        .filter(waypoint -> waypoint.getLocation().distance(particleLoc) < 2)
+                        .findFirst()
+                        .ifPresent(waypoint -> {
+                            waypoints.remove(waypoint);
+                            player.sendMessage("Вы успешно удалили точку.");
+                            change.set(true);
+                        });
             }
             if (action == Action.LEFT_CLICK_BLOCK) {
-                waypoints.add(new Waypoint(block.getLocation().add(0.5, 1, 0.5), currentColor, currentHeight));
+                waypoints.add(new Waypoint(particleLoc, currentColor, currentHeight));
                 player.sendMessage("Вы успешно добавили точку.");
-                change = true;
+                change.set(true);
             }
         }
 
-        if (change) {
+        if (change.get()) {
             ParticleController particleController = level.getLevelSettings().getParticleController();
             particleController.stopSpawnParticles(player);
             particleController.loadParticleLocations(waypoints);
@@ -107,7 +113,9 @@ public class ParticleItem extends EditorItem {
 
         double dot = cross1.dot(cross2);
 
-        return dot < 0;
+        boolean sameHalfPlane = playerDirection.dot(toBlock1) > 0 && playerDirection.dot(toBlock2) > 0;
+
+        return dot < 0 && sameHalfPlane;
     }
 
 }

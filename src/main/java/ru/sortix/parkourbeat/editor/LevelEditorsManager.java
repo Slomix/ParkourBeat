@@ -3,6 +3,7 @@ package ru.sortix.parkourbeat.editor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import ru.sortix.parkourbeat.game.GameManager;
+import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
 import java.util.HashMap;
@@ -19,17 +20,19 @@ public class LevelEditorsManager {
         this.levelsManager = levelsManager;
     }
 
-    public EditorSession createEditorSession(Player player, String levelName) {
-        EditorSession editorSession = new EditorSession(player, levelName, levelsManager, gameManager);
+    public EditorSession createEditorSession(Player player, Level level) {
+        EditorSession editorSession = new EditorSession(player, level, levelsManager, gameManager);
         editorSessions.put(player, editorSession);
         return editorSession;
     }
 
-    public void removeEditorSession(Player player) {
+    public boolean removeEditorSession(Player player) {
         EditorSession editorSession = editorSessions.remove(player);
         if (editorSession != null) {
             editorSession.stop();
+            return true;
         }
+        return false;
     }
 
     public EditorSession getEditorSession(Player player) {

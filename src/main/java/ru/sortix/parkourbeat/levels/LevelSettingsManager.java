@@ -17,6 +17,7 @@ class LevelSettingsManager {
 
     public void addLevelSettings(String name, LevelSettings settings) {
         levelSettings.put(name, settings);
+        levelSettingDAO.save(settings);
     }
 
     public void unloadLevelSettings(String name) {
@@ -32,11 +33,14 @@ class LevelSettingsManager {
 
     @NotNull
     public LevelSettings loadLevelSettings(String name) {
-        LevelSettings settings = levelSettingDAO.load(name);
+        LevelSettings settings = levelSettings.get(name);
         if (settings == null) {
-            throw new RuntimeException("Failed to load world settings for world " + name);
+            settings = levelSettingDAO.load(name);
+            if (settings == null) {
+                throw new RuntimeException("Failed to load world settings for world " + name);
+            }
+            levelSettings.put(name, settings);
         }
-        levelSettings.put(name, settings);
         return settings;
     }
 

@@ -3,8 +3,7 @@ package ru.sortix.parkourbeat.levels;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
-import org.bukkit.WorldType;
-import org.bukkit.generator.ChunkGenerator;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.sortix.parkourbeat.data.Settings;
@@ -12,6 +11,10 @@ import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -20,9 +23,11 @@ public class LevelsManager {
     private final Set<String> levels = new HashSet<>();
     private final Map<String, Level> loadedLevels = new HashMap<>();
     private final LevelSettingsManager levelsSettings;
+    private final JavaPlugin plugin;
 
-    public LevelsManager(LevelSettingDAO worldSettingDAO) {
+    public LevelsManager(JavaPlugin plugin, LevelSettingDAO worldSettingDAO) {
         this.levelsSettings = new LevelSettingsManager(worldSettingDAO);
+        this.plugin = plugin;
         init();
     }
 
@@ -33,17 +38,39 @@ public class LevelsManager {
                     .filter(File::isDirectory)
                     .map(File::getName)
                     .forEach(levels::add);
+            levels.remove(Settings.getLobbySpawn().getWorld().getName());
         }
     }
 
-    public Level createLevel(String name, World.Environment environment) {
+    public Level createLevel(String name, World.Environment environment, String owner) {
         if (levels.contains(name)) {
             return null;
         }
-        World world = Bukkit.createWorld(new WorldCreator(name).environment(environment));
+
+        File source = new File(plugin.getDataFolder(), "defaultWorld");
+        File target = new File(Bukkit.getWorldContainer(), name);
+        try {
+            Files.walk(source.toPath())
+                    .forEach(sourcePath -> {
+                        Path targetPath = target.toPath().resolve(source.toPath().relativize(sourcePath));
+                        try {
+                            Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        //TODO: replace Bukkit worlds to SWM
+        //WorldCreator(name).environment(environment)) - creates a new world not a copy
+
+        World world = Bukkit.createWorld(new WorldCreator(name));
+
         world.setAutoSave(false);
         levels.add(name);
-        LevelSettings levelSettings = LevelSettings.create(world);
+        LevelSettings levelSettings = LevelSettings.create(world, owner);
         levelsSettings.addLevelSettings(name, levelSettings);
         Level level = new Level(name, world, levelSettings);
         level.setEditing(true);
@@ -57,8 +84,10 @@ public class LevelsManager {
 
     public void deleteLevel(String name) {
         World world = Bukkit.getWorld(name);
-        File worldFolder = world.getWorldFolder();
-        Bukkit.unloadWorld(name, false);
+        if (world != null) {
+            Bukkit.unloadWorld(name, false);
+        }
+        File worldFolder = new File(Bukkit.getWorldContainer(), name);
         deleteDirectory(worldFolder);
         levels.remove(name);
         levelsSettings.deleteLevelSettings(name);
@@ -70,8 +99,7 @@ public class LevelsManager {
         }
         World world = Bukkit.createWorld(new WorldCreator(name));
         world.setAutoSave(false);
-        levelsSettings.loadLevelSettings(name);
-        Level loadedLevel = new Level(name, world, levelsSettings.getLevelSettings(name));
+        Level loadedLevel = new Level(name, world, levelsSettings.loadLevelSettings(name));
         loadedLevels.put(name, loadedLevel);
         return loadedLevel;
     }
@@ -81,6 +109,7 @@ public class LevelsManager {
             return;
         }
         levelsSettings.unloadLevelSettings(name);
+        loadedLevels.remove(name);
         Bukkit.unloadWorld(name, false);
     }
 
@@ -114,9 +143,7 @@ public class LevelsManager {
     }
 
     public List<String> getLoadedLevels() {
-        List<String> worldNames = Bukkit.getWorlds().stream().map(World::getName).collect(Collectors.toList());
-        worldNames.remove(Settings.getExitLocation().getWorld().getName());
-        return worldNames;
+        return loadedLevels.keySet().stream().sorted().collect(Collectors.toList());
     }
 
 }

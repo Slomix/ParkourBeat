@@ -4,6 +4,7 @@ import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
@@ -47,6 +48,9 @@ public class GameMoveHandler {
         LevelSettings settings = game.getLevelSettings();
         if (settings.getDirectionChecker().isCorrectDirection(startBorder, player.getLocation())) {
             game.start();
+            if ((task == null || task.isCancelled()) && !player.isSprinting()) {
+                startDamageTask(player, 6, "§cНе переставайте бежать");
+            }
         }
     }
 
@@ -84,6 +88,7 @@ public class GameMoveHandler {
     }
 
     private void startDamageTask(Player player, int damage, String reason) {
+        player.playSound(player.getLocation(), Sound.ENTITY_WOLF_HURT, 1, 1);
         task = Bukkit.getScheduler().runTaskTimer(ParkourBeat.getPlugin(), () -> {
             if (!player.isOnline() || game.getCurrentState() != Game.State.RUNNING) {
                 task.cancel();
@@ -98,6 +103,6 @@ public class GameMoveHandler {
 
     private void damagePlayer(Player player, int damage, String reason) {
         player.damage(damage);
-        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(reason));
+        player.sendTitle(reason, null, 0, 5, 5);
     }
 }
