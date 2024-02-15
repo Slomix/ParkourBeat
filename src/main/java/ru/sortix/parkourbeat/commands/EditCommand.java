@@ -38,12 +38,6 @@ public class EditCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("Недостаточно аргументов! Используйте: /edit <имя уровня>");
             return false;
         }
-        Level currentLevel = levelsManager.getLevelWorld(player.getWorld().getName());
-        if (currentLevel != null && currentLevel.isEditing()) {
-            player.sendMessage("Вы уже в режиме редактирования!");
-            return true;
-        }
-
 
         if (!levelsManager.getAllLevels().contains(args[0])) {
             player.sendMessage("Уровень не найден!");
@@ -57,10 +51,11 @@ public class EditCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
             if (level.isEditing()) {
-                player.sendMessage("Уровень уже в режиме редактирования!");
+                player.sendMessage("Вы и так уже редактируете данный уровень!");
                 return true;
             }
-            gameManager.removeGame(player);
+            if (!levelEditorsManager.removeEditorSession(player))
+                gameManager.removeGame(player);
             levelEditorsManager.createEditorSession(player, level).start();
         }
         return true;

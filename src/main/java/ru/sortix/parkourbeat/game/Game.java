@@ -68,6 +68,9 @@ public class Game {
             AMusic.setRepeatMode(player, null);
             AMusic.playSound(player, levelSettings.getGameSettings().getSongName());
         }
+        for (Player onlinePlayer : player.getWorld().getPlayers()) {
+            player.hidePlayer(ParkourBeat.getPlugin(), onlinePlayer);
+        }
 
         currentState = State.RUNNING;
     }
@@ -110,6 +113,9 @@ public class Game {
         player.playSound(player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
         levelSettings.getParticleController().stopSpawnParticles(player);
         gameMoveHandler.getAccuracyChecker().reset();
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            player.showPlayer(ParkourBeat.getPlugin(), onlinePlayer);
+        }
         currentState = State.READY;
     }
 
@@ -123,6 +129,9 @@ public class Game {
         World world = levelSettings.getWorldSettings().getWorld();
         if (unloadLevel && world.getPlayers().isEmpty())
             levelsManager.unloadLevel(world.getName());
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            player.showPlayer(ParkourBeat.getPlugin(), onlinePlayer);
+        }
         levelSettings.getParticleController().stopSpawnParticles(player);
     }
 

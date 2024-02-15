@@ -53,7 +53,8 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage("Teleported to lobby");
                 player.setGameMode(GameMode.ADVENTURE);
             }
-            gameManager.removeGame(player, !levelEditorsManager.removeEditorSession(player));
+            if (!levelEditorsManager.removeEditorSession(player))
+                gameManager.removeGame(player);
         } else {
             sender.sendMessage("Command only for players!");
         }

@@ -38,7 +38,8 @@ public final class EventListener implements Listener {
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        gameManager.removeGame(player, !levelEditorsManager.removeEditorSession(player));
+        if (!levelEditorsManager.removeEditorSession(player))
+            gameManager.removeGame(player);
     }
 
     @EventHandler
@@ -71,7 +72,9 @@ public final class EventListener implements Listener {
                 event.setCancelled(true);
             }
         } else {
-            game.endGame(false);
+            if (event.getCause() == DamageCause.VOID) {
+                player.teleport(game.getLevelSettings().getWorldSettings().getSpawn());
+            }
             event.setCancelled(true);
         }
     }

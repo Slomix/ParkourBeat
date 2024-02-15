@@ -46,7 +46,6 @@ public class DeleteCommand implements CommandExecutor, TabCompleter {
             if (level.isEditing()) {
                 Player editorPlayer = level.getWorld().getPlayers().iterator().next();
                 levelEditorsManager.removeEditorSession(editorPlayer);
-                gameManager.removeGame(editorPlayer, false);
                 editorPlayer.sendMessage("Уровень " + worldId + " был удален!");
             } else {
                 for (Player player : level.getWorld().getPlayers()) {

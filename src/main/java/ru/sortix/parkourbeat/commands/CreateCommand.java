@@ -31,11 +31,6 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
         Player player = (Player) sender;
-        Level currentLevel = levelsManager.getLevelWorld(player.getName());
-        if (currentLevel != null && currentLevel.isEditing()) {
-            player.sendMessage("Вы не можете создавать новый уровень находясь в редакторе!");
-            return true;
-        }
         if (args.length < 2) {
             sender.sendMessage("Недостаточно аргументов! Используйте: /create <имя уровня> <окружение>");
             return true;
@@ -51,8 +46,8 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
         if (levelsManager.getAllLevels().contains(args[0])) {
             sender.sendMessage("Уровень уже существует!");
         } else {
-
-            gameManager.removeGame(player);
+            if (!levelEditorsManager.removeEditorSession(player))
+                gameManager.removeGame(player);
             Level level = levelsManager.createLevel(args[0], environment, player.getName());
             player.sendMessage("Уровень " + args[0] + " создан!");
             levelEditorsManager.createEditorSession(player, level).start();
