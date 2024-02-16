@@ -1,22 +1,14 @@
 package ru.sortix.parkourbeat.editor.menu;
 
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
-import ru.sortix.parkourbeat.utils.SkullTextures;
+import ru.sortix.parkourbeat.utils.Heads;
 
 public class SongItem extends SongMenuItem {
 
-    private static final ItemStack dummy;
-
-    static {
-        dummy = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
-        SkullMeta dummyMeta = (SkullMeta) dummy.getItemMeta();
-        SkullTextures.setSkullTexture(dummyMeta, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjIyZTQwYjRiZmJjYzA0MzMwNDRkODZkNjc2ODVmMDU2NzAyNTkwNDI3MWQwYTc0OTk2YWZiZTNmOWJlMmMwZiJ9fX0=");
-        dummy.setItemMeta(dummyMeta);
-    }
+    private static final ItemStack dummy = Heads.getHeadByHash("f22e40b4bfbcc0433044d86d67685f0567025904271d0a74996afbe3f9be2c0f");
 
     private final String name;
     private final String playlist;

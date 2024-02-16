@@ -1,26 +1,21 @@
 package ru.sortix.parkourbeat.editor.menu;
 
-import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import ru.sortix.parkourbeat.utils.SkullTextures;
+import ru.sortix.parkourbeat.utils.Heads;
 
 public class ArrowItem extends SongMenuItem {
 
-    private static ItemStack rightArrow;
-    private static ItemStack leftArrow;
+    private static final ItemStack rightArrow = Heads.getHeadByHash("e3fc52264d8ad9e654f415bef01a23947edbccccf649373289bea4d149541f70");
+    private static final ItemStack leftArrow = Heads.getHeadByHash("5f133e91919db0acefdc272d67fd87b4be88dc44a958958824474e21e06d53e6");
 
     static {
-        rightArrow = new ItemStack(Material.SKULL, 1);
         SkullMeta arrowMeta = (SkullMeta) rightArrow.getItemMeta();
         arrowMeta.setDisplayName("Следующая страница");
-        SkullTextures.setSkullTexture(arrowMeta, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTNmYzUyMjY0ZDhhZDllNjU0ZjQxNWJlZjAxYTIzOTQ3ZWRiY2NjY2Y2NDkzNzMyODliZWE0ZDE0OTU0MWY3MCJ9fX0=");
         rightArrow.setItemMeta(arrowMeta);
-        leftArrow = new ItemStack(Material.SKULL, 1);
+
         arrowMeta = (SkullMeta) leftArrow.getItemMeta();
         arrowMeta.setDisplayName("Предыдущая страница");
-        SkullTextures.setSkullTexture(arrowMeta, "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvNWYxMzNlOTE5MTlkYjBhY2VmZGMyNzJkNjdmZDg3YjRiZTg4ZGM0NGE5NTg5NTg4MjQ0NzRlMjFlMDZkNTNlNiJ9fX0=");
         leftArrow.setItemMeta(arrowMeta);
     }
 
