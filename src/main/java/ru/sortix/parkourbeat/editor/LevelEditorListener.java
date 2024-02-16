@@ -6,16 +6,14 @@ import org.bukkit.event.player.PlayerInteractEvent;
 
 public class LevelEditorListener implements Listener {
 
+  private final LevelEditorsManager levelEditorsManager;
 
-    private final LevelEditorsManager levelEditorsManager;
+  public LevelEditorListener(LevelEditorsManager levelEditorsManager) {
+    this.levelEditorsManager = levelEditorsManager;
+  }
 
-    public LevelEditorListener(LevelEditorsManager levelEditorsManager) {
-        this.levelEditorsManager = levelEditorsManager;
-    }
-
-    @EventHandler
-    public void onPlayerInteract(PlayerInteractEvent e) {
-        levelEditorsManager.onPlayerInteract(e);
-    }
-
+  @EventHandler
+  public void onPlayerInteract(PlayerInteractEvent e) {
+    levelEditorsManager.onPlayerInteract(e);
+  }
 }
