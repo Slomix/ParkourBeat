@@ -10,7 +10,6 @@ import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 

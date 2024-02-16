@@ -6,7 +6,7 @@ import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.location.Waypoint;
 
-import java.util.*;
+import java.util.ArrayList;
 
 public class WorldSettings {
 

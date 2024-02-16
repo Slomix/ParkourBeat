@@ -1,8 +1,6 @@
 package ru.sortix.parkourbeat.game;
 
 import me.bomb.amusic.AMusic;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;

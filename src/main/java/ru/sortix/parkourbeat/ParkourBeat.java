@@ -1,9 +1,12 @@
 package ru.sortix.parkourbeat;
 
 import me.bomb.amusic.AMusic;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.plugin.java.JavaPlugin;
 import ru.sortix.parkourbeat.commands.*;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.data.Songs;
@@ -11,12 +14,9 @@ import ru.sortix.parkourbeat.editor.LevelEditorListener;
 import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.editor.menu.SongMenuListener;
 import ru.sortix.parkourbeat.game.GameManager;
-import ru.sortix.parkourbeat.listeners.EventListener;
-import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.plugin.java.JavaPlugin;
-import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
 import ru.sortix.parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
+import ru.sortix.parkourbeat.listeners.EventListener;
 import ru.sortix.parkourbeat.listeners.MoveListener;
 import ru.sortix.parkourbeat.listeners.ResourcePackListener;
 import ru.sortix.parkourbeat.listeners.SprintListener;
