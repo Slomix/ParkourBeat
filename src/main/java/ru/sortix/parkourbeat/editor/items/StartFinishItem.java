@@ -18,6 +18,7 @@ public class StartFinishItem extends EditorItem {
 
     private static final ItemStack startFinishItem;
     private static final int slot = 5;
+
     static {
         startFinishItem = new ItemStack(Material.STICK);
         ItemMeta meta = startFinishItem.getItemMeta();
@@ -40,11 +41,11 @@ public class StartFinishItem extends EditorItem {
     public void onClick(Action action, Block block) {
         if (action == Action.RIGHT_CLICK_BLOCK) {
             finishPoint = block.getLocation().toVector();
-            player.sendMessage("Finish border at: " + finishPoint.toString());
+            player.sendMessage("Finish border at: " + finishPoint);
             updateRegions();
         } else if (action == Action.LEFT_CLICK_BLOCK) {
             startPoint = block.getLocation().toVector();
-            player.sendMessage("Start border at: " + startPoint.toString());
+            player.sendMessage("Start border at: " + startPoint);
             updateRegions();
         }
     }

@@ -66,8 +66,8 @@ public class EditCommand implements CommandExecutor, TabCompleter {
         if (args.length == 1) {
             String input = args[0].toLowerCase();
             return levelsManager.getAllLevels().stream()
-                    .filter(level -> level.toLowerCase().startsWith(input))
-                    .collect(Collectors.toList());
+                .filter(level -> level.toLowerCase().startsWith(input))
+                .collect(Collectors.toList());
         }
         return null;
     }

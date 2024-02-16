@@ -7,7 +7,7 @@ import ru.sortix.parkourbeat.location.Waypoint;
 
 import java.util.ArrayList;
 
-public class MovementAccuracyChecker  {
+public class MovementAccuracyChecker {
 
     private final ArrayList<Waypoint> waypoint;
     private final DirectionChecker directionChecker;
@@ -71,7 +71,7 @@ public class MovementAccuracyChecker  {
      * @param  point        the location of the point
      * @param  linePoint1   the first location defining the line
      * @param  linePoint2   the second location defining the line
-     * @return             the distance from the point to the line
+     * @return the distance from the point to the line
      */
     private double calculateDistanceToLine(Location point, Location linePoint1, Location linePoint2) {
         Vector lineVector = linePoint2.toVector().subtract(linePoint1.toVector());

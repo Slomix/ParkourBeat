@@ -56,6 +56,6 @@ public class DirectionChecker {
         POSITIVE_X,
         NEGATIVE_X,
         POSITIVE_Z,
-        NEGATIVE_Z;
+        NEGATIVE_Z
     }
 }

@@ -28,6 +28,14 @@ public class ParkourBeat extends JavaPlugin {
 
     private static Songs songs;
 
+    public static JavaPlugin getPlugin() {
+        return JavaPlugin.getPlugin(ParkourBeat.class);
+    }
+
+    public static Songs getSongs() {
+        return songs;
+    }
+
     public void onEnable() {
         Settings.load();
         songs = new Songs(getPlugin(AMusic.class).getDataFolder().toPath().resolve("Music"));
@@ -62,14 +70,6 @@ public class ParkourBeat extends JavaPlugin {
         command.setExecutor(executor);
         if (completer)
             command.setTabCompleter((TabCompleter) executor);
-    }
-
-    public static JavaPlugin getPlugin() {
-        return JavaPlugin.getPlugin(ParkourBeat.class);
-    }
-
-    public static Songs getSongs() {
-        return songs;
     }
 
     public void onDisable() {

@@ -66,13 +66,13 @@ public class ParticleItem extends EditorItem {
             Location particleLoc = block.getLocation().add(0.5, 1, 0.5);
             if (action == Action.RIGHT_CLICK_BLOCK) {
                 waypoints.stream()
-                        .filter(waypoint -> waypoint.getLocation().distance(particleLoc) < 2)
-                        .findFirst()
-                        .ifPresent(waypoint -> {
-                            waypoints.remove(waypoint);
-                            player.sendMessage("Вы успешно удалили точку.");
-                            change.set(true);
-                        });
+                    .filter(waypoint -> waypoint.getLocation().distance(particleLoc) < 2)
+                    .findFirst()
+                    .ifPresent(waypoint -> {
+                        waypoints.remove(waypoint);
+                        player.sendMessage("Вы успешно удалили точку.");
+                        change.set(true);
+                    });
             }
             if (action == Action.LEFT_CLICK_BLOCK) {
                 waypoints.add(new Waypoint(particleLoc, currentColor, currentHeight));

@@ -13,8 +13,8 @@ public class SongItem extends SongMenuItem {
     private final String name;
     private final String playlist;
     private final GameSettings gameSettings;
-    private ItemStack item;
     private final Player player;
+    private final ItemStack item;
 
     public SongItem(int slot, String playlist, String name, Player player, GameSettings gameSettings) {
         super(slot);
@@ -23,6 +23,14 @@ public class SongItem extends SongMenuItem {
         this.gameSettings = gameSettings;
         this.player = player;
         this.item = createSongItem(name);
+    }
+
+    private static ItemStack createSongItem(String name) {
+        ItemStack item = dummy.clone();
+        SkullMeta meta = (SkullMeta) item.getItemMeta();
+        meta.setDisplayName(name);
+        item.setItemMeta(meta);
+        return item;
     }
 
     @Override
@@ -34,13 +42,5 @@ public class SongItem extends SongMenuItem {
     public void onClick() {
         gameSettings.setSong(playlist, name);
         player.sendMessage("Вы успешно установили песню: " + name);
-    }
-
-    private static ItemStack createSongItem(String name) {
-        ItemStack item = dummy.clone();
-        SkullMeta meta = (SkullMeta) item.getItemMeta();
-        meta.setDisplayName(name);
-        item.setItemMeta(meta);
-        return item;
     }
 }

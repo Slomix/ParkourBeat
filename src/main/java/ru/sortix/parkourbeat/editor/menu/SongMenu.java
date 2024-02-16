@@ -14,13 +14,13 @@ import java.util.Map;
 
 public class SongMenu implements InventoryHolder {
 
-    private Inventory inventory;
-    private int page = 0;
     private final int maxPage;
     private final Songs songs;
     private final Map<Integer, SongMenuItem> items;
     private final Player player;
     private final GameSettings gameSettings;
+    private final Inventory inventory;
+    private int page = 0;
 
     public SongMenu(Songs songs, Player player, GameSettings gameSettings) {
         this.inventory = Bukkit.createInventory(this, 54, "Список песен");

@@ -27,6 +27,27 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         settingsDirectory = worldDir;
     }
 
+    @NotNull
+    private static File getFile(File levelSettingsDir, String fileName) {
+        File worldSettingsFile = new File(levelSettingsDir, fileName);
+        if (!worldSettingsFile.exists()) {
+            try {
+                worldSettingsFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return worldSettingsFile;
+    }
+
+    private static void saveConfig(FileConfiguration gameSettingsConfig, File gameSettingFile) {
+        try {
+            gameSettingsConfig.save(gameSettingFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     public void save(LevelSettings settings) {
         WorldSettings worldSettings = settings.getWorldSettings();
@@ -48,27 +69,6 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
 
         saveConfig(gameSettingsConfig, gameSettingFile);
         saveConfig(worldSettingsConfig, worldSettingsFile);
-    }
-
-    @NotNull
-    private static File getFile(File levelSettingsDir, String fileName) {
-        File worldSettingsFile = new File(levelSettingsDir, fileName);
-        if (!worldSettingsFile.exists()) {
-            try {
-                worldSettingsFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return worldSettingsFile;
-    }
-
-    private static void saveConfig(FileConfiguration gameSettingsConfig, File gameSettingFile) {
-        try {
-            gameSettingsConfig.save(gameSettingFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

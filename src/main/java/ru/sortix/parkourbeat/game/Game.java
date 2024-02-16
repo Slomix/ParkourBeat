@@ -51,7 +51,7 @@ public class Game {
 
         if (gameSettings.getSongName() != null && !gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
             Bukkit.getScheduler().scheduleSyncDelayedTask(ParkourBeat.getPlugin(), () ->
-                    AMusic.loadPack(player, gameSettings.getSongPlayListName(), false), 20L);
+                AMusic.loadPack(player, gameSettings.getSongPlayListName(), false), 20L);
         } else {
             currentState = State.READY;
         }
@@ -87,13 +87,13 @@ public class Game {
         return currentState;
     }
 
-    public Player getPlayer() {
-        return player;
-    }
-
     public void setCurrentState(State currentState) {
         player.sendMessage("State: " + currentState);
         this.currentState = currentState;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 
     public void stopGame(StopReason reason) {

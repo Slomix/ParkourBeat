@@ -22,6 +22,13 @@ public class LevelSettings {
         this.particleController = new ParticleController(directionChecker);
     }
 
+    public static LevelSettings create(World world, String owner) {
+        Location defaultSpawn = Settings.getDefaultWorldSpawn().clone();
+        defaultSpawn.setWorld(world);
+        return new LevelSettings(new WorldSettings(world, defaultSpawn, null, null, new ArrayList<>()),
+            new GameSettings(null, null, owner));
+    }
+
     public WorldSettings getWorldSettings() {
         return worldSettings;
     }
@@ -32,13 +39,6 @@ public class LevelSettings {
 
     public ParticleController getParticleController() {
         return particleController;
-    }
-
-    public static LevelSettings create(World world, String owner) {
-        Location defaultSpawn = Settings.getDefaultWorldSpawn().clone();
-        defaultSpawn.setWorld(world);
-        return new LevelSettings(new WorldSettings(world, defaultSpawn, null, null, new ArrayList<>()),
-                new GameSettings(null, null, owner));
     }
 
     public DirectionChecker getDirectionChecker() {

@@ -14,15 +14,65 @@ import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class ParticleController {
-    private DirectionChecker directionChecker;
+    private static final double SEGMENT_LENGTH = 0.25;
     private final ConcurrentLinkedQueue<Location> particleLocations = new ConcurrentLinkedQueue<>();
     private final Map<Double, Color> colorsChangeLocations = new LinkedHashMap<>();
     private final Map<Player, BukkitTask> particleTasks = new HashMap<>();
-    private static final double SEGMENT_LENGTH = 0.25;
+    private DirectionChecker directionChecker;
     private boolean isLoaded = false;
 
     public ParticleController(DirectionChecker directionChecker) {
         this.directionChecker = directionChecker;
+    }
+
+    public static List<Location> createCurvedPath(Location start, Location end, double height) {
+        List<Location> path = new ArrayList<>();
+
+        Vector startVector = start.toVector();
+        Vector endVector = end.toVector();
+
+        double length = startVector.distance(endVector); // Длина отрезка
+        int segments = calculateSegments(length, height);
+
+        // Определение точек управления для кубической интерполяции
+        Vector control1 = startVector.clone().midpoint(endVector).add(new Vector(0, height, 0));
+        Vector control2 = endVector.clone().midpoint(startVector).add(new Vector(0, height, 0));
+
+        for (int t = 0; t <= segments; t++) {
+            double ratio = t / (double) segments;
+
+            Vector interpolated = cubicBezierInterpolation(startVector, control1, control2, endVector, ratio);
+
+            Location location = new Location(start.getWorld(), interpolated.getX(), interpolated.getY(), interpolated.getZ());
+            path.add(location);
+        }
+
+        return path;
+    }
+
+    private static int calculateSegments(double length, double height) {
+        // Рассчитываем количество сегментов на основе длины и высоты дуги
+        double totalLength = Math.sqrt(length * length + height * height);
+        int segments = (int) Math.ceil(totalLength / SEGMENT_LENGTH);
+        // Гарантируем, что хотя бы один сегмент
+        segments = Math.max(segments, 1);
+
+        return segments;
+    }
+
+    private static Vector cubicBezierInterpolation(Vector p0, Vector p1, Vector p2, Vector p3, double t) {
+        double u = 1 - t;
+        double tt = t * t;
+        double uu = u * u;
+        double uuu = uu * u;
+        double ttt = tt * t;
+
+        Vector p = p0.clone().multiply(uuu);
+        p.add(p1.clone().multiply(3 * uu * t));
+        p.add(p2.clone().multiply(3 * u * tt));
+        p.add(p3.clone().multiply(ttt));
+
+        return p;
     }
 
     public void setDirectionChecker(DirectionChecker directionChecker) {
@@ -109,55 +159,5 @@ public class ParticleController {
         }
 
         return path;
-    }
-
-    public static List<Location> createCurvedPath(Location start, Location end, double height) {
-        List<Location> path = new ArrayList<>();
-
-        Vector startVector = start.toVector();
-        Vector endVector = end.toVector();
-
-        double length = startVector.distance(endVector); // Длина отрезка
-        int segments = calculateSegments(length, height);
-
-        // Определение точек управления для кубической интерполяции
-        Vector control1 = startVector.clone().midpoint(endVector).add(new Vector(0, height, 0));
-        Vector control2 = endVector.clone().midpoint(startVector).add(new Vector(0, height, 0));
-
-        for (int t = 0; t <= segments; t++) {
-            double ratio = t / (double) segments;
-
-            Vector interpolated = cubicBezierInterpolation(startVector, control1, control2, endVector, ratio);
-
-            Location location = new Location(start.getWorld(), interpolated.getX(), interpolated.getY(), interpolated.getZ());
-            path.add(location);
-        }
-
-        return path;
-    }
-
-    private static int calculateSegments(double length, double height) {
-        // Рассчитываем количество сегментов на основе длины и высоты дуги
-        double totalLength = Math.sqrt(length * length + height * height);
-        int segments = (int) Math.ceil(totalLength / SEGMENT_LENGTH);
-        // Гарантируем, что хотя бы один сегмент
-        segments = Math.max(segments, 1);
-
-        return segments;
-    }
-
-    private static Vector cubicBezierInterpolation(Vector p0, Vector p1, Vector p2, Vector p3, double t) {
-        double u = 1 - t;
-        double tt = t * t;
-        double uu = u * u;
-        double uuu = uu * u;
-        double ttt = tt * t;
-
-        Vector p = p0.clone().multiply(uuu);
-        p.add(p1.clone().multiply(3 * uu * t));
-        p.add(p2.clone().multiply(3 * u * tt));
-        p.add(p3.clone().multiply(ttt));
-
-        return p;
     }
 }

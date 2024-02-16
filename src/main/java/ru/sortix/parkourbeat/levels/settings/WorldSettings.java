@@ -11,10 +11,10 @@ import java.util.ArrayList;
 public class WorldSettings {
 
     private final World world;
+    private final ArrayList<Waypoint> waypoint;
     private Location spawn;
     private Vector startBorder;
     private Vector finishBorder;
-    private final ArrayList<Waypoint> waypoint;
 
     public WorldSettings(World world, Location spawn, Vector startRegion, Vector finishRegion, ArrayList<Waypoint> waypoint) {
         this.world = world;
@@ -32,20 +32,28 @@ public class WorldSettings {
         return spawn;
     }
 
-    public ArrayList<Waypoint> getWaypoints() {
-        return waypoint;
-    }
-
     public void setSpawn(Location spawn) {
         this.spawn = spawn;
+    }
+
+    public ArrayList<Waypoint> getWaypoints() {
+        return waypoint;
     }
 
     public Vector getStartBorder() {
         return startBorder;
     }
 
+    public void setStartBorder(Vector startPoint) {
+        this.startBorder = startPoint;
+    }
+
     public Vector getFinishBorder() {
         return finishBorder;
+    }
+
+    public void setFinishBorder(Vector finishPoint) {
+        this.finishBorder = finishPoint;
     }
 
     public DirectionChecker.Direction getDirection() {
@@ -65,13 +73,5 @@ public class WorldSettings {
                 return DirectionChecker.Direction.NEGATIVE_Z;
             }
         }
-    }
-
-    public void setStartBorder(Vector startPoint) {
-        this.startBorder = startPoint;
-    }
-
-    public void setFinishBorder(Vector finishPoint) {
-        this.finishBorder = finishPoint;
     }
 }

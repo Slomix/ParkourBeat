@@ -2,9 +2,9 @@ package ru.sortix.parkourbeat.levels.settings;
 
 public class GameSettings {
 
+    private final String owner;
     private String songPlayListName;
     private String songName;
-    private final String owner;
 
     public GameSettings(String songPlayListName, String songName, String owner) {
         this.songPlayListName = songPlayListName;

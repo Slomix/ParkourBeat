@@ -19,6 +19,13 @@ public class Waypoint implements ConfigurationSerializable {
         this.height = height;
     }
 
+    public static Waypoint deserialize(Map<String, Object> map) {
+        Location location = (Location) map.get("location");
+        Color color = (Color) map.get("color");
+        double height = (double) map.get("height");
+        return new Waypoint(location, color, height);
+    }
+
     public Location getLocation() {
         return location;
     }
@@ -31,6 +38,10 @@ public class Waypoint implements ConfigurationSerializable {
         return height;
     }
 
+    public void setHeight(double height) {
+        this.height = height;
+    }
+
     @Override
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
@@ -38,16 +49,5 @@ public class Waypoint implements ConfigurationSerializable {
         map.put("color", color);
         map.put("height", height);
         return map;
-    }
-
-    public static Waypoint deserialize(Map<String, Object> map) {
-        Location location = (Location) map.get("location");
-        Color color = (Color) map.get("color");
-        double height = (double) map.get("height");
-        return new Waypoint(location, color, height);
-    }
-
-    public void setHeight(double height) {
-        this.height = height;
     }
 }

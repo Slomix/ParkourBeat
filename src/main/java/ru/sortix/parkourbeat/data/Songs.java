@@ -10,8 +10,8 @@ import java.util.stream.Stream;
 
 public class Songs {
 
-    private Map<String, String> allSongs;
-    private Path path;
+    private final Map<String, String> allSongs;
+    private final Path path;
 
     public Songs(Path path) {
         allSongs = new TreeMap<>();
@@ -25,7 +25,7 @@ public class Songs {
                 String parent = file.getParent().getFileName().toString();
                 String filename = file.getFileName().toString();
                 int dotIndex = filename.lastIndexOf(".");
-                if(dotIndex > 0) {
+                if (dotIndex > 0) {
                     filename = filename.substring(0, dotIndex);
                 }
                 allSongs.put(filename, parent);

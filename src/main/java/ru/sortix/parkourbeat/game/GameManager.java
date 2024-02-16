@@ -11,6 +11,7 @@ public class GameManager {
 
     private final Map<Player, Game> currentGames = new HashMap<>();
     private final LevelsManager levelsManager;
+
     public GameManager(LevelsManager levelsManager) {
         this.levelsManager = levelsManager;
     }

@@ -2,7 +2,7 @@ name: ParkourBeat
 main: ru.sortix.parkourbeat.ParkourBeat
 version: 0.5
 author: Sortix, Bomb
-depend: [AMusic]
+depend: [ AMusic ]
 commands:
   tptoworld:
   play:

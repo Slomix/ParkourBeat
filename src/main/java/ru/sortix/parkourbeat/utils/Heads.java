@@ -59,8 +59,8 @@ public class Heads {
 
     public static ItemStack getHeadByHash(String hash) {
         return getHeadByTextureData(
-                "{\"textures\":{\"SKIN\":{\"url\":\"https://textures.minecraft.net/texture/" + hash + "\"}}}",
-                false
+            "{\"textures\":{\"SKIN\":{\"url\":\"https://textures.minecraft.net/texture/" + hash + "\"}}}",
+            false
         );
     }
 

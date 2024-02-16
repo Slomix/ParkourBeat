@@ -19,16 +19,16 @@ public class GameMoveHandler {
 
     private final Game game;
     private final Location startBorder, finishBorder;
-    private BukkitTask task;
     private final MovementAccuracyChecker accuracyChecker;
+    private BukkitTask task;
 
     public GameMoveHandler(Game game) {
         this.game = game;
 
         WorldSettings worldSettings = game.getLevelSettings().getWorldSettings();
         this.accuracyChecker = new MovementAccuracyChecker(
-                worldSettings.getWaypoints(),
-                game.getLevelSettings().getDirectionChecker()
+            worldSettings.getWaypoints(),
+            game.getLevelSettings().getDirectionChecker()
         );
 
         startBorder = worldSettings.getStartBorder().toLocation(worldSettings.getWorld());

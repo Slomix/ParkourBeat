@@ -60,9 +60,9 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
         if (args.length == 2) {
             String environment = args[1].toLowerCase();
             return Arrays.stream(World.Environment.values())
-                    .map(Enum::name)
-                    .filter(e -> e.toLowerCase().startsWith(environment))
-                    .collect(Collectors.toList());
+                .map(Enum::name)
+                .filter(e -> e.toLowerCase().startsWith(environment))
+                .collect(Collectors.toList());
         }
         return Collections.emptyList();
     }

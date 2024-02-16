@@ -35,9 +35,9 @@ public class LevelsManager {
         File worldDirectory = Bukkit.getWorldContainer();
         if (worldDirectory.exists() && worldDirectory.isDirectory()) {
             Arrays.stream(worldDirectory.listFiles())
-                    .filter(File::isDirectory)
-                    .map(File::getName)
-                    .forEach(levels::add);
+                .filter(File::isDirectory)
+                .map(File::getName)
+                .forEach(levels::add);
             levels.remove(Settings.getLobbySpawn().getWorld().getName());
         }
     }
@@ -51,14 +51,14 @@ public class LevelsManager {
         File target = new File(Bukkit.getWorldContainer(), name);
         try {
             Files.walk(source.toPath())
-                    .forEach(sourcePath -> {
-                        Path targetPath = target.toPath().resolve(source.toPath().relativize(sourcePath));
-                        try {
-                            Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
+                .forEach(sourcePath -> {
+                    Path targetPath = target.toPath().resolve(source.toPath().relativize(sourcePath));
+                    try {
+                        Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                });
         } catch (IOException e) {
             e.printStackTrace();
         }
