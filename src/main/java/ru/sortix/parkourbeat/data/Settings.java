@@ -22,7 +22,14 @@ public class Settings {
     JavaPlugin plugin = ParkourBeat.getPlugin();
     plugin.saveDefaultConfig();
     FileConfiguration config = plugin.getConfig();
-    lobbySpawn = getLocation(config.getConfigurationSection("lobby"));
+    ConfigurationSection spawnSection = config.getConfigurationSection("lobby");
+    lobbySpawn = getLocation(spawnSection);
+    World spawnWorld = Bukkit.getWorld(spawnSection.getString("world));
+    if (spawnWorld == null) {
+        throw IllegalStateException("No world for spawn with provided name is present!");
+    }
+    lobbySpawn.setWorld(spawnWorld);
+
     defaultWorldSpawn = getLocation(config.getConfigurationSection("default_world"));
     isLoaded = true;
   }
@@ -33,11 +40,7 @@ public class Settings {
     double z = config.getDouble("z", 0);
     float yaw = (float) config.getDouble("yaw", 0);
     float pitch = (float) config.getDouble("pitch", 0);
-    World world = Bukkit.getWorld(config.getString("world"));
-    if (world == null) {
-        throw new IllegalStateException("World for section " + config.getName() + " is unknown");
-    }
-    return new Location(world, x, y, z, yaw, pitch);
+    return new Location(null, x, y, z, yaw, pitch);
   }
 
   public static Location getLobbySpawn() {
