@@ -9,25 +9,25 @@ import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 
 public class SongCommand implements CommandExecutor {
 
-  private final LevelEditorsManager levelEditorsManager;
+	private final LevelEditorsManager levelEditorsManager;
 
-  public SongCommand(LevelEditorsManager levelEditorsManager) {
-    this.levelEditorsManager = levelEditorsManager;
-  }
+	public SongCommand(LevelEditorsManager levelEditorsManager) {
+		this.levelEditorsManager = levelEditorsManager;
+	}
 
-  @Override
-  public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-    if (!(sender instanceof Player)) {
-      sender.sendMessage("Команда только для игроков!");
-      return true;
-    }
-    Player player = (Player) sender;
-    EditorSession editorSession = levelEditorsManager.getEditorSession(player);
-    if (editorSession == null) {
-      player.sendMessage("Вы не в режиме редактирования!");
-      return true;
-    }
-    editorSession.openSongMenu();
-    return true;
-  }
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+		if (!(sender instanceof Player)) {
+			sender.sendMessage("Команда только для игроков!");
+			return true;
+		}
+		Player player = (Player) sender;
+		EditorSession editorSession = levelEditorsManager.getEditorSession(player);
+		if (editorSession == null) {
+			player.sendMessage("Вы не в режиме редактирования!");
+			return true;
+		}
+		editorSession.openSongMenu();
+		return true;
+	}
 }
