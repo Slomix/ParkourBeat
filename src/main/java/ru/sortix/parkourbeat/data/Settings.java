@@ -2,9 +2,11 @@ package ru.sortix.parkourbeat.data;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.lang.IllegalStateException;
 import ru.sortix.parkourbeat.ParkourBeat;
 
 public class Settings {
@@ -20,8 +22,13 @@ public class Settings {
     JavaPlugin plugin = ParkourBeat.getPlugin();
     plugin.saveDefaultConfig();
     FileConfiguration config = plugin.getConfig();
-    lobbySpawn = getLocation(config.getConfigurationSection("lobby"));
-    lobbySpawn.setWorld(Bukkit.getWorld(config.getString("lobby.world")));
+    ConfigurationSection spawnSection = config.getConfigurationSection("lobby");
+    lobbySpawn = getLocation(spawnSection);
+    World spawnWorld = Bukkit.getWorld(spawnSection.getString("world"));
+    if (spawnWorld == null) {
+        throw IllegalStateException("No world for spawn with provided name is present!");
+    }
+    lobbySpawn.setWorld(spawnWorld);
     defaultWorldSpawn = getLocation(config.getConfigurationSection("default_world"));
     isLoaded = true;
   }
