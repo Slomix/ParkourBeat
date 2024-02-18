@@ -17,55 +17,55 @@ import ru.sortix.parkourbeat.levels.LevelsManager;
 
 public class CreateCommand implements CommandExecutor, TabCompleter {
 
-  private final LevelEditorsManager levelEditorsManager;
-  private final LevelsManager levelsManager;
-  private final GameManager gameManager;
+	private final LevelEditorsManager levelEditorsManager;
+	private final LevelsManager levelsManager;
+	private final GameManager gameManager;
 
-  public CreateCommand(
-      LevelEditorsManager levelEditorsManager,
-      LevelsManager levelsManager,
-      GameManager gameManager) {
-    this.levelEditorsManager = levelEditorsManager;
-    this.levelsManager = levelsManager;
-    this.gameManager = gameManager;
-  }
+	public CreateCommand(
+			LevelEditorsManager levelEditorsManager,
+			LevelsManager levelsManager,
+			GameManager gameManager) {
+		this.levelEditorsManager = levelEditorsManager;
+		this.levelsManager = levelsManager;
+		this.gameManager = gameManager;
+	}
 
-  @Override
-  public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
-    Player player = (Player) sender;
-    if (args.length < 2) {
-      sender.sendMessage("Недостаточно аргументов! Используйте: /create <имя уровня> <окружение>");
-      return true;
-    }
-    World.Environment environment;
-    try {
-      environment = World.Environment.valueOf(args[1].toUpperCase());
-    } catch (IllegalArgumentException e) {
-      sender.sendMessage("Неверное окружение! Допустимые значения: NORMAL, NETHER, THE_END");
-      return true;
-    }
+	@Override
+	public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+		Player player = (Player) sender;
+		if (args.length < 2) {
+			sender.sendMessage("Недостаточно аргументов! Используйте: /create <имя уровня> <окружение>");
+			return true;
+		}
+		World.Environment environment;
+		try {
+			environment = World.Environment.valueOf(args[1].toUpperCase());
+		} catch (IllegalArgumentException e) {
+			sender.sendMessage("Неверное окружение! Допустимые значения: NORMAL, NETHER, THE_END");
+			return true;
+		}
 
-    if (levelsManager.getAllLevels().contains(args[0])) {
-      sender.sendMessage("Уровень уже существует!");
-    } else {
-      if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
-      Level level = levelsManager.createLevel(args[0], environment, player.getName());
-      player.sendMessage("Уровень " + args[0] + " создан!");
-      levelEditorsManager.createEditorSession(player, level).start();
-    }
-    return true;
-  }
+		if (levelsManager.getAllLevels().contains(args[0])) {
+			sender.sendMessage("Уровень уже существует!");
+		} else {
+			if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
+			Level level = levelsManager.createLevel(args[0], environment, player.getName());
+			player.sendMessage("Уровень " + args[0] + " создан!");
+			levelEditorsManager.createEditorSession(player, level).start();
+		}
+		return true;
+	}
 
-  @Override
-  public List<String> onTabComplete(
-      CommandSender sender, Command command, String s, String[] args) {
-    if (args.length == 2) {
-      String environment = args[1].toLowerCase();
-      return Arrays.stream(World.Environment.values())
-          .map(Enum::name)
-          .filter(e -> e.toLowerCase().startsWith(environment))
-          .collect(Collectors.toList());
-    }
-    return Collections.emptyList();
-  }
+	@Override
+	public List<String> onTabComplete(
+			CommandSender sender, Command command, String s, String[] args) {
+		if (args.length == 2) {
+			String environment = args[1].toLowerCase();
+			return Arrays.stream(World.Environment.values())
+					.map(Enum::name)
+					.filter(e -> e.toLowerCase().startsWith(environment))
+					.collect(Collectors.toList());
+		}
+		return Collections.emptyList();
+	}
 }

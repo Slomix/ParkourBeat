@@ -8,26 +8,26 @@ import ru.sortix.parkourbeat.game.GameManager;
 
 public class ResourcePackListener implements Listener {
 
-  private final GameManager gameManager;
+	private final GameManager gameManager;
 
-  public ResourcePackListener(GameManager gameManager) {
-    this.gameManager = gameManager;
-  }
+	public ResourcePackListener(GameManager gameManager) {
+		this.gameManager = gameManager;
+	}
 
-  @EventHandler
-  public void onResourcePack(PlayerResourcePackStatusEvent event) {
-    Game game = gameManager.getCurrentGame(event.getPlayer());
-    if (game == null) {
-      return;
-    }
-    if (event.getStatus() == PlayerResourcePackStatusEvent.Status.ACCEPTED) {
+	@EventHandler
+	public void onResourcePack(PlayerResourcePackStatusEvent event) {
+		Game game = gameManager.getCurrentGame(event.getPlayer());
+		if (game == null) {
+			return;
+		}
+		if (event.getStatus() == PlayerResourcePackStatusEvent.Status.ACCEPTED) {
 
-    } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.DECLINED) {
+		} else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.DECLINED) {
 
-    } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) {
+		} else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) {
 
-    } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
-      game.setCurrentState(Game.State.READY);
-    }
-  }
+		} else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
+			game.setCurrentState(Game.State.READY);
+		}
+	}
 }

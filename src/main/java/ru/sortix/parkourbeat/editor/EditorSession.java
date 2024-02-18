@@ -19,75 +19,75 @@ import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 
 public class EditorSession {
 
-  private final Player owner;
-  private final Level level;
-  private final LevelsManager levelsManager;
-  private final ItemsContainer editorItems;
-  private final GameManager gameManager;
-  private final Inventory songMenu;
+	private final Player owner;
+	private final Level level;
+	private final LevelsManager levelsManager;
+	private final ItemsContainer editorItems;
+	private final GameManager gameManager;
+	private final Inventory songMenu;
 
-  public EditorSession(
-      Player owner, Level level, LevelsManager levelsManager, GameManager gameManager) {
-    this.owner = owner;
-    this.level = level;
-    this.levelsManager = levelsManager;
-    this.gameManager = gameManager;
-    this.editorItems = new ItemsContainer(owner, level, gameManager);
-    songMenu =
-        new SongMenu(ParkourBeat.getSongs(), owner, level.getLevelSettings().getGameSettings())
-            .getInventory();
-  }
+	public EditorSession(
+			Player owner, Level level, LevelsManager levelsManager, GameManager gameManager) {
+		this.owner = owner;
+		this.level = level;
+		this.levelsManager = levelsManager;
+		this.gameManager = gameManager;
+		this.editorItems = new ItemsContainer(owner, level, gameManager);
+		songMenu =
+				new SongMenu(ParkourBeat.getSongs(), owner, level.getLevelSettings().getGameSettings())
+						.getInventory();
+	}
 
-  public void openSongMenu() {
-    owner.openInventory(songMenu);
-  }
+	public void openSongMenu() {
+		owner.openInventory(songMenu);
+	}
 
-  public <T extends EditorItem> T getEditorItem(Class<T> editorItemClass) {
-    return editorItems.getEditorItem(editorItemClass);
-  }
+	public <T extends EditorItem> T getEditorItem(Class<T> editorItemClass) {
+		return editorItems.getEditorItem(editorItemClass);
+	}
 
-  public void start() {
-    PlayerInventory inventory = owner.getInventory();
-    inventory.clear();
-    editorItems.giveToPlayer();
+	public void start() {
+		PlayerInventory inventory = owner.getInventory();
+		inventory.clear();
+		editorItems.giveToPlayer();
 
-    LevelSettings levelSettings = level.getLevelSettings();
-    WorldSettings worldSettings = levelSettings.getWorldSettings();
-    ParticleController particleController = levelSettings.getParticleController();
+		LevelSettings levelSettings = level.getLevelSettings();
+		WorldSettings worldSettings = levelSettings.getWorldSettings();
+		ParticleController particleController = levelSettings.getParticleController();
 
-    particleController.loadParticleLocations(worldSettings.getWaypoints());
-    particleController.startSpawnParticles(owner);
+		particleController.loadParticleLocations(worldSettings.getWaypoints());
+		particleController.startSpawnParticles(owner);
 
-    owner.setGameMode(GameMode.CREATIVE);
-    owner.teleport(worldSettings.getSpawn());
-    owner.sendMessage("Редактор уровня " + level.getName() + " успешно запущен");
+		owner.setGameMode(GameMode.CREATIVE);
+		owner.teleport(worldSettings.getSpawn());
+		owner.sendMessage("Редактор уровня " + level.getName() + " успешно запущен");
 
-    level.setEditing(true);
-  }
+		level.setEditing(true);
+	}
 
-  public void stop() {
-    level.getLevelSettings().getParticleController().stopSpawnParticles(owner);
-    level.setEditing(false);
+	public void stop() {
+		level.getLevelSettings().getParticleController().stopSpawnParticles(owner);
+		level.setEditing(false);
 
-    gameManager.removeGame(owner, false);
+		gameManager.removeGame(owner, false);
 
-    owner.setGameMode(GameMode.ADVENTURE);
-    owner.getInventory().clear();
-    owner.teleport(Settings.getLobbySpawn());
-    owner.sendMessage("Редактор уровня " + level.getName() + " успешно остановлен");
+		owner.setGameMode(GameMode.ADVENTURE);
+		owner.getInventory().clear();
+		owner.teleport(Settings.getLobbySpawn());
+		owner.sendMessage("Редактор уровня " + level.getName() + " успешно остановлен");
 
-    levelsManager.saveLevel(level);
-    levelsManager.unloadLevel(level.getName());
-  }
+		levelsManager.saveLevel(level);
+		levelsManager.unloadLevel(level.getName());
+	}
 
-  public void onPlayerInteract(PlayerInteractEvent e) {
-    if (e.getItem() == null) {
-      return;
-    }
-    EditorItem editorItem = editorItems.getEditorItems().get(e.getItem());
-    if (editorItem != null) {
-      editorItem.onClick(e.getAction(), e.getClickedBlock());
-      e.setCancelled(true);
-    }
-  }
+	public void onPlayerInteract(PlayerInteractEvent e) {
+		if (e.getItem() == null) {
+			return;
+		}
+		EditorItem editorItem = editorItems.getEditorItems().get(e.getItem());
+		if (editorItem != null) {
+			editorItem.onClick(e.getAction(), e.getClickedBlock());
+			e.setCancelled(true);
+		}
+	}
 }

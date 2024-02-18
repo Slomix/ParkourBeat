@@ -63,6 +63,8 @@
                     <reflowLongStrings>true</reflowLongStrings>
                     <formatJavadoc>false</formatJavadoc>
                   </googleJavaFormat>
+                  <indent><tabs>true</tabs><spacesPerTab>2</spacesPerTab></indent>
+                  <indent><tabs>true</tabs><spacesPerTab>4</spacesPerTab></indent>
                   <importOrder />
                   <removeUnusedImports />
                   <formatAnnotations />
