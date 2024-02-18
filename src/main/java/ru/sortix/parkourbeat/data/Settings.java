@@ -26,7 +26,7 @@ public class Settings {
     lobbySpawn = getLocation(spawnSection);
     World spawnWorld = Bukkit.getWorld(spawnSection.getString("world"));
     if (spawnWorld == null) {
-        throw IllegalStateException("No world for spawn with provided name is present!");
+        throw new IllegalStateException("No world for spawn with provided name is present!");
     }
     lobbySpawn.setWorld(spawnWorld);
     defaultWorldSpawn = getLocation(config.getConfigurationSection("default_world"));
