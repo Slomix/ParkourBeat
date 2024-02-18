@@ -8,26 +8,25 @@ import ru.sortix.parkourbeat.levels.Level;
 
 public abstract class EditorItem {
 
-    protected final int slot;
-    protected final Player player;
-    protected final Level level;
-    protected ItemStack itemStack;
+  protected final int slot;
+  protected final Player player;
+  protected final Level level;
+  protected ItemStack itemStack;
 
-    public EditorItem(ItemStack itemStack, int slot, Player player, Level level) {
-        this.itemStack = itemStack;
-        this.slot = slot;
-        this.player = player;
-        this.level = level;
-    }
+  public EditorItem(ItemStack itemStack, int slot, Player player, Level level) {
+    this.itemStack = itemStack;
+    this.slot = slot;
+    this.player = player;
+    this.level = level;
+  }
 
-    public int getSlot() {
-        return slot;
-    }
+  public int getSlot() {
+    return slot;
+  }
 
-    public ItemStack getItemStack() {
-        return itemStack;
-    }
+  public ItemStack getItemStack() {
+    return itemStack;
+  }
 
-    public abstract void onClick(Action action, Block block);
-
+  public abstract void onClick(Action action, Block block);
 }

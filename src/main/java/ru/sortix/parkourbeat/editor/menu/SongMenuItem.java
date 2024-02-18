@@ -4,18 +4,17 @@ import org.bukkit.inventory.ItemStack;
 
 public abstract class SongMenuItem {
 
-    private final int slot;
+  private final int slot;
 
-    public SongMenuItem(int slot) {
-        this.slot = slot;
-    }
+  public SongMenuItem(int slot) {
+    this.slot = slot;
+  }
 
-    public int getSlot() {
-        return slot;
-    }
+  public int getSlot() {
+    return slot;
+  }
 
-    public abstract ItemStack getItemStack();
+  public abstract ItemStack getItemStack();
 
-    public abstract void onClick();
-
+  public abstract void onClick();
 }
