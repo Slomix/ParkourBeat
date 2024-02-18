@@ -2,9 +2,11 @@ package ru.sortix.parkourbeat.data;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.lang.IllegalStateException;
 import ru.sortix.parkourbeat.ParkourBeat;
 
 public class Settings {
@@ -21,7 +23,6 @@ public class Settings {
     plugin.saveDefaultConfig();
     FileConfiguration config = plugin.getConfig();
     lobbySpawn = getLocation(config.getConfigurationSection("lobby"));
-    lobbySpawn.setWorld(Bukkit.getWorld(config.getString("lobby.world")));
     defaultWorldSpawn = getLocation(config.getConfigurationSection("default_world"));
     isLoaded = true;
   }
@@ -32,7 +33,11 @@ public class Settings {
     double z = config.getDouble("z", 0);
     float yaw = (float) config.getDouble("yaw", 0);
     float pitch = (float) config.getDouble("pitch", 0);
-    return new Location(null, x, y, z, yaw, pitch);
+    World world = Bukkit.getWorld(config.getString("world"));
+    if (world == null) {
+        throw new IllegalStateException("World for section " + config.getName() + " is unknown");
+    }
+    return new Location(world, x, y, z, yaw, pitch);
   }
 
   public static Location getLobbySpawn() {
