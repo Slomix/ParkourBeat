@@ -16,61 +16,61 @@ import ru.sortix.parkourbeat.levels.LevelsManager;
 
 public class TpToWorldCommand implements CommandExecutor, TabCompleter {
 
-	private final LevelsManager levelsManager;
-	private final GameManager gameManager;
-	private final LevelEditorsManager levelEditorsManager;
+    private final LevelsManager levelsManager;
+    private final GameManager gameManager;
+    private final LevelEditorsManager levelEditorsManager;
 
-	public TpToWorldCommand(
-			LevelEditorsManager levelEditorsManager,
-			GameManager gameManager,
-			LevelsManager levelsManager) {
-		this.levelsManager = levelsManager;
-		this.gameManager = gameManager;
-		this.levelEditorsManager = levelEditorsManager;
-	}
+    public TpToWorldCommand(
+            LevelEditorsManager levelEditorsManager,
+            GameManager gameManager,
+            LevelsManager levelsManager) {
+        this.levelsManager = levelsManager;
+        this.gameManager = gameManager;
+        this.levelEditorsManager = levelEditorsManager;
+    }
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (sender instanceof Player) {
-			Player player = (Player) sender;
-			if (args.length > 0) {
-				String worldId = args[0];
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            if (args.length > 0) {
+                String worldId = args[0];
 
-				if (!levelsManager.getLoadedLevels().contains(worldId)) {
-					sender.sendMessage("World not loaded!");
-					return true;
-				}
-				Level level = levelsManager.getLevelWorld(worldId);
-				if (level.getWorld().equals(player.getWorld())) {
-					sender.sendMessage("You are already in this world!");
-					return true;
-				}
-				player.teleport(level.getLevelSettings().getWorldSettings().getSpawn());
-				player.setGameMode(GameMode.SPECTATOR);
-				player.sendMessage("Teleported to parkourbeat level " + level.getName());
-			} else {
-				player.teleport(Settings.getLobbySpawn());
-				player.sendMessage("Teleported to lobby");
-				player.setGameMode(GameMode.ADVENTURE);
-			}
-			if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
-		} else {
-			sender.sendMessage("Command only for players!");
-		}
-		return true;
-	}
+                if (!levelsManager.getLoadedLevels().contains(worldId)) {
+                    sender.sendMessage("World not loaded!");
+                    return true;
+                }
+                Level level = levelsManager.getLevelWorld(worldId);
+                if (level.getWorld().equals(player.getWorld())) {
+                    sender.sendMessage("You are already in this world!");
+                    return true;
+                }
+                player.teleport(level.getLevelSettings().getWorldSettings().getSpawn());
+                player.setGameMode(GameMode.SPECTATOR);
+                player.sendMessage("Teleported to parkourbeat level " + level.getName());
+            } else {
+                player.teleport(Settings.getLobbySpawn());
+                player.sendMessage("Teleported to lobby");
+                player.setGameMode(GameMode.ADVENTURE);
+            }
+            if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
+        } else {
+            sender.sendMessage("Command only for players!");
+        }
+        return true;
+    }
 
-	@Override
-	public List<String> onTabComplete(
-			CommandSender sender, Command command, String alias, String[] args) {
-		ArrayList<String> tabComplete = new ArrayList<>();
-		if (sender instanceof Player && args.length == 1) {
-			for (String inGameWorld : levelsManager.getLoadedLevels()) {
-				if (inGameWorld.toLowerCase().startsWith(args[0].toLowerCase())) {
-					tabComplete.add(inGameWorld);
-				}
-			}
-		}
-		return tabComplete;
-	}
+    @Override
+    public List<String> onTabComplete(
+            CommandSender sender, Command command, String alias, String[] args) {
+        ArrayList<String> tabComplete = new ArrayList<>();
+        if (sender instanceof Player && args.length == 1) {
+            for (String inGameWorld : levelsManager.getLoadedLevels()) {
+                if (inGameWorld.toLowerCase().startsWith(args[0].toLowerCase())) {
+                    tabComplete.add(inGameWorld);
+                }
+            }
+        }
+        return tabComplete;
+    }
 }

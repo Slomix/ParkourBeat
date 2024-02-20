@@ -63,9 +63,8 @@
                     <reflowLongStrings>true</reflowLongStrings>
                     <formatJavadoc>false</formatJavadoc>
                   </googleJavaFormat>
-                  <indent><tabs>true</tabs><spacesPerTab>2</spacesPerTab></indent>
-                  <indent><tabs>true</tabs><spacesPerTab>4</spacesPerTab></indent>
-                  <importOrder />
+                    <indent><tabs>true</tabs><spacesPerTab>2</spacesPerTab></indent>
+                    <indent><spaces>true</spaces><spacesPerTab>4</spacesPerTab></indent>
                   <removeUnusedImports />
                   <formatAnnotations />
                 </java>
@@ -73,9 +72,9 @@
               <executions>
                 <execution>
                     <goals>
-                      <goal>check</goal>
+                      <goal>apply</goal>
                     </goals>
-                  <phase>compile</phase>
+                  <phase>validate</phase>
                 </execution>
               </executions>
             </plugin>
