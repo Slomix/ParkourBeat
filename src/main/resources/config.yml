@@ -1,10 +1,10 @@
 lobby:
+  world: pb_lobby
   x: 0
   y: 0
   z: 0
   yaw: 0
   pitch: 0
-  world: lobby
 default_world:
   x: 0
   y: 0

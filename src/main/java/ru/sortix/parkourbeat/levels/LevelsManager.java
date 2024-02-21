@@ -46,7 +46,7 @@ public class LevelsManager {
             return null;
         }
 
-        File source = new File(plugin.getDataFolder(), "defaultWorld");
+        File source = new File(plugin.getDataFolder(), "pb_default_level");
         File target = new File(Bukkit.getWorldContainer(), name);
         try {
             Files.walk(source.toPath())
