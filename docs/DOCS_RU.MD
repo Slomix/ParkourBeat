@@ -1,15 +1,21 @@
-Сборка проекта:
+### Сборка проекта:
+
 - Склонируйте проект
 - Выполните `mvn package`
 - Готовый jar находится в папке `target` и называется `ParkourBeat-1.0-SNAPSHOT.jar`
 
-Зависимости плагина:
+### Зависимости плагина:
+
 - Paper 1.12.2 или 1.16.5 (другие версии не протестированы, но, вероятно, работают тоже)
 - [AMusic 0.12](https://spigotmc.org/resources/108835)
 
-Установка плагина:
-- Создайте мир "pb_lobby" при помощи [MultiVerse](https://spigotmc.org/resources/390) или просто скопируйте папку на сервер и назовите её "pb_lobby"
-- Создайте мир "pb_default_level" при помощи [MultiVerse](https://spigotmc.org/resources/390) или просто скопируйте папку на сервер и назовите её "pb_default_level"
+### Установка плагина:
+
+- Убедитесь, что AMusic установлен
+- Создайте мир "pb_lobby" при помощи [MultiVerse](https://spigotmc.org/resources/390) или просто скопируйте папку на
+  сервер и назовите её "pb_lobby"
+- Создайте мир "pb_default_level" при помощи [MultiVerse](https://spigotmc.org/resources/390) или просто скопируйте
+  папку на сервер и назовите её "pb_default_level"
 - Скопируйте `ParkourBeat-1.0-SNAPSHOT.jar` в папку `plugins`
 - Выполните рестарт сервера, чтобы загрузить плагин
 - Отредактируйте все конфиги в директории `plugins/ParkourBeat`
