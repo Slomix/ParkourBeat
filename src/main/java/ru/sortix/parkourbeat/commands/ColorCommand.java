@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat.commands;
 
+import lombok.NonNull;
 import org.bukkit.Color;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -18,7 +19,11 @@ public class ColorCommand implements CommandExecutor {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+    public boolean onCommand(
+            @NonNull CommandSender sender,
+            @NonNull Command command,
+            @NonNull String label,
+            @NonNull String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("Команда только для игроков!");
             return true;

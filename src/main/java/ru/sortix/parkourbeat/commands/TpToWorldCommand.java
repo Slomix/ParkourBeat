@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.commands;
 
 import java.util.ArrayList;
 import java.util.List;
+import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -30,7 +31,11 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(
+            @NonNull CommandSender sender,
+            @NonNull Command command,
+            @NonNull String label,
+            @NonNull String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             if (args.length > 0) {
@@ -62,7 +67,10 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(
-            CommandSender sender, Command command, String alias, String[] args) {
+            @NonNull CommandSender sender,
+            @NonNull Command command,
+            @NonNull String label,
+            @NonNull String[] args) {
         ArrayList<String> tabComplete = new ArrayList<>();
         if (sender instanceof Player && args.length == 1) {
             for (String inGameWorld : levelsManager.getLoadedLevels()) {

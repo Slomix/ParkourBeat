@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.commands;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.NonNull;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -28,7 +29,11 @@ public class EditCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+    public boolean onCommand(
+            @NonNull CommandSender sender,
+            @NonNull Command command,
+            @NonNull String label,
+            @NonNull String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("Команда только для игроков!");
             return true;
@@ -64,7 +69,10 @@ public class EditCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(
-            CommandSender sender, Command command, String s, String[] args) {
+            @NonNull CommandSender sender,
+            @NonNull Command command,
+            @NonNull String label,
+            @NonNull String[] args) {
         if (args.length == 1) {
             String input = args[0].toLowerCase();
             return levelsManager.getAllLevels().stream()

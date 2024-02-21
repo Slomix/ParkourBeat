@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.NonNull;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -31,7 +32,11 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String s, String[] args) {
+    public boolean onCommand(
+            @NonNull CommandSender sender,
+            @NonNull Command command,
+            @NonNull String label,
+            @NonNull String[] args) {
         Player player = (Player) sender;
         if (args.length < 2) {
             sender.sendMessage("Недостаточно аргументов! Используйте: /create <имя уровня> <окружение>");
@@ -58,7 +63,7 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(
-            CommandSender sender, Command command, String s, String[] args) {
+            CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 2) {
             String environment = args[1].toLowerCase();
             return Arrays.stream(World.Environment.values())

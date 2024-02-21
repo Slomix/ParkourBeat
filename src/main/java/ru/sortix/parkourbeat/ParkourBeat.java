@@ -1,12 +1,13 @@
 package ru.sortix.parkourbeat;
 
 import java.io.File;
+import lombok.Getter;
 import me.bomb.amusic.AMusic;
-import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.sortix.parkourbeat.commands.*;
 import ru.sortix.parkourbeat.data.Settings;
@@ -25,18 +26,15 @@ import ru.sortix.parkourbeat.location.Waypoint;
 
 public class ParkourBeat extends JavaPlugin {
 
-    private static Songs songs;
+    @Getter private static Songs songs;
 
     public static JavaPlugin getPlugin() {
         return JavaPlugin.getPlugin(ParkourBeat.class);
     }
 
-    public static Songs getSongs() {
-        return songs;
-    }
-
+    @Override
     public void onEnable() {
-        Settings.load();
+        Settings.load(this);
         songs = new Songs(getPlugin(AMusic.class).getDataFolder().toPath().resolve("Music"));
 
         ConfigurationSerialization.registerClass(Waypoint.class);
@@ -55,13 +53,13 @@ public class ParkourBeat extends JavaPlugin {
         registerCommand("song", new SongCommand(levelEditorsManager), false);
         registerCommand("color", new ColorCommand(levelEditorsManager), false);
 
-        Bukkit.getPluginManager()
-                .registerEvents(new EventListener(gameManager, levelEditorsManager), this);
-        Bukkit.getPluginManager().registerEvents(new MoveListener(gameManager), this);
-        Bukkit.getPluginManager().registerEvents(new ResourcePackListener(gameManager), this);
-        Bukkit.getPluginManager().registerEvents(new SprintListener(gameManager), this);
-        Bukkit.getPluginManager().registerEvents(new LevelEditorListener(levelEditorsManager), this);
-        Bukkit.getPluginManager().registerEvents(new SongMenuListener(), this);
+        PluginManager pluginManager = this.getServer().getPluginManager();
+        pluginManager.registerEvents(new EventListener(gameManager, levelEditorsManager), this);
+        pluginManager.registerEvents(new MoveListener(gameManager), this);
+        pluginManager.registerEvents(new ResourcePackListener(gameManager), this);
+        pluginManager.registerEvents(new SprintListener(gameManager), this);
+        pluginManager.registerEvents(new LevelEditorListener(levelEditorsManager), this);
+        pluginManager.registerEvents(new SongMenuListener(), this);
     }
 
     private void registerCommand(String commandName, CommandExecutor executor) {
@@ -74,5 +72,6 @@ public class ParkourBeat extends JavaPlugin {
         if (completer) command.setTabCompleter((TabCompleter) executor);
     }
 
+    @Override
     public void onDisable() {}
 }

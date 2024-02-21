@@ -2,25 +2,27 @@ package ru.sortix.parkourbeat.levels;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
-import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.location.Waypoint;
 
 public class ParticleController {
     private static final double SEGMENT_LENGTH = 0.25;
+
+    private final Plugin plugin;
     private final ConcurrentLinkedQueue<Location> particleLocations = new ConcurrentLinkedQueue<>();
     private final Map<Double, Color> colorsChangeLocations = new LinkedHashMap<>();
     private final Map<Player, BukkitTask> particleTasks = new HashMap<>();
     private DirectionChecker directionChecker;
     private boolean isLoaded = false;
 
-    public ParticleController(DirectionChecker directionChecker) {
+    public ParticleController(Plugin plugin, DirectionChecker directionChecker) {
+        this.plugin = plugin;
         this.directionChecker = directionChecker;
     }
 
@@ -122,9 +124,11 @@ public class ParticleController {
         }
         particleTasks.put(
                 player,
-                Bukkit.getScheduler()
+                this.plugin
+                        .getServer()
+                        .getScheduler()
                         .runTaskTimerAsynchronously(
-                                ParkourBeat.getPlugin(),
+                                this.plugin,
                                 () -> {
                                     for (Location location : particleLocations) {
                                         Color color = getCurrentColor(player.getLocation());

@@ -7,10 +7,12 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
-import org.bukkit.Bukkit;
+import lombok.Getter;
+import lombok.NonNull;
+import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.sortix.parkourbeat.data.Settings;
@@ -22,16 +24,16 @@ public class LevelsManager {
     private final Set<String> levels = new HashSet<>();
     private final Map<String, Level> loadedLevels = new HashMap<>();
     private final LevelSettingsManager levelsSettings;
-    private final JavaPlugin plugin;
+    @Getter private final Plugin plugin;
 
-    public LevelsManager(JavaPlugin plugin, LevelSettingDAO worldSettingDAO) {
+    public LevelsManager(@NonNull Plugin plugin, LevelSettingDAO worldSettingDAO) {
         this.levelsSettings = new LevelSettingsManager(worldSettingDAO);
         this.plugin = plugin;
         init();
     }
 
     private void init() {
-        File worldDirectory = Bukkit.getWorldContainer();
+        File worldDirectory = this.plugin.getServer().getWorldContainer();
         if (worldDirectory.exists() && worldDirectory.isDirectory()) {
             Arrays.stream(worldDirectory.listFiles())
                     .filter(File::isDirectory)
@@ -46,8 +48,8 @@ public class LevelsManager {
             return null;
         }
 
-        File source = new File(plugin.getDataFolder(), "pb_default_level");
-        File target = new File(Bukkit.getWorldContainer(), name);
+        File source = new File(this.plugin.getDataFolder(), "pb_default_level");
+        File target = new File(this.plugin.getServer().getWorldContainer(), name);
         try {
             Files.walk(source.toPath())
                     .forEach(
@@ -66,7 +68,7 @@ public class LevelsManager {
         // TODO: replace Bukkit worlds to SWM
         // WorldCreator(name).environment(environment)) - creates a new world not a copy
 
-        World world = Bukkit.createWorld(new WorldCreator(name));
+        World world = this.plugin.getServer().createWorld(new WorldCreator(name));
 
         world.setAutoSave(false);
         levels.add(name);
@@ -82,11 +84,12 @@ public class LevelsManager {
     }
 
     public void deleteLevel(String name) {
-        World world = Bukkit.getWorld(name);
+        Server server = this.plugin.getServer();
+        World world = server.getWorld(name);
         if (world != null) {
-            Bukkit.unloadWorld(name, false);
+            server.unloadWorld(name, false);
         }
-        File worldFolder = new File(Bukkit.getWorldContainer(), name);
+        File worldFolder = new File(server.getWorldContainer(), name);
         deleteDirectory(worldFolder);
         levels.remove(name);
         levelsSettings.deleteLevelSettings(name);
@@ -96,7 +99,7 @@ public class LevelsManager {
         if (isLevelLoaded(name)) {
             return getLevelWorld(name);
         }
-        World world = Bukkit.createWorld(new WorldCreator(name));
+        World world = this.plugin.getServer().createWorld(new WorldCreator(name));
         world.setAutoSave(false);
         Level loadedLevel = new Level(name, world, levelsSettings.loadLevelSettings(name));
         loadedLevels.put(name, loadedLevel);
@@ -109,7 +112,7 @@ public class LevelsManager {
         }
         levelsSettings.unloadLevelSettings(name);
         loadedLevels.remove(name);
-        Bukkit.unloadWorld(name, false);
+        this.plugin.getServer().unloadWorld(name, false);
     }
 
     public void saveLevel(Level level) {

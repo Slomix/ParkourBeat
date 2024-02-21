@@ -1,13 +1,14 @@
 package ru.sortix.parkourbeat.game;
 
+import lombok.Getter;
+import lombok.NonNull;
 import me.bomb.amusic.AMusic;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
-import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
@@ -20,8 +21,8 @@ public class Game {
 
     private final LevelsManager levelsManager;
     private LevelSettings levelSettings;
-    private Player player;
-    private State currentState;
+    @Getter private Player player;
+    @Getter private State currentState;
     private GameMoveHandler gameMoveHandler;
 
     public Game(LevelsManager levelsManager) {
@@ -51,9 +52,11 @@ public class Game {
 
         if (gameSettings.getSongName() != null
                 && !gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
-            Bukkit.getScheduler()
+            this.getPlugin()
+                    .getServer()
+                    .getScheduler()
                     .scheduleSyncDelayedTask(
-                            ParkourBeat.getPlugin(),
+                            this.getPlugin(),
                             () -> AMusic.loadPack(player, gameSettings.getSongPlayListName(), false),
                             20L);
         } else {
@@ -70,8 +73,9 @@ public class Game {
             AMusic.setRepeatMode(player, null);
             AMusic.playSound(player, levelSettings.getGameSettings().getSongName());
         }
+        Plugin plugin = this.levelsManager.getPlugin();
         for (Player onlinePlayer : player.getWorld().getPlayers()) {
-            player.hidePlayer(ParkourBeat.getPlugin(), onlinePlayer);
+            player.hidePlayer(plugin, onlinePlayer);
         }
 
         currentState = State.RUNNING;
@@ -85,17 +89,9 @@ public class Game {
         return gameMoveHandler;
     }
 
-    public State getCurrentState() {
-        return currentState;
-    }
-
     public void setCurrentState(State currentState) {
         player.sendMessage("State: " + currentState);
         this.currentState = currentState;
-    }
-
-    public Player getPlayer() {
-        return player;
     }
 
     public void stopGame(StopReason reason) {
@@ -113,10 +109,17 @@ public class Game {
         player.playSound(player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
         levelSettings.getParticleController().stopSpawnParticles(player);
         gameMoveHandler.getAccuracyChecker().reset();
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            player.showPlayer(ParkourBeat.getPlugin(), onlinePlayer);
+
+        Plugin plugin = this.getPlugin();
+        for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+            player.showPlayer(plugin, onlinePlayer);
         }
+
         currentState = State.READY;
+    }
+
+    @NonNull public Plugin getPlugin() {
+        return this.levelsManager.getPlugin();
     }
 
     public void endGame() {
@@ -128,9 +131,12 @@ public class Game {
         AMusic.stopSound(player);
         World world = levelSettings.getWorldSettings().getWorld();
         if (unloadLevel && world.getPlayers().isEmpty()) levelsManager.unloadLevel(world.getName());
-        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-            player.showPlayer(ParkourBeat.getPlugin(), onlinePlayer);
+
+        Plugin plugin = this.getPlugin();
+        for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+            player.showPlayer(plugin, onlinePlayer);
         }
+
         levelSettings.getParticleController().stopSpawnParticles(player);
     }
 

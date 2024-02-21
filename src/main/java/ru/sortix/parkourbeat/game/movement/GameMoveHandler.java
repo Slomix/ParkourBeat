@@ -1,16 +1,16 @@
 package ru.sortix.parkourbeat.game.movement;
 
+import lombok.NonNull;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
-import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
@@ -92,9 +92,11 @@ public class GameMoveHandler {
     private void startDamageTask(Player player, int damage, String reason) {
         player.playSound(player.getLocation(), Sound.ENTITY_WOLF_HURT, 1, 1);
         task =
-                Bukkit.getScheduler()
+                this.getPlugin()
+                        .getServer()
+                        .getScheduler()
                         .runTaskTimer(
-                                ParkourBeat.getPlugin(),
+                                this.getPlugin(),
                                 () -> {
                                     if (!player.isOnline() || game.getCurrentState() != Game.State.RUNNING) {
                                         task.cancel();
@@ -107,6 +109,10 @@ public class GameMoveHandler {
                                 },
                                 0,
                                 2);
+    }
+
+    @NonNull public Plugin getPlugin() {
+        return this.game.getPlugin();
     }
 
     private void damagePlayer(Player player, int damage, String reason) {

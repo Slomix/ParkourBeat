@@ -2,20 +2,19 @@ package ru.sortix.parkourbeat.data;
 
 import java.io.File;
 import javax.annotation.Nullable;
+import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
 import ru.sortix.parkourbeat.ParkourBeat;
 
 public class Settings {
-    private static Location lobbySpawn;
-    private static Location defaultWorldSpawn;
+    @Getter private static Location lobbySpawn;
+    @Getter private static Location defaultWorldSpawn;
     private static boolean isLoaded = false;
 
-    public static void load() {
-        JavaPlugin plugin = ParkourBeat.getPlugin();
+    public static void load(@NonNull ParkourBeat plugin) {
         if (isLoaded) {
             plugin.getLogger().warning("Settings already loaded!");
             return;
@@ -73,13 +72,5 @@ public class Settings {
         float yaw = (float) config.getDouble("yaw", 0);
         float pitch = (float) config.getDouble("pitch", 0);
         return new Location(null, x, y, z, yaw, pitch);
-    }
-
-    public static Location getLobbySpawn() {
-        return lobbySpawn;
-    }
-
-    public static Location getDefaultWorldSpawn() {
-        return defaultWorldSpawn;
     }
 }
