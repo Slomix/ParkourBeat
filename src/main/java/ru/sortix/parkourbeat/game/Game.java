@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
-import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
@@ -37,31 +36,35 @@ public class Game {
         currentState = State.PREPARING;
         this.player = player;
 
-        Level level = levelsManager.loadLevel(levelName);
-        levelSettings = level.getLevelSettings();
-        WorldSettings worldSettings = levelSettings.getWorldSettings();
-        GameSettings gameSettings = levelSettings.getGameSettings();
-        ParticleController particleController = levelSettings.getParticleController();
+        levelsManager
+                .loadLevel(levelName)
+                .thenAccept(
+                        level -> {
+                            levelSettings = level.getLevelSettings();
+                            WorldSettings worldSettings = levelSettings.getWorldSettings();
+                            GameSettings gameSettings = levelSettings.getGameSettings();
+                            ParticleController particleController = levelSettings.getParticleController();
 
-        if (!particleController.isLoaded()) {
-            particleController.loadParticleLocations(worldSettings.getWaypoints());
-        }
+                            if (!particleController.isLoaded()) {
+                                particleController.loadParticleLocations(worldSettings.getWaypoints());
+                            }
 
-        player.teleport(worldSettings.getSpawn());
-        this.gameMoveHandler = new GameMoveHandler(this);
+                            player.teleport(worldSettings.getSpawn());
+                            this.gameMoveHandler = new GameMoveHandler(this);
 
-        if (gameSettings.getSongName() != null
-                && !gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
-            this.getPlugin()
-                    .getServer()
-                    .getScheduler()
-                    .scheduleSyncDelayedTask(
-                            this.getPlugin(),
-                            () -> AMusic.loadPack(player, gameSettings.getSongPlayListName(), false),
-                            20L);
-        } else {
-            currentState = State.READY;
-        }
+                            if (gameSettings.getSongName() != null
+                                    && !gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
+                                this.getPlugin()
+                                        .getServer()
+                                        .getScheduler()
+                                        .scheduleSyncDelayedTask(
+                                                this.getPlugin(),
+                                                () -> AMusic.loadPack(player, gameSettings.getSongPlayListName(), false),
+                                                20L);
+                            } else {
+                                currentState = State.READY;
+                            }
+                        });
     }
 
     public void start() {

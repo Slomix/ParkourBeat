@@ -13,7 +13,6 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.GameManager;
-import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
 public class CreateCommand implements CommandExecutor, TabCompleter {
@@ -53,10 +52,16 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
         if (levelsManager.getAllLevels().contains(args[0])) {
             sender.sendMessage("Уровень уже существует!");
         } else {
-            if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
-            Level level = levelsManager.createLevel(args[0], environment, player.getName());
-            player.sendMessage("Уровень " + args[0] + " создан!");
-            levelEditorsManager.createEditorSession(player, level).start();
+            if (!levelEditorsManager.removeEditorSession(player)) {
+                gameManager.removeGame(player);
+            }
+            levelsManager
+                    .createLevel(args[0], environment, player.getName())
+                    .thenAccept(
+                            level -> {
+                                player.sendMessage("Уровень " + args[0] + " создан!");
+                                levelEditorsManager.createEditorSession(player, level).start();
+                            });
         }
         return true;
     }

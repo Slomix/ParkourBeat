@@ -1,20 +1,24 @@
 package ru.sortix.parkourbeat.data;
 
-import java.io.File;
-import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
-import org.bukkit.*;
+import lombok.experimental.UtilityClass;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.WorldCreator;
+import org.bukkit.WorldType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.levels.WorldsManager;
 
+@UtilityClass
 public class Settings {
-    @Getter private static Location lobbySpawn;
-    @Getter private static Location defaultWorldSpawn;
-    private static boolean isLoaded = false;
+    @Getter private Location lobbySpawn;
+    @Getter private Location defaultWorldSpawn;
+    private boolean isLoaded = false;
 
-    public static void load(@NonNull ParkourBeat plugin) {
+    public void load(@NonNull ParkourBeat plugin, @NonNull WorldsManager worldsManager) {
         if (isLoaded) {
             plugin.getLogger().warning("Settings already loaded!");
             return;
@@ -26,7 +30,13 @@ public class Settings {
 
         World spawnWorld;
         try {
-            spawnWorld = getOrLoadWord(plugin.getServer(), spawnSection.getString("world"));
+            String worldName = spawnSection.getString("world");
+            WorldCreator worldCreator = newWorldCreator(worldName);
+            spawnWorld =
+                    worldsManager
+                            .createWorldFromDefaultContainer(
+                                    worldCreator, worldsManager.getCurrentThreadExecutor())
+                            .join();
         } catch (Exception e) {
             throw new RuntimeException("Unable to load lobby world", e);
         }
@@ -36,33 +46,13 @@ public class Settings {
         isLoaded = true;
     }
 
-    @NonNull private static World getOrLoadWord(@NonNull Server server, @Nullable String worldName) {
-        if (worldName == null) {
-            throw new IllegalArgumentException("World name not found");
-        }
-
-        World result = server.getWorld(worldName);
-        if (result != null) return result;
-
-        File worldDir = new File(server.getWorldContainer(), worldName);
-        if (!worldDir.isDirectory()) {
-            throw new IllegalArgumentException("Is not a directory: " + worldDir.getAbsolutePath());
-        }
-
+    @NonNull private WorldCreator newWorldCreator(@NonNull String worldName) {
         WorldCreator worldCreator = new WorldCreator(worldName);
         worldCreator.seed(0L);
         worldCreator.environment(World.Environment.NORMAL);
         worldCreator.type(WorldType.FLAT);
         worldCreator.generateStructures(false);
-
-        result = server.createWorld(worldCreator);
-        if (result != null) return result;
-
-        throw new UnsupportedOperationException(
-                "Unable to create world \""
-                        + worldName
-                        + "\" from directory "
-                        + worldDir.getAbsolutePath());
+        return worldCreator;
     }
 
     private static Location getLocation(ConfigurationSection config) {

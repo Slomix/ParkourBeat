@@ -10,7 +10,6 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.GameManager;
-import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
 public class EditCommand implements CommandExecutor, TabCompleter {
@@ -48,22 +47,26 @@ public class EditCommand implements CommandExecutor, TabCompleter {
 
         if (!levelsManager.getAllLevels().contains(args[0])) {
             player.sendMessage("Уровень не найден!");
-        } else {
-            Level level = levelsManager.loadLevel(args[0]);
-            if (!level.getLevelSettings().getGameSettings().getOwner().equals(player.getName())) {
-                player.sendMessage("Вы не являетесь владельцем этого уровня!");
-                if (level.getWorld().getPlayers().isEmpty()) {
-                    levelsManager.unloadLevel(level.getName());
-                }
-                return true;
-            }
-            if (level.isEditing()) {
-                player.sendMessage("Вы и так уже редактируете данный уровень!");
-                return true;
-            }
-            if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
-            levelEditorsManager.createEditorSession(player, level).start();
+            return true;
         }
+        levelsManager
+                .loadLevel(args[0])
+                .thenAccept(
+                        level -> {
+                            if (!level.getLevelSettings().getGameSettings().getOwner().equals(player.getName())) {
+                                player.sendMessage("Вы не являетесь владельцем этого уровня!");
+                                if (level.getWorld().getPlayers().isEmpty()) {
+                                    levelsManager.unloadLevel(level.getName());
+                                }
+                                return;
+                            }
+                            if (level.isEditing()) {
+                                player.sendMessage("Вы и так уже редактируете данный уровень!");
+                                return;
+                            }
+                            if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
+                            levelEditorsManager.createEditorSession(player, level).start();
+                        });
         return true;
     }
 

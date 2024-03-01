@@ -11,19 +11,23 @@ import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.world.WorldInitEvent;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.game.GameManager;
+import ru.sortix.parkourbeat.levels.LevelsManager;
 
 public final class EventListener implements Listener {
 
     private final GameManager gameManager;
+    private final LevelsManager levelsManager;
     private final LevelEditorsManager levelEditorsManager;
 
-    public EventListener(GameManager gameManager, LevelEditorsManager levelEditorsManager) {
+    public EventListener(GameManager gameManager, LevelsManager levelsManager, LevelEditorsManager levelEditorsManager) {
         this.gameManager = gameManager;
+        this.levelsManager = levelsManager;
         this.levelEditorsManager = levelEditorsManager;
     }
 
@@ -91,5 +95,11 @@ public final class EventListener implements Listener {
     @EventHandler
     public void onFoodLevelChange(FoodLevelChangeEvent event) {
         event.setFoodLevel(20);
+    }
+
+    @EventHandler
+    private void on(WorldInitEvent event) {
+        // if (!event.getWorld().getName().startsWith("pb_level_")) return; // TODO See https://github.com/Slomix/ParkourBeat/issues/9
+        this.levelsManager.prepareLevelWorld(event.getWorld(), false);
     }
 }

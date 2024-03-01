@@ -2,9 +2,11 @@ package ru.sortix.parkourbeat.levels.dao.files;
 
 import java.io.File;
 import java.io.IOException;
+import lombok.NonNull;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
@@ -18,8 +20,8 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     private final GameSettingsDAO gameSettingsDAO = new GameSettingsDAO();
     private final WorldSettingsDAO worldSettingsDAO = new WorldSettingsDAO();
 
-    public FileLevelSettingDAO(String directory) {
-        File worldDir = new File(directory);
+    public FileLevelSettingDAO(@NonNull Plugin plugin) {
+        File worldDir = new File(plugin.getDataFolder(), "settings");
         if (!worldDir.exists()) {
             worldDir.mkdir();
         }

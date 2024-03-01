@@ -10,7 +10,6 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.GameManager;
-import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
 public class DeleteCommand implements CommandExecutor, TabCompleter {
@@ -40,31 +39,35 @@ public class DeleteCommand implements CommandExecutor, TabCompleter {
         }
 
         String worldId = args[0];
-        if (levelsManager.getAllLevels().contains(worldId)) {
-            Level level = levelsManager.loadLevel(worldId);
-            if (!level.getLevelSettings().getGameSettings().getOwner().equals(sender.getName())
-                    && !sender.isOp()) {
-                sender.sendMessage("Вы не являетесь владельцем этого уровня!");
-                if (level.getWorld().getPlayers().isEmpty()) {
-                    levelsManager.unloadLevel(level.getName());
-                }
-                return true;
-            }
-            if (level.isEditing()) {
-                Player editorPlayer = level.getWorld().getPlayers().iterator().next();
-                levelEditorsManager.removeEditorSession(editorPlayer);
-                editorPlayer.sendMessage("Уровень " + worldId + " был удален!");
-            } else {
-                for (Player player : level.getWorld().getPlayers()) {
-                    player.sendMessage("Уровень " + worldId + " был удален!");
-                    gameManager.removeGame(player);
-                }
-            }
-            levelsManager.deleteLevel(worldId);
-            sender.sendMessage("Вы успешно удалили " + worldId + "!");
-        } else {
+        if (!levelsManager.getAllLevels().contains(worldId)) {
             sender.sendMessage("Уровень не найден!");
+            return true;
         }
+        levelsManager
+                .loadLevel(worldId)
+                .thenAccept(
+                        level -> {
+                            if (!level.getLevelSettings().getGameSettings().getOwner().equals(sender.getName())
+                                    && !sender.isOp()) {
+                                sender.sendMessage("Вы не являетесь владельцем этого уровня!");
+                                if (level.getWorld().getPlayers().isEmpty()) {
+                                    levelsManager.unloadLevel(level.getName());
+                                }
+                                return;
+                            }
+                            if (level.isEditing()) {
+                                Player editorPlayer = level.getWorld().getPlayers().iterator().next();
+                                levelEditorsManager.removeEditorSession(editorPlayer);
+                                editorPlayer.sendMessage("Уровень " + worldId + " был удален!");
+                            } else {
+                                for (Player player : level.getWorld().getPlayers()) {
+                                    player.sendMessage("Уровень " + worldId + " был удален!");
+                                    gameManager.removeGame(player);
+                                }
+                            }
+                            levelsManager.deleteLevel(worldId);
+                            sender.sendMessage("Вы успешно удалили " + worldId + "!");
+                        });
         return true;
     }
 

@@ -1,8 +1,6 @@
 package ru.sortix.parkourbeat;
 
-import java.io.File;
 import lombok.Getter;
-import me.bomb.amusic.AMusic;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
@@ -17,6 +15,7 @@ import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.editor.menu.SongMenuListener;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.levels.WorldsManager;
 import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
 import ru.sortix.parkourbeat.listeners.EventListener;
 import ru.sortix.parkourbeat.listeners.MoveListener;
@@ -34,13 +33,13 @@ public class ParkourBeat extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        Settings.load(this);
-        songs = new Songs(getPlugin(AMusic.class).getDataFolder().toPath().resolve("Music"));
+        WorldsManager worldsManager = new WorldsManager(this);
+        Settings.load(this, worldsManager);
+        songs = new Songs();
 
         ConfigurationSerialization.registerClass(Waypoint.class);
-        LevelsManager levelsManager =
-                new LevelsManager(
-                        this, new FileLevelSettingDAO(getDataFolder() + File.separator + "settings"));
+        FileLevelSettingDAO fileLevelSettingDAO = new FileLevelSettingDAO(this);
+        LevelsManager levelsManager = new LevelsManager(this, worldsManager, fileLevelSettingDAO);
         GameManager gameManager = new GameManager(levelsManager);
         LevelEditorsManager levelEditorsManager = new LevelEditorsManager(gameManager, levelsManager);
 
@@ -52,9 +51,10 @@ public class ParkourBeat extends JavaPlugin {
         registerCommand("delete", new DeleteCommand(levelEditorsManager, levelsManager, gameManager));
         registerCommand("song", new SongCommand(levelEditorsManager));
         registerCommand("color", new ColorCommand(levelEditorsManager));
+        registerCommand("test", new TestCommand(levelsManager));
 
         PluginManager pluginManager = this.getServer().getPluginManager();
-        pluginManager.registerEvents(new EventListener(gameManager, levelEditorsManager), this);
+        pluginManager.registerEvents(new EventListener(gameManager, levelsManager, levelEditorsManager), this);
         pluginManager.registerEvents(new MoveListener(gameManager), this);
         pluginManager.registerEvents(new ResourcePackListener(gameManager), this);
         pluginManager.registerEvents(new SprintListener(gameManager), this);
@@ -65,7 +65,8 @@ public class ParkourBeat extends JavaPlugin {
     public void registerCommand(String commandName, CommandExecutor executor) {
         PluginCommand command = getCommand(commandName);
         if (command == null) {
-            this.getLogger().severe("Unable to register command " + commandName + ". Is it specified in plugin.yml?");
+            this.getLogger()
+                    .severe("Unable to register command " + commandName + ". Is it specified in plugin.yml?");
             return;
         }
         command.setExecutor(executor);

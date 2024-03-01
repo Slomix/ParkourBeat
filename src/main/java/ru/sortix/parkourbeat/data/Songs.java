@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat.data;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,15 +8,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Stream;
+import me.bomb.amusic.AMusic;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class Songs {
 
     private final Map<String, String> allSongs;
     private final Path path;
 
-    public Songs(Path path) {
+    public Songs() {
         allSongs = new TreeMap<>();
-        this.path = path;
+        this.path = new File(JavaPlugin.getPlugin(AMusic.class).getDataFolder(), "Music").toPath();
         reload();
     }
 
