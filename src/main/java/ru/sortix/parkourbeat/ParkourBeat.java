@@ -54,7 +54,8 @@ public class ParkourBeat extends JavaPlugin {
         registerCommand("test", new TestCommand(levelsManager));
 
         PluginManager pluginManager = this.getServer().getPluginManager();
-        pluginManager.registerEvents(new EventListener(gameManager, levelsManager, levelEditorsManager), this);
+        pluginManager.registerEvents(
+                new EventListener(gameManager, levelsManager, levelEditorsManager), this);
         pluginManager.registerEvents(new MoveListener(gameManager), this);
         pluginManager.registerEvents(new ResourcePackListener(gameManager), this);
         pluginManager.registerEvents(new SprintListener(gameManager), this);

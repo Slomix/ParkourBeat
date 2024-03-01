@@ -25,7 +25,10 @@ public final class EventListener implements Listener {
     private final LevelsManager levelsManager;
     private final LevelEditorsManager levelEditorsManager;
 
-    public EventListener(GameManager gameManager, LevelsManager levelsManager, LevelEditorsManager levelEditorsManager) {
+    public EventListener(
+            GameManager gameManager,
+            LevelsManager levelsManager,
+            LevelEditorsManager levelEditorsManager) {
         this.gameManager = gameManager;
         this.levelsManager = levelsManager;
         this.levelEditorsManager = levelEditorsManager;
@@ -99,7 +102,8 @@ public final class EventListener implements Listener {
 
     @EventHandler
     private void on(WorldInitEvent event) {
-        // if (!event.getWorld().getName().startsWith("pb_level_")) return; // TODO See https://github.com/Slomix/ParkourBeat/issues/9
+        // if (!event.getWorld().getName().startsWith("pb_level_")) return; // TODO See
+        // https://github.com/Slomix/ParkourBeat/issues/9
         this.levelsManager.prepareLevelWorld(event.getWorld(), false);
     }
 }
