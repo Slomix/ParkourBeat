@@ -12,8 +12,6 @@
 ### Plugin installation:
 
 - Make sure if AMusic is installed
-- Create or copy world with name "pb_lobby" for player lobby (use MultiVerse for example)
-- Create or copy world with name "pb_default_level" for all new use (using MultiVerse for example)
 - Create world "pb_lobby" using [MultiVerse](https://spigotmc.org/resources/390) or simple copy world directory and name
   it "pb_lobby"
 - Create world "pb_default_level" using [MultiVerse](https://spigotmc.org/resources/390) or simple copy world directory
