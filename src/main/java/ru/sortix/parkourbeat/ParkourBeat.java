@@ -50,8 +50,8 @@ public class ParkourBeat extends JavaPlugin {
         registerCommand("edit", new EditCommand(levelEditorsManager, levelsManager, gameManager));
         registerCommand("create", new CreateCommand(levelEditorsManager, levelsManager, gameManager));
         registerCommand("delete", new DeleteCommand(levelEditorsManager, levelsManager, gameManager));
-        registerCommand("song", new SongCommand(levelEditorsManager), false);
-        registerCommand("color", new ColorCommand(levelEditorsManager), false);
+        registerCommand("song", new SongCommand(levelEditorsManager));
+        registerCommand("color", new ColorCommand(levelEditorsManager));
 
         PluginManager pluginManager = this.getServer().getPluginManager();
         pluginManager.registerEvents(new EventListener(gameManager, levelEditorsManager), this);
@@ -62,14 +62,16 @@ public class ParkourBeat extends JavaPlugin {
         pluginManager.registerEvents(new SongMenuListener(), this);
     }
 
-    private void registerCommand(String commandName, CommandExecutor executor) {
-        registerCommand(commandName, executor, true);
-    }
-
-    public void registerCommand(String commandName, CommandExecutor executor, boolean completer) {
+    public void registerCommand(String commandName, CommandExecutor executor) {
         PluginCommand command = getCommand(commandName);
+        if (command == null) {
+            this.getLogger().severe("Unable to register command " + commandName + ". Is it specified in plugin.yml?");
+            return;
+        }
         command.setExecutor(executor);
-        if (completer) command.setTabCompleter((TabCompleter) executor);
+        if (executor instanceof TabCompleter) {
+            command.setTabCompleter((TabCompleter) executor);
+        }
     }
 
     @Override
