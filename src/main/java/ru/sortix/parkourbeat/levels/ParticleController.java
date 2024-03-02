@@ -13,6 +13,7 @@ import ru.sortix.parkourbeat.location.Waypoint;
 
 public class ParticleController {
     private static final double SEGMENT_LENGTH = 0.25;
+    private static final double MAX_PARTICLES_VIEW_DISTANCE_SQUARED = Math.pow(10, 2);
 
     private final Plugin plugin;
     private final ConcurrentLinkedQueue<Location> particleLocations = new ConcurrentLinkedQueue<>();
@@ -130,16 +131,21 @@ public class ParticleController {
                         .runTaskTimerAsynchronously(
                                 this.plugin,
                                 () -> {
-                                    for (Location location : particleLocations) {
-                                        Color color = getCurrentColor(player.getLocation());
+                                    Location playerLoc = player.getLocation();
+                                    Color color = getCurrentColor(playerLoc);
+                                    for (Location location : this.particleLocations) {
+                                        // TODO Оптимизировать это:
+                                        if (location.distanceSquared(playerLoc) > MAX_PARTICLES_VIEW_DISTANCE_SQUARED)
+                                            continue;
                                         player.spawnParticle(
                                                 Particle.REDSTONE,
                                                 location,
                                                 0,
-                                                color.getRed() / 255.0,
-                                                color.getGreen() / 255.0,
-                                                color.getBlue() / 255.0,
-                                                1);
+                                                0,
+                                                0,
+                                                0,
+                                                1,
+                                                new Particle.DustOptions(color, 1f));
                                     }
                                 },
                                 0,
