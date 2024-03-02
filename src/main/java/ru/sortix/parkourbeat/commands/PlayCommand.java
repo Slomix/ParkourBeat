@@ -59,11 +59,15 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        if (levelsManager.getAllLevels().contains(worldId)) {
-            gameManager.createNewGame(player, worldId);
-        } else {
+        if (!levelsManager.getAllLevels().contains(worldId)) {
             player.sendMessage("Уровень не найден!");
+            return true;
         }
+
+        player.sendMessage("Загрузка уровня...");
+        gameManager
+                .createNewGame(player, worldId)
+                .thenAccept(unused -> player.sendMessage("Уровень загружен"));
 
         return true;
     }

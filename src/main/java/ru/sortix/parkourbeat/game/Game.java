@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat.game;
 
+import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.NonNull;
 import me.bomb.amusic.AMusic;
@@ -32,11 +33,12 @@ public class Game {
         this.levelsManager = levelsManager;
     }
 
-    public void prepare(Player player, String levelName) {
+    @NonNull public CompletableFuture<Void> prepare(Player player, String levelName) {
+        CompletableFuture<Void> result = new CompletableFuture<>();
         currentState = State.PREPARING;
         this.player = player;
 
-        levelsManager
+        this.levelsManager
                 .loadLevel(levelName)
                 .thenAccept(
                         level -> {
@@ -64,7 +66,9 @@ public class Game {
                             } else {
                                 currentState = State.READY;
                             }
+                            result.complete(null);
                         });
+        return result;
     }
 
     public void start() {
@@ -89,7 +93,10 @@ public class Game {
     }
 
     @NotNull public GameMoveHandler getGameMoveHandler() {
-        return gameMoveHandler;
+        if (this.gameMoveHandler == null) {
+            throw new IllegalStateException("Unable to get " + GameMoveHandler.class.getSimpleName());
+        }
+        return this.gameMoveHandler;
     }
 
     public void setCurrentState(State currentState) {

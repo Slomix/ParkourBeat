@@ -44,16 +44,21 @@ public class TestItem extends EditorItem {
                 player.sendMessage("Вы вышли из режима тестирования");
             } else {
                 level.getLevelSettings().getParticleController().stopSpawnParticles(player);
-                gameManager.createNewGame(player, level.getName());
-                player.setGameMode(GameMode.ADVENTURE);
-                player.getInventory().clear();
+                player.sendMessage("Загрузка уровня...");
+                gameManager
+                        .createNewGame(player, level.getName())
+                        .thenAccept(
+                                unused -> {
+                                    player.setGameMode(GameMode.ADVENTURE);
+                                    player.getInventory().clear();
 
-                ItemStack newItem = testItem.clone();
-                itemsContainer.updateEditorItem(itemStack, newItem);
-                itemStack = newItem;
+                                    ItemStack newItem = testItem.clone();
+                                    itemsContainer.updateEditorItem(itemStack, newItem);
+                                    itemStack = newItem;
 
-                player.getInventory().setItem(slot, itemStack);
-                player.sendMessage("Вы вошли в режим тестирования");
+                                    player.getInventory().setItem(slot, itemStack);
+                                    player.sendMessage("Вы вошли в режим тестирования");
+                                });
             }
         }
     }

@@ -2,6 +2,8 @@ package ru.sortix.parkourbeat.game;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import lombok.NonNull;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 import ru.sortix.parkourbeat.levels.LevelsManager;
@@ -15,12 +17,19 @@ public class GameManager {
         this.levelsManager = levelsManager;
     }
 
-    public void createNewGame(Player player, String arenaName) {
-        if (!currentGames.containsKey(player)) {
-            Game game = new Game(levelsManager);
-            game.prepare(player, arenaName);
-            currentGames.put(player, game);
+    @NonNull public CompletableFuture<Void> createNewGame(Player player, String arenaName) {
+        if (this.currentGames.containsKey(player)) {
+            return CompletableFuture.completedFuture(null);
         }
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        Game game = new Game(levelsManager);
+        game.prepare(player, arenaName)
+                .thenAccept(
+                        unused -> {
+                            this.currentGames.put(player, game);
+                            result.complete(null);
+                        });
+        return result;
     }
 
     @Nullable public Game getCurrentGame(Player player) {
