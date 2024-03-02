@@ -1,6 +1,7 @@
 package ru.sortix.parkourbeat.game;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 import lombok.Getter;
 import lombok.NonNull;
 import me.bomb.amusic.AMusic;
@@ -54,14 +55,30 @@ public class Game {
                             player.teleport(worldSettings.getSpawn());
                             this.gameMoveHandler = new GameMoveHandler(this);
 
+                            String songPlayListName = gameSettings.getSongPlayListName();
                             if (gameSettings.getSongName() != null
-                                    && !gameSettings.getSongPlayListName().equals(AMusic.getPackName(player))) {
+                                    && !songPlayListName.equals(AMusic.getPackName(player))) {
                                 this.getPlugin()
                                         .getServer()
                                         .getScheduler()
                                         .scheduleSyncDelayedTask(
                                                 this.getPlugin(),
-                                                () -> AMusic.loadPack(player, gameSettings.getSongPlayListName(), false),
+                                                () -> {
+                                                    try {
+                                                        AMusic.loadPack(player, songPlayListName, false);
+                                                    } catch (Throwable t) {
+                                                        this.levelsManager
+                                                                .getPlugin()
+                                                                .getLogger()
+                                                                .log(
+                                                                        Level.SEVERE,
+                                                                        "Не удалось загрузить пак "
+                                                                                + songPlayListName
+                                                                                + " игроку "
+                                                                                + player.getName(),
+                                                                        t);
+                                                    }
+                                                },
                                                 20L);
                             } else {
                                 currentState = State.READY;
