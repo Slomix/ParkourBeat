@@ -128,6 +128,8 @@ public class Game {
         player.setGameMode(GameMode.ADVENTURE);
         if (reason == StopReason.WRONG_DIRECTION) {
             player.sendTitle("§cНельзя бежать назад", null, 10, 10, 10);
+        } else if (reason == StopReason.STOP_MOVEMENT) {
+            player.sendTitle("§cВы остановились", null, 10, 10, 10);
         } else if (reason == StopReason.FALL) {
             player.sendTitle("§cВы упали", null, 10, 10, 10);
         } else if (reason == StopReason.LOOSE) {
@@ -180,6 +182,7 @@ public class Game {
         FINISH,
         LOOSE,
         WRONG_DIRECTION,
+        STOP_MOVEMENT,
         FALL
     }
 }

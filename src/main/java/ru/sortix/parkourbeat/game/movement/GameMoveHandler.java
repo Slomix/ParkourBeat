@@ -9,6 +9,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.game.Game;
@@ -46,7 +47,7 @@ public class GameMoveHandler {
         if (settings.getDirectionChecker().isCorrectDirection(startBorder, player.getLocation())) {
             game.start();
             if ((task == null || task.isCancelled()) && !player.isSprinting()) {
-                startDamageTask(player, 6, "§cНе переставайте бежать");
+                startDamageTask(player, 6, "§cНе переставайте бежать", Game.StopReason.STOP_MOVEMENT);
             }
         }
     }
@@ -74,7 +75,7 @@ public class GameMoveHandler {
     public void onRunningState(PlayerToggleSprintEvent event) {
         Player player = event.getPlayer();
         if (!event.isSprinting()) {
-            startDamageTask(player, 6, "§cНе переставайте бежать");
+            startDamageTask(player, 6, "§cНе переставайте бежать", Game.StopReason.STOP_MOVEMENT);
         } else {
             if (task != null) {
                 task.cancel();
@@ -89,34 +90,37 @@ public class GameMoveHandler {
         return Math.toDegrees(angle) < 100;
     }
 
-    private void startDamageTask(Player player, int damage, String reason) {
+    private void startDamageTask(
+            Player player, int damage, String reason, Game.StopReason stopReason) {
         player.playSound(player.getLocation(), Sound.ENTITY_WOLF_HURT, 1, 1);
-        task =
-                this.getPlugin()
-                        .getServer()
-                        .getScheduler()
-                        .runTaskTimer(
-                                this.getPlugin(),
-                                () -> {
-                                    if (!player.isOnline() || game.getCurrentState() != Game.State.RUNNING) {
-                                        task.cancel();
-                                        return;
-                                    }
-                                    damagePlayer(player, damage, reason);
-                                    if (player.isDead() || player.getHealth() <= 0) {
-                                        task.cancel();
-                                    }
-                                },
-                                0,
-                                2);
+
+        this.task =
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        if (!player.isOnline() || game.getCurrentState() != Game.State.RUNNING) {
+                            this.cancel();
+                            return;
+                        }
+
+                        boolean stopped;
+                        if (player.getHealth() <= damage) {
+                            game.stopGame(stopReason);
+                            stopped = true;
+                        } else {
+                            player.damage(damage);
+                            stopped = false;
+                        }
+                        player.sendTitle(reason, null, 0, 5, 5);
+
+                        if (stopped) {
+                            this.cancel();
+                        }
+                    }
+                }.runTaskTimer(this.getPlugin(), 0, 2);
     }
 
     @NonNull public Plugin getPlugin() {
         return this.game.getPlugin();
-    }
-
-    private void damagePlayer(Player player, int damage, String reason) {
-        player.damage(damage);
-        player.sendTitle(reason, null, 0, 5, 5);
     }
 }
