@@ -103,6 +103,7 @@ public class GameMoveHandler {
                             return;
                         }
 
+                        player.sendTitle(reason, null, 0, 5, 5);
                         boolean stopped;
                         if (player.getHealth() <= damage) {
                             game.stopGame(stopReason);
@@ -111,7 +112,6 @@ public class GameMoveHandler {
                             player.damage(damage);
                             stopped = false;
                         }
-                        player.sendTitle(reason, null, 0, 5, 5);
 
                         if (stopped) {
                             this.cancel();
