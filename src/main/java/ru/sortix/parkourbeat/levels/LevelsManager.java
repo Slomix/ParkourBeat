@@ -134,7 +134,12 @@ public class LevelsManager {
         try {
             level.getWorld().save();
         } catch (Exception e) {
-            this.plugin.getLogger().log(java.util.logging.Level.SEVERE, "Unable to save world " + level.getWorld().getName(), e);
+            this.plugin
+                    .getLogger()
+                    .log(
+                            java.util.logging.Level.SEVERE,
+                            "Unable to save world " + level.getWorld().getName(),
+                            e);
         }
         levelsSettings.saveWorldSettings(level.getName());
     }
