@@ -7,6 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -91,6 +92,15 @@ public final class EventListener implements Listener {
             }
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler
+    private void on(EntityRegainHealthEvent event) {
+        if (!(event.getEntity() instanceof Player)) return;
+        Player player = ((Player) event.getEntity());
+        Game game = this.gameManager.getCurrentGame(player);
+        if (game == null) return;
+        event.setCancelled(true);
     }
 
     @EventHandler
