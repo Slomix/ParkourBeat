@@ -10,6 +10,7 @@ import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.WorldInitEvent;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
@@ -59,6 +60,17 @@ public final class EventListener implements Listener {
     }
 
     @EventHandler
+    private void on(PlayerMoveEvent event) {
+        if (event.getFrom().getY() <= event.getTo().getY()) return;
+        Game game = this.gameManager.getCurrentGame(event.getPlayer());
+        if (game == null) return;
+        if (event.getTo().getY() > game.getLevelSettings().getWorldSettings().getMinWorldHeight())
+            return;
+        event.getPlayer().setFallDistance(0f);
+        event.getPlayer().teleport(game.getLevelSettings().getWorldSettings().getSpawn());
+    }
+
+    @EventHandler
     public void onPlayerDamage(EntityDamageEvent event) {
         if (event.getEntity().getType() != EntityType.PLAYER) {
             return;
@@ -76,6 +88,7 @@ public final class EventListener implements Listener {
             }
         } else {
             if (event.getCause() == DamageCause.VOID) {
+                player.setFallDistance(0f);
                 player.teleport(game.getLevelSettings().getWorldSettings().getSpawn());
             }
             event.setCancelled(true);
