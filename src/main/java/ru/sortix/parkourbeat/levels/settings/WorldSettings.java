@@ -2,20 +2,22 @@ package ru.sortix.parkourbeat.levels.settings;
 
 import java.util.ArrayList;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.location.Waypoint;
 
+@Getter
 public class WorldSettings {
 
     private final World world;
     private final ArrayList<Waypoint> waypoints;
-    @Getter private final int minWorldHeight;
-    private Location spawn;
-    private Vector startBorder;
-    private Vector finishBorder;
+    private final int minWorldHeight;
+    @Setter private Location spawn;
+    @Setter private Vector startBorder;
+    @Setter private Vector finishBorder;
 
     public WorldSettings(
             World world,
@@ -38,38 +40,6 @@ public class WorldSettings {
             }
             this.minWorldHeight = minWorldHeight - 1;
         }
-    }
-
-    public World getWorld() {
-        return world;
-    }
-
-    public Location getSpawn() {
-        return spawn;
-    }
-
-    public void setSpawn(Location spawn) {
-        this.spawn = spawn;
-    }
-
-    public ArrayList<Waypoint> getWaypoints() {
-        return waypoints;
-    }
-
-    public Vector getStartBorder() {
-        return startBorder;
-    }
-
-    public void setStartBorder(Vector startPoint) {
-        this.startBorder = startPoint;
-    }
-
-    public Vector getFinishBorder() {
-        return finishBorder;
-    }
-
-    public void setFinishBorder(Vector finishPoint) {
-        this.finishBorder = finishPoint;
     }
 
     public DirectionChecker.Direction getDirection() {

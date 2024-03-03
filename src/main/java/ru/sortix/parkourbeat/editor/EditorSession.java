@@ -86,7 +86,7 @@ public class EditorSession {
         }
         EditorItem editorItem = editorItems.getEditorItems().get(e.getItem());
         if (editorItem != null) {
-            editorItem.onClick(e.getAction(), e.getClickedBlock());
+            editorItem.onClick(e.getAction(), e.getClickedBlock(), e.getInteractionPoint());
             e.setCancelled(true);
         }
     }

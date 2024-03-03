@@ -52,6 +52,10 @@ public class DirectionChecker {
         }
     }
 
+    public Direction getDirection() {
+        return direction;
+    }
+
     public enum Direction {
         POSITIVE_X,
         NEGATIVE_X,

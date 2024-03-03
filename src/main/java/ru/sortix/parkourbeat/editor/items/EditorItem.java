@@ -1,9 +1,11 @@
 package ru.sortix.parkourbeat.editor.items;
 
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 import ru.sortix.parkourbeat.levels.Level;
 
 public abstract class EditorItem {
@@ -28,5 +30,5 @@ public abstract class EditorItem {
         return itemStack;
     }
 
-    public abstract void onClick(Action action, Block block);
+    public abstract void onClick(Action action, Block block, @Nullable Location interactionPoint);
 }
