@@ -66,8 +66,7 @@ public final class EventListener implements Listener {
         if (game == null) return;
         if (event.getTo().getY() > game.getLevelSettings().getWorldSettings().getMinWorldHeight())
             return;
-        event.getPlayer().setFallDistance(0f);
-        event.getPlayer().teleport(game.getLevelSettings().getWorldSettings().getSpawn());
+        game.stopGame(Game.StopReason.FALL);
     }
 
     @EventHandler
@@ -88,8 +87,7 @@ public final class EventListener implements Listener {
             }
         } else {
             if (event.getCause() == DamageCause.VOID) {
-                player.setFallDistance(0f);
-                player.teleport(game.getLevelSettings().getWorldSettings().getSpawn());
+                game.stopGame(Game.StopReason.FALL);
             }
             event.setCancelled(true);
         }

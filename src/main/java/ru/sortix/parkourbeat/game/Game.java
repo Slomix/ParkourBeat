@@ -122,11 +122,14 @@ public class Game {
     }
 
     public void stopGame(StopReason reason) {
+        player.setFallDistance(0f);
         player.teleport(levelSettings.getWorldSettings().getSpawn());
         player.setHealth(20);
         player.setGameMode(GameMode.ADVENTURE);
         if (reason == StopReason.WRONG_DIRECTION) {
             player.sendTitle("§cНельзя бежать назад", null, 10, 10, 10);
+        } else if (reason == StopReason.FALL) {
+            player.sendTitle("§cВы упали", null, 10, 10, 10);
         } else if (reason == StopReason.LOOSE) {
             player.sendTitle("§cВы проиграли", null, 10, 10, 10);
         } else if (reason == StopReason.FINISH) {
@@ -176,6 +179,7 @@ public class Game {
     public enum StopReason {
         FINISH,
         LOOSE,
-        WRONG_DIRECTION
+        WRONG_DIRECTION,
+        FALL
     }
 }
