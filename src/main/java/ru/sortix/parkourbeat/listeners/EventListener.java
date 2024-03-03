@@ -76,21 +76,21 @@ public final class EventListener implements Listener {
             return;
         }
         Player player = (Player) event.getEntity();
-        Game game = gameManager.getCurrentGame(player);
+        Game game = this.gameManager.getCurrentGame(player);
         if (game == null) {
+            // TODO Убедиться, что игрок в лобби PB
             event.setCancelled(true);
             return;
         }
+        event.setCancelled(true);
         if (game.getCurrentState() == Game.State.RUNNING) {
             if (event.getCause() == DamageCause.VOID) {
                 game.stopGame(Game.StopReason.LOOSE);
-                event.setCancelled(true);
             }
         } else {
             if (event.getCause() == DamageCause.VOID) {
                 game.stopGame(Game.StopReason.FALL);
             }
-            event.setCancelled(true);
         }
     }
 
