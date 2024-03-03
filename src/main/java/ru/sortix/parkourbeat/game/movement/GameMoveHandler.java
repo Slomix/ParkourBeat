@@ -109,7 +109,10 @@ public class GameMoveHandler {
                             game.stopGame(stopReason);
                             stopped = true;
                         } else {
-                            player.damage(damage);
+                            if (player.getNoDamageTicks() <= 0) {
+                                player.setHealth(player.getHealth() - damage);
+                                player.setNoDamageTicks(20);
+                            }
                             stopped = false;
                         }
 
