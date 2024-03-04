@@ -82,9 +82,12 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
         gameManager
                 .createNewGame(player, levelId)
                 .thenAccept(
-                        unused -> {
+                        success -> {
                             if (level == null) {
                                 player.sendMessage("Уровень загружен");
+                            }
+                            if (!success) {
+                                player.sendMessage("Не удалось начать игру");
                             }
                         });
 

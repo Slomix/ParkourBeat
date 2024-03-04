@@ -51,6 +51,9 @@ public class LevelsManager {
                 this.plugin.getLogger().warning("Duplicate level name: " + levelName);
             }
         }
+        for (Map.Entry<String, UUID> entry : this.levelIdsByName.entrySet()) {
+            this.plugin.getLogger().info("Loaded world " + entry.getValue() + ": " + entry.getKey());
+        }
     }
 
     @NonNull public CompletableFuture<Level> createLevel(
@@ -122,14 +125,19 @@ public class LevelsManager {
                 .createWorldFromDefaultContainer(worldCreator, this.worldsManager.getSyncExecutor())
                 .thenAccept(
                         world -> {
-                            this.prepareLevelWorld(world, false);
+                            try {
+                                this.prepareLevelWorld(world, false);
 
-                            LevelSettings levelSettings = this.levelsSettings.loadLevelSettings(levelId);
-                            String levelName = levelSettings.getGameSettings().getLevelName();
-                            Level loadedLevel = new Level(levelId, levelName, world, levelSettings);
-                            this.loadedLevels.put(levelId, loadedLevel);
+                                LevelSettings levelSettings = this.levelsSettings.loadLevelSettings(levelId);
+                                String levelName = levelSettings.getGameSettings().getLevelName();
+                                Level loadedLevel = new Level(levelId, levelName, world, levelSettings);
+                                this.loadedLevels.put(levelId, loadedLevel);
 
-                            result.complete(loadedLevel);
+                                result.complete(loadedLevel);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                result.complete(null);
+                            }
                         });
         return result;
     }

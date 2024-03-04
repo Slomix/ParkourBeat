@@ -1,7 +1,9 @@
 package ru.sortix.parkourbeat.listeners;
 
+import java.util.UUID;
 import lombok.NonNull;
 import org.bukkit.GameMode;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -21,6 +23,7 @@ import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
+import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
 
 public final class GamesListener implements Listener {
     private final GameManager gameManager;
@@ -171,22 +174,17 @@ public final class GamesListener implements Listener {
     }
 
     @NonNull private WorldType getWorldType(@NonNull Player player) {
-        if (this.gameManager.getCurrentGame(player) != null) {
+        return this.getWorldType(player.getWorld());
+    }
+
+    @NonNull private WorldType getWorldType(@NonNull World world) {
+        UUID levelId = FileLevelSettingDAO.getLevelId(world.getName());
+        if (levelId != null) {
             return WorldType.PB_LEVEL;
         }
-        if (this.levelEditorsManager.getEditorSession(player) != null) {
-            return WorldType.PB_LEVEL;
-        }
-        if (Settings.getLobbySpawn().getWorld() == player.getWorld()) {
+        if (Settings.getLobbySpawn().getWorld() == world) {
             return WorldType.PB_LOBBY;
         }
-
-        // TODO Стандартизировать названия миров и проверять по ним, а не при помощи gameManager:
-        //  https://github.com/Slomix/ParkourBeat/issues/9
-        if (true) {
-            return WorldType.PB_LEVEL;
-        }
-
         return WorldType.NON_PB;
     }
 

@@ -18,6 +18,7 @@ public class Waypoint implements ConfigurationSerializable {
         this.height = height;
     }
 
+    @SuppressWarnings("unused")
     public static Waypoint deserialize(Map<String, Object> map) {
         Location location = (Location) map.get("location");
         Color color = (Color) map.get("color");

@@ -57,7 +57,11 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
                 .createLevel(levelName, environment, player.getName())
                 .thenAccept(
                         level -> {
-                            player.sendMessage("Уровень \"" + levelName + "\" создан!");
+                            if (level == null) {
+                                player.sendMessage("Не удалось создать уровень \"" + levelName + "\"");
+                                return;
+                            }
+                            player.sendMessage("Уровень \"" + levelName + "\" создан");
                             levelEditorsManager.createEditorSession(player, level).start();
                         });
         return true;

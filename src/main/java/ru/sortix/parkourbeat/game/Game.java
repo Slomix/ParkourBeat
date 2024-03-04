@@ -35,8 +35,8 @@ public class Game {
         this.levelsManager = levelsManager;
     }
 
-    @NonNull public CompletableFuture<Void> prepare(@NonNull Player player, @NonNull UUID levelId) {
-        CompletableFuture<Void> result = new CompletableFuture<>();
+    @NonNull public CompletableFuture<Boolean> prepare(@NonNull Player player, @NonNull UUID levelId) {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
         currentState = State.PREPARING;
         this.player = player;
 
@@ -44,9 +44,14 @@ public class Game {
                 .loadLevel(levelId)
                 .thenAccept(
                         level -> {
-                            this.level = level;
-                            this.prepareGame();
-                            result.complete(null);
+                            try {
+                                this.level = level;
+                                this.prepareGame();
+                                result.complete(true);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                result.complete(false);
+                            }
                         });
         return result;
     }

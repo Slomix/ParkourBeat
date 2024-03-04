@@ -18,17 +18,21 @@ public class GameManager {
         this.levelsManager = levelsManager;
     }
 
-    @NonNull public CompletableFuture<Void> createNewGame(@NonNull Player player, @NonNull UUID levelId) {
+    @NonNull public CompletableFuture<Boolean> createNewGame(@NonNull Player player, @NonNull UUID levelId) {
         if (this.currentGames.containsKey(player)) {
-            return CompletableFuture.completedFuture(null);
+            return CompletableFuture.completedFuture(true);
         }
-        CompletableFuture<Void> result = new CompletableFuture<>();
-        Game game = new Game(levelsManager);
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        Game game = new Game(this.levelsManager);
         game.prepare(player, levelId)
                 .thenAccept(
-                        unused -> {
+                        success -> {
+                            if (!success) {
+                                result.complete(false);
+                                return;
+                            }
                             this.currentGames.put(player, game);
-                            result.complete(null);
+                            result.complete(true);
                         });
         return result;
     }

@@ -3,6 +3,8 @@ package ru.sortix.parkourbeat.levels.dao.files;
 import java.io.File;
 import java.io.IOException;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import lombok.NonNull;
 import org.bukkit.Bukkit;
@@ -19,51 +21,58 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     private static final String WORLD_NAME_PREFIX = "pb_level_";
     private static final int WORLD_NAME_PREFIX_LENGTH = WORLD_NAME_PREFIX.length();
 
+    private final Logger logger;
     private final File worldsDir;
     private final GameSettingsDAO gameSettingsDAO = new GameSettingsDAO();
     private final WorldSettingsDAO worldSettingsDAO = new WorldSettingsDAO();
 
     public FileLevelSettingDAO(@NonNull Plugin plugin) {
+        this.logger = plugin.getLogger();
         this.worldsDir = plugin.getServer().getWorldContainer();
     }
 
-    @NonNull private static File getFile(File levelSettingsDir, String fileName) {
+    @NonNull private File getFile(@NonNull UUID levelId, @NonNull String fileName) throws IOException {
+        File levelSettingsDir = getSettingsDirectory(levelId);
+        if (!levelSettingsDir.isDirectory()) {
+            //noinspection ResultOfMethodCallIgnored
+            levelSettingsDir.mkdirs();
+        }
         File worldSettingsFile = new File(levelSettingsDir, fileName);
         if (!worldSettingsFile.exists()) {
-            try {
-                worldSettingsFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            //noinspection ResultOfMethodCallIgnored
+            worldSettingsFile.createNewFile();
         }
         return worldSettingsFile;
     }
 
-    private static void saveConfig(FileConfiguration gameSettingsConfig, File gameSettingFile) {
-        try {
-            gameSettingsConfig.save(gameSettingFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void saveConfig(
+            @NonNull FileConfiguration gameSettingsConfig, @NonNull File gameSettingFile)
+            throws IOException {
+        gameSettingsConfig.save(gameSettingFile);
     }
 
     @Override
     public void save(LevelSettings settings) {
-        WorldSettings worldSettings = settings.getWorldSettings();
-        GameSettings gameSettings = settings.getGameSettings();
+        try {
+            WorldSettings worldSettings = settings.getWorldSettings();
+            GameSettings gameSettings = settings.getGameSettings();
 
-        File settingsDir = getSettingsDirectory(gameSettings.getLevelId());
-        File worldSettingsFile = getFile(settingsDir, "world_settings.yml");
-        File gameSettingFile = getFile(settingsDir, "game_settings.yml");
+            File worldSettingsFile = getFile(gameSettings.getLevelId(), "world_settings.yml");
+            File gameSettingFile = getFile(gameSettings.getLevelId(), "game_settings.yml");
 
-        FileConfiguration worldSettingsConfig = YamlConfiguration.loadConfiguration(worldSettingsFile);
-        FileConfiguration gameSettingsConfig = YamlConfiguration.loadConfiguration(gameSettingFile);
+            FileConfiguration worldSettingsConfig =
+                    YamlConfiguration.loadConfiguration(worldSettingsFile);
+            FileConfiguration gameSettingsConfig = YamlConfiguration.loadConfiguration(gameSettingFile);
 
-        gameSettingsDAO.set(gameSettings, gameSettingsConfig);
-        worldSettingsDAO.set(worldSettings, worldSettingsConfig);
+            gameSettingsDAO.set(gameSettings, gameSettingsConfig);
+            worldSettingsDAO.set(worldSettings, worldSettingsConfig);
 
-        saveConfig(gameSettingsConfig, gameSettingFile);
-        saveConfig(worldSettingsConfig, worldSettingsFile);
+            saveConfig(gameSettingsConfig, gameSettingFile);
+            saveConfig(worldSettingsConfig, worldSettingsFile);
+        } catch (Exception e) {
+            this.logger.log(
+                    Level.SEVERE, "Unable to save level " + settings.getGameSettings().getLevelId(), e);
+        }
     }
 
     @Nullable public String loadLevelName(@NonNull UUID levelId) {
@@ -111,6 +120,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     public void delete(@NonNull UUID levelId) {
         File settingsDir = getSettingsDirectory(levelId);
         if (settingsDir.exists()) {
+            //noinspection ResultOfMethodCallIgnored
             settingsDir.delete();
         }
     }
@@ -121,7 +131,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     }
 
     @NonNull public static String getWorldDirName(@NonNull UUID levelId) {
-        return "pb_level_" + levelId;
+        return WORLD_NAME_PREFIX + levelId;
     }
 
     @Nullable public static UUID getLevelId(@NonNull String worldName) {
