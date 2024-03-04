@@ -1,7 +1,9 @@
 package ru.sortix.parkourbeat.levels.settings;
 
+import java.util.Comparator;
 import java.util.List;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -59,6 +61,24 @@ public class WorldSettings {
             } else {
                 return DirectionChecker.Direction.NEGATIVE_Z;
             }
+        }
+    }
+
+    public void sortWaypoints(@NonNull DirectionChecker directionChecker) {
+        Comparator<Waypoint> comparator =
+                Comparator.comparingDouble(
+                        waypoint -> directionChecker.getCoordinate(waypoint.getLocation()));
+        if (directionChecker.getDirection() == DirectionChecker.Direction.NEGATIVE_X
+                || directionChecker.getDirection() == DirectionChecker.Direction.NEGATIVE_Z)
+            comparator = comparator.reversed();
+        this.waypoints.sort(comparator);
+
+        Location prevLocation = null;
+        for (Waypoint waypoint : this.waypoints) {
+            if (waypoint.getLocation().equals(prevLocation)) {
+                System.out.println("Duplicate point: " + prevLocation);
+            }
+            prevLocation = waypoint.getLocation();
         }
     }
 }
