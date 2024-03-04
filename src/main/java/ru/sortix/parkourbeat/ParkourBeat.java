@@ -17,10 +17,8 @@ import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.WorldsManager;
 import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
-import ru.sortix.parkourbeat.listeners.EventListener;
-import ru.sortix.parkourbeat.listeners.MoveListener;
-import ru.sortix.parkourbeat.listeners.ResourcePackListener;
-import ru.sortix.parkourbeat.listeners.SprintListener;
+import ru.sortix.parkourbeat.listeners.GamesListener;
+import ru.sortix.parkourbeat.listeners.WorldsListener;
 import ru.sortix.parkourbeat.location.Waypoint;
 
 public class ParkourBeat extends JavaPlugin {
@@ -54,11 +52,8 @@ public class ParkourBeat extends JavaPlugin {
         registerCommand("test", new TestCommand(levelsManager));
 
         PluginManager pluginManager = this.getServer().getPluginManager();
-        pluginManager.registerEvents(
-                new EventListener(gameManager, levelsManager, levelEditorsManager), this);
-        pluginManager.registerEvents(new MoveListener(gameManager), this);
-        pluginManager.registerEvents(new ResourcePackListener(gameManager), this);
-        pluginManager.registerEvents(new SprintListener(gameManager), this);
+        pluginManager.registerEvents(new GamesListener(this, gameManager, levelEditorsManager), this);
+        pluginManager.registerEvents(new WorldsListener(levelsManager), this);
         pluginManager.registerEvents(new LevelEditorListener(levelEditorsManager), this);
         pluginManager.registerEvents(new SongMenuListener(), this);
     }
