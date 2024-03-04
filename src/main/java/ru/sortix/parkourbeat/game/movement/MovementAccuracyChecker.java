@@ -44,7 +44,7 @@ public class MovementAccuracyChecker {
         double distanceToLine = calculateDistanceToLine(newLocation, point1, point2);
 
         if (distanceToLine > MAX_ALLOW_OFFSET) {
-            totalOffset += distanceToLine;
+            totalOffset += distanceToLine - MAX_ALLOW_OFFSET;
         }
         totalSteps++;
 
