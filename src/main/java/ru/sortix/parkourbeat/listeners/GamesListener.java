@@ -2,8 +2,10 @@ package ru.sortix.parkourbeat.listeners;
 
 import lombok.NonNull;
 import org.bukkit.GameMode;
+import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
@@ -14,6 +16,7 @@ import org.bukkit.event.player.*;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.editor.EditorSession;
 import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.game.GameManager;
@@ -154,6 +157,17 @@ public final class GamesListener implements Listener {
         if (game.getCurrentState() == Game.State.RUNNING) {
             game.getGameMoveHandler().onRunningState(event);
         }
+    }
+
+    @EventHandler
+    private void on(PlayerInteractEvent event) {
+        if (this.getWorldType(event.getPlayer()) == WorldType.NON_PB) return;
+        Block block = event.getClickedBlock();
+        if (block == null) return;
+        EditorSession editorSession = this.levelEditorsManager.getEditorSession(event.getPlayer());
+        if (editorSession != null && block.getWorld() == editorSession.getLevel().getWorld()) return;
+        if (event.getPlayer().hasPermission("parkourbeat.level.edit.anytime")) return;
+        event.setUseInteractedBlock(Event.Result.DENY);
     }
 
     @NonNull private WorldType getWorldType(@NonNull Player player) {
