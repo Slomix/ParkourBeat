@@ -37,22 +37,30 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
             @NonNull String label,
             @NonNull String[] args) {
         Player player = (Player) sender;
-        if (args.length < 2) {
-            sender.sendMessage("Недостаточно аргументов! Используйте: /create <имя уровня> <окружение>");
-            return true;
-        }
-        World.Environment environment;
-        try {
-            environment = World.Environment.valueOf(args[1].toUpperCase());
-        } catch (IllegalArgumentException e) {
-            sender.sendMessage("Неверное окружение! Допустимые значения: NORMAL, NETHER, THE_END");
+
+        if (args.length < 1) {
+            sender.sendMessage("Недостаточно аргументов! Используйте: /create <имя уровня> [окружение]");
             return true;
         }
 
         String levelName = args[0];
+        World.Environment environment = World.Environment.NORMAL;
+
+        if (args.length >= 2) {
+            try {
+                environment = World.Environment.valueOf(args[1].toUpperCase());
+            } catch (IllegalArgumentException e) {
+                sender.sendMessage(
+                        "Неверное окружение! Допустимые значения: "
+                                + Arrays.toString(World.Environment.values()));
+                return true;
+            }
+        }
+
         if (!levelEditorsManager.removeEditorSession(player)) {
             gameManager.removeGame(player);
         }
+
         levelsManager
                 .createLevel(levelName, environment, player.getUniqueId(), player.getName())
                 .thenAccept(

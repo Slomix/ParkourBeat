@@ -38,7 +38,9 @@ public class GameMoveHandler {
         finishBorder = worldSettings.getFinishBorderLoc();
     }
 
-    public void onPreparingState(PlayerMoveEvent event) {}
+    public void onPreparingState(PlayerMoveEvent event) {
+        event.setCancelled(true);
+    }
 
     public void onReadyState(PlayerMoveEvent event) {
         Player player = event.getPlayer();

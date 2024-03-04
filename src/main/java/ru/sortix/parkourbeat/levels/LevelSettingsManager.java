@@ -42,8 +42,8 @@ class LevelSettingsManager {
     public void saveWorldSettings(@NonNull UUID levelId) {
         LevelSettings settings = levelSettings.get(levelId);
         if (settings == null) {
-            throw new IllegalStateException("Failed to save settings for level " + levelId + ": "
-                + "Settings not found");
+            throw new IllegalStateException(
+                    "Failed to save settings for level " + levelId + ": " + "Settings not found");
         }
         levelSettingDAO.saveLevelSettings(settings);
     }

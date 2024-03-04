@@ -1,12 +1,11 @@
 package ru.sortix.parkourbeat.game;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import lombok.NonNull;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
+import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
 public class GameManager {
@@ -54,5 +53,14 @@ public class GameManager {
         if (game != null) {
             game.endGame(unloadLevel);
         }
+    }
+
+    @NonNull public Collection<Player> getPlayersOnLevel(@NonNull Level level) {
+        List<Player> result = new ArrayList<>();
+        for (Map.Entry<Player, Game> entry : this.currentGames.entrySet()) {
+            if (entry.getValue().getLevel() != level) continue;
+            result.add(entry.getKey());
+        }
+        return result;
     }
 }

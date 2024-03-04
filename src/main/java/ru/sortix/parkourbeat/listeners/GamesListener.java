@@ -1,6 +1,7 @@
 package ru.sortix.parkourbeat.listeners;
 
 import java.util.UUID;
+import javax.annotation.Nullable;
 import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.World;
@@ -23,6 +24,7 @@ import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
+import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
 
 public final class GamesListener implements Listener {
@@ -43,18 +45,18 @@ public final class GamesListener implements Listener {
     }
 
     @EventHandler
-    public void onSpawnLocation(PlayerSpawnLocationEvent event) {
+    private void on(PlayerSpawnLocationEvent event) {
         event.setSpawnLocation(Settings.getLobbySpawn());
     }
 
     @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
+    private void on(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    private void on(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (this.getWorldType(player) == WorldType.NON_PB) return;
         player.teleport(Settings.getLobbySpawn());
@@ -68,17 +70,7 @@ public final class GamesListener implements Listener {
     }
 
     @EventHandler
-    private void on(PlayerMoveEvent event) {
-        if (event.getFrom().getY() <= event.getTo().getY()) return;
-        Game game = this.gameManager.getCurrentGame(event.getPlayer());
-        if (game == null) return;
-        if (event.getTo().getY()
-                > game.getLevel().getLevelSettings().getWorldSettings().getMinWorldHeight()) return;
-        game.stopGame(Game.StopReason.FALL);
-    }
-
-    @EventHandler
-    public void onPlayerDamage(EntityDamageEvent event) {
+    private void on(EntityDamageEvent event) {
         if (event.getEntity().getType() != EntityType.PLAYER) {
             return;
         }
@@ -96,34 +88,49 @@ public final class GamesListener implements Listener {
     }
 
     @EventHandler
-    public void onDeath(PlayerDeathEvent event) {
+    private void on(PlayerDeathEvent event) {
         Player player = event.getEntity();
         if (this.getWorldType(player) == WorldType.NON_PB) return;
+
         event.setKeepInventory(true);
         event.getDrops().clear();
         player.spigot().respawn();
+
         Game game = this.gameManager.getCurrentGame(player);
-        if (game != null) {
-            game.stopGame(Game.StopReason.DEATH);
-            return;
-        }
-        player.teleport(Settings.getLobbySpawn());
+        if (game != null) game.stopGame(Game.StopReason.DEATH);
     }
 
     @EventHandler
-    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+    private void on(FoodLevelChangeEvent event) {
         if (this.getWorldType((Player) event.getEntity()) == WorldType.NON_PB) return;
-        event.setFoodLevel(20);
+        if (event.getFoodLevel() != 20) {
+            event.setFoodLevel(20);
+        }
     }
 
     @EventHandler
-    public void onMove(PlayerMoveEvent event) {
+    private void on1(PlayerMoveEvent event) {
+        if (event.getFrom().getY() <= event.getTo().getY()) return;
+
+        Player player = event.getPlayer();
+        if (this.getWorldType(player) == WorldType.NON_PB) return;
+
+        Level level = this.getEditOrGameLevel(player);
+        int minWorldHeight =
+                level == null ? 0 : level.getLevelSettings().getWorldSettings().getMinWorldHeight();
+        if (event.getTo().getY() > minWorldHeight) return;
+
+        Game game = this.gameManager.getCurrentGame(player);
+        if (game != null) game.stopGame(Game.StopReason.FALL);
+        else player.teleport(player.getWorld().getSpawnLocation());
+    }
+
+    @EventHandler
+    private void on2(PlayerMoveEvent event) {
         Player player = event.getPlayer();
 
-        Game game = gameManager.getCurrentGame(player);
-        if (game == null) {
-            return;
-        }
+        Game game = this.gameManager.getCurrentGame(player);
+        if (game == null) return;
 
         Game.State state = game.getCurrentState();
         GameMoveHandler gameMoveHandler = game.getGameMoveHandler();
@@ -137,26 +144,31 @@ public final class GamesListener implements Listener {
     }
 
     @EventHandler
-    public void onResourcePack(PlayerResourcePackStatusEvent event) {
-        Game game = gameManager.getCurrentGame(event.getPlayer());
+    private void on(PlayerDropItemEvent event) {
+        if (this.getWorldType(event.getPlayer()) == WorldType.NON_PB) return;
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    private void on(PlayerResourcePackStatusEvent event) {
+        Player player = event.getPlayer();
+        Game game = this.gameManager.getCurrentGame(player);
         if (game == null) return;
-        if (event.getStatus() == PlayerResourcePackStatusEvent.Status.ACCEPTED) {
 
-        } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.DECLINED) {
-
-        } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) {
-
+        if (event.getStatus() == PlayerResourcePackStatusEvent.Status.DECLINED
+                || event.getStatus() == PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) {
+            player.sendMessage("Не удалось установить ресурс-пак для воспроизведения мелодии");
         } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
+            player.teleport(game.getLevel().getLevelSettings().getWorldSettings().getSpawn());
             game.setCurrentState(Game.State.READY);
         }
     }
 
     @EventHandler
-    public void onSprint(PlayerToggleSprintEvent event) {
+    private void on(PlayerToggleSprintEvent event) {
         Game game = gameManager.getCurrentGame(event.getPlayer());
-        if (game == null) {
-            return;
-        }
+        if (game == null) return;
+
         if (game.getCurrentState() == Game.State.RUNNING) {
             game.getGameMoveHandler().onRunningState(event);
         }
@@ -171,6 +183,16 @@ public final class GamesListener implements Listener {
         if (editorSession != null && block.getWorld() == editorSession.getLevel().getWorld()) return;
         if (event.getPlayer().hasPermission("parkourbeat.level.edit.anytime")) return;
         event.setUseInteractedBlock(Event.Result.DENY);
+    }
+
+    @Nullable private Level getEditOrGameLevel(@NonNull Player player) {
+        Game game = this.gameManager.getCurrentGame(player);
+        if (game != null) return game.getLevel();
+
+        EditorSession editorSession = this.levelEditorsManager.getEditorSession(player);
+        if (editorSession != null) return editorSession.getLevel();
+
+        return null;
     }
 
     @NonNull private WorldType getWorldType(@NonNull Player player) {

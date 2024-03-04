@@ -67,8 +67,7 @@ public class LevelsManager {
 
         CompletableFuture<Level> result = new CompletableFuture<>();
         if (this.availableLevelIdsByName.containsKey(levelName)) {
-            result.completeExceptionally(
-                    new IllegalArgumentException("Уровень с таким названием уже существует"));
+            result.complete(null);
             return result;
         }
 

@@ -33,6 +33,7 @@ public class Settings {
 
         ConfigurationSection lobbyConfig = rootConfig.getConfigurationSection("lobby");
         lobbySpawn = getLocation(lobbyConfig, "spawn_pos", worldsManager, true);
+        lobbySpawn.getWorld().setSpawnLocation(lobbySpawn);
 
         ConfigurationSection defaultLevelConfig = rootConfig.getConfigurationSection("default_level");
         startBorder = getIntVector(defaultLevelConfig, "start_border");

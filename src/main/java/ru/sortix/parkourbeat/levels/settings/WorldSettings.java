@@ -33,6 +33,8 @@ public class WorldSettings {
         this.finishBorder = finishRegion;
         this.waypoints = waypoints;
         this.minWorldHeight = this.findMinWorldHeight();
+
+        this.world.setSpawnLocation(spawn);
     }
 
     private int findMinWorldHeight() {

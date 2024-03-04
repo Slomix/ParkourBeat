@@ -66,6 +66,10 @@ public class EditCommand implements CommandExecutor, TabCompleter {
                                 player.sendMessage("Вы и так уже редактируете данный уровень!");
                                 return;
                             }
+                            if (!this.gameManager.getPlayersOnLevel(level).isEmpty()) {
+                                player.sendMessage("Нельзя редактировать уровень, на котором находятся игроки");
+                                return;
+                            }
                             if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
                             levelEditorsManager.createEditorSession(player, level).start();
                         });
