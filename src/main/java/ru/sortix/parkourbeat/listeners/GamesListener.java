@@ -85,7 +85,7 @@ public final class GamesListener implements Listener {
     private void on(EntityRegainHealthEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
         Player player = ((Player) event.getEntity());
-        if (this.getWorldType(player) == WorldType.PB_LEVEL) return;
+        if (this.getWorldType(player) == WorldType.NON_PB) return;
         event.setCancelled(true);
     }
 
