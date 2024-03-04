@@ -23,12 +23,14 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
 
     private final Logger logger;
     private final File worldsDir;
-    private final GameSettingsDAO gameSettingsDAO = new GameSettingsDAO();
-    private final WorldSettingsDAO worldSettingsDAO = new WorldSettingsDAO();
+    private final GameSettingsDAO gameSettingsDAO;
+    private final WorldSettingsDAO worldSettingsDAO;
 
     public FileLevelSettingDAO(@NonNull Plugin plugin) {
         this.logger = plugin.getLogger();
         this.worldsDir = plugin.getServer().getWorldContainer();
+        this.gameSettingsDAO = new GameSettingsDAO();
+        this.worldSettingsDAO = new WorldSettingsDAO(plugin.getLogger());
     }
 
     @NonNull private File getFile(@NonNull UUID levelId, @NonNull String fileName) throws IOException {

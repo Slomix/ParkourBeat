@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat.data;
 
+import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
@@ -8,13 +9,15 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.levels.WorldsManager;
 
 @UtilityClass
 public class Settings {
     @Getter private Location lobbySpawn;
+    @Getter private Vector startBorder;
+    @Getter private Vector finishBorder;
     @Getter private Location defaultWorldSpawn;
     private boolean isLoaded = false;
 
@@ -23,26 +26,19 @@ public class Settings {
             plugin.getLogger().warning("Settings already loaded!");
             return;
         }
+
         plugin.saveDefaultConfig();
-        FileConfiguration config = plugin.getConfig();
-        ConfigurationSection spawnSection = config.getConfigurationSection("lobby");
-        lobbySpawn = getLocation(spawnSection);
 
-        World spawnWorld;
-        try {
-            String worldName = spawnSection.getString("world");
-            WorldCreator worldCreator = newWorldCreator(worldName);
-            spawnWorld =
-                    worldsManager
-                            .createWorldFromDefaultContainer(
-                                    worldCreator, worldsManager.getCurrentThreadExecutor())
-                            .join();
-        } catch (Exception e) {
-            throw new RuntimeException("Unable to load lobby world", e);
-        }
+        ConfigurationSection rootConfig = plugin.getConfig();
 
-        lobbySpawn.setWorld(spawnWorld);
-        defaultWorldSpawn = getLocation(config.getConfigurationSection("default_world"));
+        ConfigurationSection lobbyConfig = rootConfig.getConfigurationSection("lobby");
+        lobbySpawn = getLocation(lobbyConfig, "spawn_pos", worldsManager, true);
+
+        ConfigurationSection defaultLevelConfig = rootConfig.getConfigurationSection("default_level");
+        startBorder = getIntVector(defaultLevelConfig, "start_border");
+        finishBorder = getIntVector(defaultLevelConfig, "finish_border");
+        defaultWorldSpawn = getLocation(defaultLevelConfig, "spawn_pos", null, true);
+
         isLoaded = true;
     }
 
@@ -55,12 +51,45 @@ public class Settings {
         return worldCreator;
     }
 
-    private static Location getLocation(ConfigurationSection config) {
-        double x = config.getDouble("x", 0);
-        double y = config.getDouble("y", 0);
-        double z = config.getDouble("z", 0);
-        float yaw = (float) config.getDouble("yaw", 0);
-        float pitch = (float) config.getDouble("pitch", 0);
-        return new Location(null, x, y, z, yaw, pitch);
+    @NonNull private static Location getLocation(
+            @NonNull ConfigurationSection config,
+            @NonNull String key,
+            @Nullable WorldsManager worldsManager,
+            boolean parseYawPitch) {
+        ConfigurationSection section = config.getConfigurationSection(key);
+        double x = section.getDouble("x", 0);
+        double y = section.getDouble("y", 0);
+        double z = section.getDouble("z", 0);
+        float yaw = parseYawPitch ? (float) section.getDouble("yaw", 0) : 0f;
+        float pitch = parseYawPitch ? (float) section.getDouble("pitch", 0) : 0f;
+
+        World world;
+        if (worldsManager == null) {
+            world = null;
+        } else {
+            String worldName = section.getString("world");
+            try {
+                WorldCreator worldCreator = newWorldCreator(worldName);
+                world =
+                        worldsManager
+                                .createWorldFromDefaultContainer(
+                                        worldCreator, worldsManager.getCurrentThreadExecutor())
+                                .join();
+            } catch (Exception e) {
+                throw new RuntimeException("Unable to load lobby world", e);
+            }
+        }
+
+        return new Location(world, x, y, z, yaw, pitch);
+    }
+
+    @NonNull private static Vector getIntVector(@NonNull ConfigurationSection section, @NonNull String key) {
+        String vectorString = section.getString(key);
+        String[] args = vectorString.split(" ");
+        if (args.length != 3) {
+            throw new IllegalArgumentException("Wrong vector: " + vectorString);
+        }
+        return new Vector(
+                Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]));
     }
 }

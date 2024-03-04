@@ -11,7 +11,7 @@ public class GameSettingsDAO {
         config.set("level_name", gameSettings.getLevelName());
         config.set("song_play_list_name", gameSettings.getSongPlayListName());
         config.set("song_name", gameSettings.getSongName());
-        config.set("owner", gameSettings.getOwner());
+        config.set("owner", gameSettings.getOwnerName());
     }
 
     public GameSettings load(@NonNull UUID levelId, FileConfiguration config) {

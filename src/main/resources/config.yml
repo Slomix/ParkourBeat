@@ -1,13 +1,17 @@
 lobby:
-  world: pb_lobby
-  x: 0
-  y: 0
-  z: 0
-  yaw: 0
-  pitch: 0
-default_world:
-  x: 0
-  y: 0
-  z: 0
-  yaw: 0
-  pitch: 0
+  spawn_pos:
+    world: pb_lobby
+    x: 0
+    y: 0
+    z: 0
+    yaw: 0
+    pitch: 0
+default_level:
+  start_border: "0 0 0"
+  finish_border: "10 0 0"
+  spawn_pos:
+    x: 0
+    y: 0
+    z: 0
+    yaw: 0
+    pitch: 0

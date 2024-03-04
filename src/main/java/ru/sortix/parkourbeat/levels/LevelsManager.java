@@ -97,19 +97,24 @@ public class LevelsManager {
         return levelsSettings.getLevelSettings(levelId);
     }
 
-    public void deleteLevel(@NonNull Level level) {
+    public boolean deleteLevel(@NonNull Level level) {
         UUID levelId = level.getLevelId();
         String worldDirName = FileLevelSettingDAO.getWorldDirName(levelId);
         Server server = this.plugin.getServer();
         World world = server.getWorld(worldDirName);
+        boolean success = true;
         if (world != null) {
-            server.unloadWorld(worldDirName, false);
+            success = server.unloadWorld(worldDirName, false);
+            if (!success) {
+                this.plugin.getLogger().severe("Unable to unload world (#1): " + worldDirName);
+            }
         }
         File worldFolder = new File(server.getWorldContainer(), worldDirName);
         deleteDirectory(worldFolder);
         levelIdsByName.remove(level.getLevelName());
         levelsSettings.deleteLevelSettings(levelId);
         loadedLevels.remove(levelId);
+        return success;
     }
 
     @NonNull public CompletableFuture<Level> loadLevel(@NonNull UUID levelId) {
@@ -142,13 +147,18 @@ public class LevelsManager {
         return result;
     }
 
-    public void unloadLevel(@NonNull UUID levelId) {
+    public boolean unloadLevel(@NonNull UUID levelId) {
         if (!isLevelLoaded(levelId)) {
-            return;
+            return true;
         }
         levelsSettings.unloadLevelSettings(levelId);
         loadedLevels.remove(levelId);
-        this.plugin.getServer().unloadWorld(FileLevelSettingDAO.getWorldDirName(levelId), false);
+        String worldDirName = FileLevelSettingDAO.getWorldDirName(levelId);
+        boolean success = this.plugin.getServer().unloadWorld(worldDirName, false);
+        if (!success) {
+            this.plugin.getLogger().severe("Unable to unload world (#2): " + worldDirName);
+        }
+        return success;
     }
 
     public void saveLevel(Level level) {

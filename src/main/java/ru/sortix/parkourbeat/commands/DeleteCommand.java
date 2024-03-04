@@ -49,7 +49,11 @@ public class DeleteCommand implements CommandExecutor, TabCompleter {
                 .loadLevel(levelId)
                 .thenAccept(
                         level -> {
-                            if (!level.getLevelSettings().getGameSettings().getOwner().equals(sender.getName())
+                            if (!level
+                                            .getLevelSettings()
+                                            .getGameSettings()
+                                            .getOwnerName()
+                                            .equals(sender.getName())
                                     && !sender.isOp()) {
                                 sender.sendMessage("Вы не являетесь владельцем этого уровня");
                                 if (level.getWorld().getPlayers().isEmpty()) {
@@ -67,8 +71,11 @@ public class DeleteCommand implements CommandExecutor, TabCompleter {
                                     gameManager.removeGame(player);
                                 }
                             }
-                            levelsManager.deleteLevel(level);
-                            sender.sendMessage("Вы успешно удалили \"" + levelName + "\"");
+                            if (levelsManager.deleteLevel(level)) {
+                                sender.sendMessage("Вы успешно удалили \"" + levelName + "\"");
+                            } else {
+                                sender.sendMessage("Не удалось удалить мир \"" + levelName + "\"");
+                            }
                         });
         return true;
     }
