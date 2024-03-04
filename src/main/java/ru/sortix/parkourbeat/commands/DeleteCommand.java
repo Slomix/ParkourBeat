@@ -67,9 +67,9 @@ public class DeleteCommand implements CommandExecutor, TabCompleter {
                                 }
                             }
                             if (levelsManager.deleteLevel(level)) {
-                                sender.sendMessage("Вы успешно удалили \"" + levelName + "\"");
+                                sender.sendMessage("Вы успешно удалили уровень \"" + levelName + "\"");
                             } else {
-                                sender.sendMessage("Не удалось удалить мир \"" + levelName + "\"");
+                                sender.sendMessage("Не удалось удалить уровень \"" + levelName + "\"");
                             }
                         });
         return true;

@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import javax.annotation.Nullable;
+import lombok.Getter;
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
@@ -11,7 +12,7 @@ import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 class LevelSettingsManager {
     private final Map<UUID, LevelSettings> levelSettings = new HashMap<>();
-    private final LevelSettingDAO levelSettingDAO;
+    @Getter private final LevelSettingDAO levelSettingDAO;
 
     protected LevelSettingsManager(@NonNull LevelSettingDAO levelSettingDAO) {
         this.levelSettingDAO = levelSettingDAO;
@@ -19,18 +20,11 @@ class LevelSettingsManager {
 
     public void addLevelSettings(@NonNull UUID levelId, @NonNull LevelSettings settings) {
         levelSettings.put(levelId, settings);
-        levelSettingDAO.save(settings);
+        levelSettingDAO.saveLevelSettings(settings);
     }
 
     public void unloadLevelSettings(@NonNull UUID levelId) {
         levelSettings.remove(levelId);
-    }
-
-    public void deleteLevelSettings(@NonNull UUID levelId) {
-        LevelSettings settings = levelSettings.remove(levelId);
-        if (settings != null) {
-            this.levelSettingDAO.delete(levelId);
-        }
     }
 
     @NotNull public LevelSettings loadLevelSettings(@NonNull UUID levelId) {
@@ -48,9 +42,10 @@ class LevelSettingsManager {
     public void saveWorldSettings(@NonNull UUID levelId) {
         LevelSettings settings = levelSettings.get(levelId);
         if (settings == null) {
-            throw new RuntimeException("Failed to save settings for level " + levelId);
+            throw new IllegalStateException("Failed to save settings for level " + levelId + ": "
+                + "Settings not found");
         }
-        levelSettingDAO.save(settings);
+        levelSettingDAO.saveLevelSettings(settings);
     }
 
     @Nullable public LevelSettings getLevelSettings(@NonNull UUID levelId) {

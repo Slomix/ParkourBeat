@@ -97,7 +97,7 @@ public class ParticleItem extends EditorItem {
     }
 
     private int findNearestWaypointIndex(
-        List<Waypoint> waypoints, double particleCoordinate, DirectionChecker directionChecker) {
+            List<Waypoint> waypoints, double particleCoordinate, DirectionChecker directionChecker) {
         int left = 0;
         int right = waypoints.size() - 1;
 
