@@ -217,6 +217,7 @@ public class LevelsManager {
 
     private void setBooleanGameRule(@NonNull World world, @NonNull String name, boolean newValue) {
         if (!gameRulesSupport) {
+            //noinspection deprecation
             world.setGameRuleValue(name, String.valueOf(newValue));
             return;
         }
@@ -228,6 +229,7 @@ public class LevelsManager {
 
     private void setIntegerGameRule(@NonNull World world, @NonNull String name, int newValue) {
         if (!gameRulesSupport) {
+            //noinspection deprecation
             world.setGameRuleValue(name, String.valueOf(newValue));
             return;
         }
