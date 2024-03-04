@@ -16,10 +16,13 @@ import ru.sortix.parkourbeat.editor.menu.SongMenuListener;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.WorldsManager;
+import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
 import ru.sortix.parkourbeat.listeners.GamesListener;
 import ru.sortix.parkourbeat.listeners.WorldsListener;
 import ru.sortix.parkourbeat.location.Waypoint;
+import ru.sortix.parkourbeat.utils.NonWorldAndYawPitchLocation;
+import ru.sortix.parkourbeat.utils.NonWorldLocation;
 
 public class ParkourBeat extends JavaPlugin {
 
@@ -31,19 +34,22 @@ public class ParkourBeat extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        ConfigurationSerialization.registerClass(NonWorldAndYawPitchLocation.class);
+        ConfigurationSerialization.registerClass(NonWorldLocation.class);
+
         WorldsManager worldsManager = new WorldsManager(this);
         Settings.load(this, worldsManager);
         songs = new Songs();
 
         ConfigurationSerialization.registerClass(Waypoint.class);
-        FileLevelSettingDAO fileLevelSettingDAO = new FileLevelSettingDAO(this);
+        LevelSettingDAO fileLevelSettingDAO = new FileLevelSettingDAO(this);
         LevelsManager levelsManager = new LevelsManager(this, worldsManager, fileLevelSettingDAO);
         GameManager gameManager = new GameManager(levelsManager);
         LevelEditorsManager levelEditorsManager = new LevelEditorsManager(gameManager, levelsManager);
 
         registerCommand(
                 "tptoworld", new TpToWorldCommand(levelEditorsManager, gameManager, levelsManager));
-        registerCommand("play", new PlayCommand(gameManager, levelsManager));
+        registerCommand("play", new PlayCommand(gameManager, levelsManager, levelEditorsManager));
         registerCommand("edit", new EditCommand(levelEditorsManager, levelsManager, gameManager));
         registerCommand("create", new CreateCommand(levelEditorsManager, levelsManager, gameManager));
         registerCommand("delete", new DeleteCommand(levelEditorsManager, levelsManager, gameManager));
@@ -72,5 +78,8 @@ public class ParkourBeat extends JavaPlugin {
     }
 
     @Override
-    public void onDisable() {}
+    public void onDisable() {
+        ConfigurationSerialization.unregisterClass(NonWorldAndYawPitchLocation.class);
+        ConfigurationSerialization.unregisterClass(NonWorldLocation.class);
+    }
 }

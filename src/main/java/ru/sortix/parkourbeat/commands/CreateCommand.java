@@ -49,20 +49,17 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        if (levelsManager.getAllLevels().contains(args[0])) {
-            sender.sendMessage("Уровень уже существует!");
-        } else {
-            if (!levelEditorsManager.removeEditorSession(player)) {
-                gameManager.removeGame(player);
-            }
-            levelsManager
-                    .createLevel(args[0], environment, player.getName())
-                    .thenAccept(
-                            level -> {
-                                player.sendMessage("Уровень " + args[0] + " создан!");
-                                levelEditorsManager.createEditorSession(player, level).start();
-                            });
+        String levelName = args[0];
+        if (!levelEditorsManager.removeEditorSession(player)) {
+            gameManager.removeGame(player);
         }
+        levelsManager
+                .createLevel(levelName, environment, player.getName())
+                .thenAccept(
+                        level -> {
+                            player.sendMessage("Уровень \"" + levelName + "\" создан!");
+                            levelEditorsManager.createEditorSession(player, level).start();
+                        });
         return true;
     }
 

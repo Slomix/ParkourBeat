@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat.game.movement;
 
+import lombok.Getter;
 import lombok.NonNull;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -22,30 +23,26 @@ public class GameMoveHandler {
 
     private final Game game;
     private final Location startBorder, finishBorder;
-    private final MovementAccuracyChecker accuracyChecker;
+    @Getter private final MovementAccuracyChecker accuracyChecker;
     private BukkitTask task;
 
     public GameMoveHandler(Game game) {
         this.game = game;
 
-        WorldSettings worldSettings = game.getLevelSettings().getWorldSettings();
+        WorldSettings worldSettings = game.getLevel().getLevelSettings().getWorldSettings();
         this.accuracyChecker =
                 new MovementAccuracyChecker(
-                        worldSettings.getWaypoints(), game.getLevelSettings().getDirectionChecker());
+                        worldSettings.getWaypoints(), game.getLevel().getLevelSettings().getDirectionChecker());
 
-        startBorder = worldSettings.getStartBorder().toLocation(worldSettings.getWorld());
-        finishBorder = worldSettings.getFinishBorder().toLocation(worldSettings.getWorld());
-    }
-
-    public MovementAccuracyChecker getAccuracyChecker() {
-        return accuracyChecker;
+        startBorder = worldSettings.getStartBorderLoc();
+        finishBorder = worldSettings.getFinishBorderLoc();
     }
 
     public void onPreparingState(PlayerMoveEvent event) {}
 
     public void onReadyState(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        LevelSettings settings = game.getLevelSettings();
+        LevelSettings settings = game.getLevel().getLevelSettings();
         if (settings.getDirectionChecker().isCorrectDirection(startBorder, player.getLocation())) {
             game.start();
             if ((task == null || task.isCancelled()) && !player.isSprinting()) {
@@ -56,7 +53,7 @@ public class GameMoveHandler {
 
     public void onRunningState(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        LevelSettings settings = game.getLevelSettings();
+        LevelSettings settings = game.getLevel().getLevelSettings();
         if (settings.getDirectionChecker().isCorrectDirection(finishBorder, player.getLocation())) {
             game.stopGame(Game.StopReason.FINISH);
             return;

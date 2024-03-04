@@ -48,7 +48,7 @@ public class TestItem extends EditorItem {
                 level.getLevelSettings().getParticleController().stopSpawnParticles(player);
                 player.sendMessage("Загрузка уровня...");
                 gameManager
-                        .createNewGame(player, level.getName())
+                        .createNewGame(player, level.getLevelId())
                         .thenAccept(
                                 unused -> {
                                     player.setGameMode(GameMode.ADVENTURE);

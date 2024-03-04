@@ -61,7 +61,7 @@ public class EditorSession {
 
         owner.setGameMode(GameMode.CREATIVE);
         owner.teleport(worldSettings.getSpawn());
-        owner.sendMessage("Редактор уровня " + level.getName() + " успешно запущен");
+        owner.sendMessage("Редактор уровня " + level.getLevelName() + " успешно запущен");
 
         level.setEditing(true);
     }
@@ -75,10 +75,10 @@ public class EditorSession {
         owner.setGameMode(GameMode.ADVENTURE);
         owner.getInventory().clear();
         owner.teleport(Settings.getLobbySpawn());
-        owner.sendMessage("Редактор уровня " + level.getName() + " успешно остановлен");
+        owner.sendMessage("Редактор уровня " + level.getLevelName() + " успешно остановлен");
 
         levelsManager.saveLevel(level);
-        levelsManager.unloadLevel(level.getName());
+        levelsManager.unloadLevel(level.getLevelId());
     }
 
     public void onPlayerInteract(PlayerInteractEvent e) {

@@ -1,18 +1,18 @@
 package ru.sortix.parkourbeat.game;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Level;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import me.bomb.amusic.AMusic;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
+import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
@@ -22,7 +22,7 @@ import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 public class Game {
 
     private final LevelsManager levelsManager;
-    private LevelSettings levelSettings;
+    private Level level;
     @Getter private Player player;
     @Getter private State currentState;
     private GameMoveHandler gameMoveHandler;
@@ -30,73 +30,79 @@ public class Game {
     public Game(LevelsManager levelsManager) {
         currentState = State.PREPARING;
         player = null;
-        levelSettings = null;
+        level = null;
         gameMoveHandler = null;
         this.levelsManager = levelsManager;
     }
 
-    @NonNull public CompletableFuture<Void> prepare(Player player, String levelName) {
+    @NonNull public CompletableFuture<Void> prepare(@NonNull Player player, @NonNull UUID levelId) {
         CompletableFuture<Void> result = new CompletableFuture<>();
         currentState = State.PREPARING;
         this.player = player;
 
         this.levelsManager
-                .loadLevel(levelName)
+                .loadLevel(levelId)
                 .thenAccept(
                         level -> {
-                            levelSettings = level.getLevelSettings();
-                            WorldSettings worldSettings = levelSettings.getWorldSettings();
-                            GameSettings gameSettings = levelSettings.getGameSettings();
-                            ParticleController particleController = levelSettings.getParticleController();
-
-                            if (!particleController.isLoaded()) {
-                                particleController.loadParticleLocations(worldSettings.getWaypoints());
-                            }
-
-                            player.teleport(worldSettings.getSpawn());
-                            this.gameMoveHandler = new GameMoveHandler(this);
-
-                            String songPlayListName = gameSettings.getSongPlayListName();
-                            if (gameSettings.getSongName() != null
-                                    && !songPlayListName.equals(AMusic.getPackName(player))) {
-                                this.getPlugin()
-                                        .getServer()
-                                        .getScheduler()
-                                        .scheduleSyncDelayedTask(
-                                                this.getPlugin(),
-                                                () -> {
-                                                    try {
-                                                        AMusic.loadPack(player, songPlayListName, false);
-                                                    } catch (Throwable t) {
-                                                        this.levelsManager
-                                                                .getPlugin()
-                                                                .getLogger()
-                                                                .log(
-                                                                        Level.SEVERE,
-                                                                        "Не удалось загрузить пак "
-                                                                                + songPlayListName
-                                                                                + " игроку "
-                                                                                + player.getName(),
-                                                                        t);
-                                                    }
-                                                },
-                                                20L);
-                            } else {
-                                currentState = State.READY;
-                            }
+                            this.level = level;
+                            this.prepareGame();
                             result.complete(null);
                         });
         return result;
+    }
+
+    private void prepareGame() {
+        LevelSettings settings = this.level.getLevelSettings();
+        WorldSettings worldSettings = settings.getWorldSettings();
+        GameSettings gameSettings = settings.getGameSettings();
+        ParticleController particleController = settings.getParticleController();
+
+        if (!particleController.isLoaded()) {
+            particleController.loadParticleLocations(worldSettings.getWaypoints());
+        }
+
+        this.player.teleport(worldSettings.getSpawn());
+        this.gameMoveHandler = new GameMoveHandler(this);
+
+        String songPlayListName = gameSettings.getSongPlayListName();
+        if (gameSettings.getSongName() != null
+                && !songPlayListName.equals(AMusic.getPackName(player))) {
+            this.getPlugin()
+                    .getServer()
+                    .getScheduler()
+                    .scheduleSyncDelayedTask(
+                            this.getPlugin(),
+                            () -> {
+                                try {
+                                    AMusic.loadPack(player, songPlayListName, false);
+                                } catch (Throwable t) {
+                                    this.levelsManager
+                                            .getPlugin()
+                                            .getLogger()
+                                            .log(
+                                                    java.util.logging.Level.SEVERE,
+                                                    "Не удалось загрузить пак "
+                                                            + songPlayListName
+                                                            + " игроку "
+                                                            + player.getName(),
+                                                    t);
+                                }
+                            },
+                            20L);
+        } else {
+            currentState = State.READY;
+        }
     }
 
     public void start() {
         if (currentState != State.READY) {
             return;
         }
-        levelSettings.getParticleController().startSpawnParticles(player);
-        if (levelSettings.getGameSettings().getSongName() != null) {
+        LevelSettings settings = this.level.getLevelSettings();
+        settings.getParticleController().startSpawnParticles(player);
+        if (settings.getGameSettings().getSongName() != null) {
             AMusic.setRepeatMode(player, null);
-            AMusic.playSound(player, levelSettings.getGameSettings().getSongName());
+            AMusic.playSound(player, settings.getGameSettings().getSongName());
         }
         Plugin plugin = this.levelsManager.getPlugin();
         for (Player onlinePlayer : player.getWorld().getPlayers()) {
@@ -106,8 +112,8 @@ public class Game {
         currentState = State.RUNNING;
     }
 
-    @NotNull public LevelSettings getLevelSettings() {
-        return levelSettings;
+    @NotNull public Level getLevel() {
+        return this.level;
     }
 
     @NotNull public GameMoveHandler getGameMoveHandler() {
@@ -123,8 +129,9 @@ public class Game {
     }
 
     public void stopGame(StopReason reason) {
+        LevelSettings settings = this.level.getLevelSettings();
         player.setFallDistance(0f);
-        player.teleport(levelSettings.getWorldSettings().getSpawn());
+        player.teleport(settings.getWorldSettings().getSpawn());
         player.setHealth(20);
         player.setGameMode(GameMode.ADVENTURE);
 
@@ -132,7 +139,7 @@ public class Game {
 
         AMusic.stopSound(player);
         player.playSound(player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
-        levelSettings.getParticleController().stopSpawnParticles(player);
+        settings.getParticleController().stopSpawnParticles(player);
         gameMoveHandler.getAccuracyChecker().reset();
 
         Plugin plugin = this.getPlugin();
@@ -152,17 +159,22 @@ public class Game {
     }
 
     public void endGame(boolean unloadLevel) {
+        LevelSettings settings = this.level.getLevelSettings();
         player.setHealth(20);
         AMusic.stopSound(player);
-        World world = levelSettings.getWorldSettings().getWorld();
-        if (unloadLevel && world.getPlayers().isEmpty()) levelsManager.unloadLevel(world.getName());
+
+        if (unloadLevel) {
+            if (settings.getWorldSettings().isWorldEmpty()) {
+                this.levelsManager.unloadLevel(settings.getGameSettings().getLevelId());
+            }
+        }
 
         Plugin plugin = this.getPlugin();
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             player.showPlayer(plugin, onlinePlayer);
         }
 
-        levelSettings.getParticleController().stopSpawnParticles(player);
+        settings.getParticleController().stopSpawnParticles(player);
     }
 
     public enum State {

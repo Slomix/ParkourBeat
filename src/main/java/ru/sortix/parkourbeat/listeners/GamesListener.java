@@ -69,8 +69,8 @@ public final class GamesListener implements Listener {
         if (event.getFrom().getY() <= event.getTo().getY()) return;
         Game game = this.gameManager.getCurrentGame(event.getPlayer());
         if (game == null) return;
-        if (event.getTo().getY() > game.getLevelSettings().getWorldSettings().getMinWorldHeight())
-            return;
+        if (event.getTo().getY()
+                > game.getLevel().getLevelSettings().getWorldSettings().getMinWorldHeight()) return;
         game.stopGame(Game.StopReason.FALL);
     }
 

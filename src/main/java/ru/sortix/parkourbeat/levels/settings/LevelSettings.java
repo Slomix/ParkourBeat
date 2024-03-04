@@ -1,7 +1,9 @@
 package ru.sortix.parkourbeat.levels.settings;
 
 import java.util.ArrayList;
+import java.util.UUID;
 import lombok.Getter;
+import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.World;
 import ru.sortix.parkourbeat.ParkourBeat;
@@ -17,7 +19,7 @@ public class LevelSettings {
     private final ParticleController particleController;
     private DirectionChecker directionChecker;
 
-    public LevelSettings(WorldSettings worldSettings, GameSettings gameSettings) {
+    public LevelSettings(@NonNull WorldSettings worldSettings, @NonNull GameSettings gameSettings) {
         this.worldSettings = worldSettings;
         this.gameSettings = gameSettings;
         this.directionChecker = new DirectionChecker(worldSettings.getDirection());
@@ -28,12 +30,13 @@ public class LevelSettings {
         this.worldSettings.sortWaypoints(this.directionChecker);
     }
 
-    public static LevelSettings create(World world, String owner) {
+    public static LevelSettings create(
+            @NonNull UUID levelId, @NonNull String levelName, World world, String owner) {
         Location defaultSpawn = Settings.getDefaultWorldSpawn().clone();
         defaultSpawn.setWorld(world);
         return new LevelSettings(
                 new WorldSettings(world, defaultSpawn, null, null, new ArrayList<>()),
-                new GameSettings(null, null, owner));
+                new GameSettings(levelId, levelName, null, null, owner));
     }
 
     public void updateDirectionChecker() {

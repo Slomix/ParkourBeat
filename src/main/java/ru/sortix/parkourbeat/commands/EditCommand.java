@@ -1,7 +1,7 @@
 package ru.sortix.parkourbeat.commands;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 import lombok.NonNull;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -45,18 +45,20 @@ public class EditCommand implements CommandExecutor, TabCompleter {
             return false;
         }
 
-        if (!levelsManager.getAllLevels().contains(args[0])) {
-            player.sendMessage("Уровень не найден!");
+        String levelName = String.join(" ", args);
+        UUID levelId = this.levelsManager.findLevelIdByName(levelName);
+        if (levelId == null) {
+            sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
             return true;
         }
         levelsManager
-                .loadLevel(args[0])
+                .loadLevel(levelId)
                 .thenAccept(
                         level -> {
                             if (!level.getLevelSettings().getGameSettings().getOwner().equals(player.getName())) {
                                 player.sendMessage("Вы не являетесь владельцем этого уровня!");
                                 if (level.getWorld().getPlayers().isEmpty()) {
-                                    levelsManager.unloadLevel(level.getName());
+                                    levelsManager.unloadLevel(levelId);
                                 }
                                 return;
                             }
@@ -76,12 +78,7 @@ public class EditCommand implements CommandExecutor, TabCompleter {
             @NonNull Command command,
             @NonNull String label,
             @NonNull String[] args) {
-        if (args.length == 1) {
-            String input = args[0].toLowerCase();
-            return levelsManager.getAllLevels().stream()
-                    .filter(level -> level.toLowerCase().startsWith(input))
-                    .collect(Collectors.toList());
-        }
-        return null;
+        if (args.length == 0) return null;
+        return this.levelsManager.getValidLevelNames(String.join(" ", args).toLowerCase());
     }
 }

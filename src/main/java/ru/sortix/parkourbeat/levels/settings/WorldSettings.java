@@ -32,16 +32,19 @@ public class WorldSettings {
         this.startBorder = startRegion;
         this.finishBorder = finishRegion;
         this.waypoints = waypoints;
+        this.minWorldHeight = this.findMinWorldHeight();
+    }
 
+    private int findMinWorldHeight() {
         if (this.waypoints.isEmpty()) {
-            this.minWorldHeight = 0;
-        } else {
-            int minWorldHeight = Integer.MAX_VALUE;
-            for (Waypoint waypoint : this.waypoints) {
-                minWorldHeight = Math.min(minWorldHeight, waypoint.getLocation().getBlockY());
-            }
-            this.minWorldHeight = minWorldHeight - 1;
+            return 0;
         }
+
+        int minWorldHeight = Integer.MAX_VALUE;
+        for (Waypoint waypoint : this.waypoints) {
+            minWorldHeight = Math.min(minWorldHeight, waypoint.getLocation().getBlockY());
+        }
+        return minWorldHeight - 1;
     }
 
     public DirectionChecker.Direction getDirection() {
@@ -80,5 +83,17 @@ public class WorldSettings {
             }
             prevLocation = waypoint.getLocation();
         }
+    }
+
+    @NonNull public Location getStartBorderLoc() {
+        return this.startBorder.toLocation(this.world);
+    }
+
+    @NonNull public Location getFinishBorderLoc() {
+        return this.finishBorder.toLocation(this.world);
+    }
+
+    public boolean isWorldEmpty() {
+        return this.world.getPlayers().isEmpty();
     }
 }

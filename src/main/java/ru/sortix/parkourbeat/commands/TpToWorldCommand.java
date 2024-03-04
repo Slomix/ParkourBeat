@@ -1,7 +1,7 @@
 package ru.sortix.parkourbeat.commands;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
@@ -12,7 +12,6 @@ import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.GameManager;
-import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
 public class TpToWorldCommand implements CommandExecutor, TabCompleter {
@@ -39,26 +38,34 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             if (args.length > 0) {
-                String worldId = args[0];
+                String levelName = String.join(" ", args);
+                UUID levelId = this.levelsManager.findLevelIdByName(levelName);
+                if (levelId == null) {
+                    sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
+                    return true;
+                }
 
-                if (!levelsManager.getLoadedLevels().contains(worldId)) {
-                    sender.sendMessage("World not loaded!");
-                    return true;
-                }
-                Level level = levelsManager.getLevelWorld(worldId);
-                if (level.getWorld().equals(player.getWorld())) {
-                    sender.sendMessage("You are already in this world!");
-                    return true;
-                }
-                player.teleport(level.getLevelSettings().getWorldSettings().getSpawn());
-                player.setGameMode(GameMode.SPECTATOR);
-                player.sendMessage("Teleported to parkourbeat level " + level.getName());
+                this.levelsManager
+                        .loadLevel(levelId)
+                        .thenAccept(
+                                level -> {
+                                    if (level.getWorld() == player.getWorld()) {
+                                        sender.sendMessage("You are already in this world!");
+                                        return;
+                                    }
+
+                                    player.teleport(level.getLevelSettings().getWorldSettings().getSpawn());
+                                    player.setGameMode(GameMode.SPECTATOR);
+                                    player.sendMessage("Teleported to parkourbeat level " + level.getLevelName());
+                                });
             } else {
                 player.teleport(Settings.getLobbySpawn());
                 player.sendMessage("Teleported to lobby");
                 player.setGameMode(GameMode.ADVENTURE);
             }
-            if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
+            if (!levelEditorsManager.removeEditorSession(player)) {
+                gameManager.removeGame(player);
+            }
         } else {
             sender.sendMessage("Command only for players!");
         }
@@ -71,14 +78,8 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
             @NonNull Command command,
             @NonNull String label,
             @NonNull String[] args) {
-        ArrayList<String> tabComplete = new ArrayList<>();
-        if (sender instanceof Player && args.length == 1) {
-            for (String inGameWorld : levelsManager.getLoadedLevels()) {
-                if (inGameWorld.toLowerCase().startsWith(args[0].toLowerCase())) {
-                    tabComplete.add(inGameWorld);
-                }
-            }
-        }
-        return tabComplete;
+        if (!(sender instanceof Player)) return null;
+        if (args.length == 0) return null;
+        return this.levelsManager.getValidLevelNames(String.join(" ", args).toLowerCase());
     }
 }

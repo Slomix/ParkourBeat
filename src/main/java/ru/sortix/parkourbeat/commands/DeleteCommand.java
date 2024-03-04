@@ -1,7 +1,7 @@
 package ru.sortix.parkourbeat.commands;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 import lombok.NonNull;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -38,35 +38,37 @@ public class DeleteCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        String worldId = args[0];
-        if (!levelsManager.getAllLevels().contains(worldId)) {
-            sender.sendMessage("Уровень не найден!");
+        String levelName = String.join(" ", args);
+        UUID levelId = this.levelsManager.findLevelIdByName(levelName);
+        if (levelId == null) {
+            sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
             return true;
         }
+
         levelsManager
-                .loadLevel(worldId)
+                .loadLevel(levelId)
                 .thenAccept(
                         level -> {
                             if (!level.getLevelSettings().getGameSettings().getOwner().equals(sender.getName())
                                     && !sender.isOp()) {
-                                sender.sendMessage("Вы не являетесь владельцем этого уровня!");
+                                sender.sendMessage("Вы не являетесь владельцем этого уровня");
                                 if (level.getWorld().getPlayers().isEmpty()) {
-                                    levelsManager.unloadLevel(level.getName());
+                                    levelsManager.unloadLevel(level.getLevelId());
                                 }
                                 return;
                             }
                             if (level.isEditing()) {
                                 Player editorPlayer = level.getWorld().getPlayers().iterator().next();
                                 levelEditorsManager.removeEditorSession(editorPlayer);
-                                editorPlayer.sendMessage("Уровень " + worldId + " был удален!");
+                                editorPlayer.sendMessage("Уровень \"" + levelName + "\" был удален");
                             } else {
                                 for (Player player : level.getWorld().getPlayers()) {
-                                    player.sendMessage("Уровень " + worldId + " был удален!");
+                                    player.sendMessage("Уровень \"" + levelName + "\" был удален");
                                     gameManager.removeGame(player);
                                 }
                             }
-                            levelsManager.deleteLevel(worldId);
-                            sender.sendMessage("Вы успешно удалили " + worldId + "!");
+                            levelsManager.deleteLevel(level);
+                            sender.sendMessage("Вы успешно удалили \"" + levelName + "\"");
                         });
         return true;
     }
@@ -77,12 +79,7 @@ public class DeleteCommand implements CommandExecutor, TabCompleter {
             @NonNull Command command,
             @NonNull String label,
             @NonNull String[] args) {
-        if (args.length == 1) {
-            String input = args[0].toLowerCase();
-            return levelsManager.getAllLevels().stream()
-                    .filter(level -> level.toLowerCase().startsWith(input))
-                    .collect(Collectors.toList());
-        }
-        return null;
+        if (args.length == 0) return null;
+        return this.levelsManager.getValidLevelNames(String.join(" ", args).toLowerCase());
     }
 }

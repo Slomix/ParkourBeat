@@ -1,32 +1,19 @@
 package ru.sortix.parkourbeat.levels;
 
+import java.util.UUID;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.World;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
+@RequiredArgsConstructor
 public class Level {
-
-    private final World world;
-    private final String name;
-    private final LevelSettings levelSettings;
+    @Getter private final @NonNull UUID levelId;
+    @Getter private final @NonNull String levelName;
+    @Getter private final @NonNull World world;
+    @Getter private final @NonNull LevelSettings levelSettings;
     private boolean isEditing = false;
-
-    public Level(String name, World world, LevelSettings levelSettings) {
-        this.name = name;
-        this.world = world;
-        this.levelSettings = levelSettings;
-    }
-
-    public World getWorld() {
-        return world;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public LevelSettings getLevelSettings() {
-        return levelSettings;
-    }
 
     public boolean isEditing() {
         return isEditing;
@@ -34,5 +21,11 @@ public class Level {
 
     public void setEditing(boolean isEditing) {
         this.isEditing = isEditing;
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (!(other instanceof Level)) return false;
+        return ((Level) other).levelId.equals(this.levelId);
     }
 }
