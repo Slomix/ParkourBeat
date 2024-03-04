@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat.levels;
 
+import lombok.NonNull;
 import org.bukkit.Location;
 
 public class DirectionChecker {
@@ -24,7 +25,7 @@ public class DirectionChecker {
         }
     }
 
-    public boolean isAheadDirection(Location location, double coordinate) {
+    public boolean isAheadDirection(@NonNull Location location, double coordinate) {
         switch (direction) {
             case NEGATIVE_X:
                 return location.getX() < coordinate;

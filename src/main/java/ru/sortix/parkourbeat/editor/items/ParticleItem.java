@@ -20,6 +20,7 @@ import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.location.Waypoint;
 
 public class ParticleItem extends EditorItem {
+    public static final Color DEFAULT_PARTICLES_COLOR = Color.LIME;
 
     private static final ItemStack particleItem;
     private static final int slot = 0;
@@ -46,7 +47,7 @@ public class ParticleItem extends EditorItem {
 
     public ParticleItem(Player player, Level level) {
         super(particleItem.clone(), slot, player, level);
-        currentColor = Color.BLACK;
+        currentColor = DEFAULT_PARTICLES_COLOR;
         currentHeight = 0;
     }
 

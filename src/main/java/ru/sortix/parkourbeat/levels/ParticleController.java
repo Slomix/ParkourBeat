@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.levels;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -9,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import ru.sortix.parkourbeat.editor.items.ParticleItem;
 import ru.sortix.parkourbeat.location.Waypoint;
 import ru.sortix.parkourbeat.utils.java.ParticleUtils;
 
@@ -152,7 +154,7 @@ public class ParticleController {
         return isLoaded;
     }
 
-    private Color getCurrentColor(Location location) {
+    @NonNull private Color getCurrentColor(@NonNull Location location) {
         Color lastColor = null;
         for (Map.Entry<Double, Color> entry : colorsChangeLocations.entrySet()) {
             if (lastColor == null || directionChecker.isAheadDirection(location, entry.getKey())) {
@@ -161,7 +163,7 @@ public class ParticleController {
             }
             break;
         }
-        return lastColor;
+        return lastColor == null ? ParticleItem.DEFAULT_PARTICLES_COLOR : lastColor;
     }
 
     private List<Location> createStraightPath(Location start, Location end) {
