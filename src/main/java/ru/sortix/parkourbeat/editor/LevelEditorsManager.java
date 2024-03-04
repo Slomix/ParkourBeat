@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.editor;
 
 import java.util.HashMap;
 import java.util.Map;
+import javax.annotation.Nullable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import ru.sortix.parkourbeat.game.GameManager;
@@ -34,7 +35,7 @@ public class LevelEditorsManager {
         return false;
     }
 
-    public EditorSession getEditorSession(Player player) {
+    @Nullable public EditorSession getEditorSession(Player player) {
         return editorSessions.get(player);
     }
 

@@ -163,6 +163,9 @@ public final class GamesListener implements Listener {
         if (game != null) {
             return WorldType.PB_LEVEL;
         }
+        if (this.levelEditorsManager.getEditorSession(player) != null) {
+            return WorldType.PB_LEVEL;
+        }
         if (Settings.getLobbySpawn().getWorld() == player.getWorld()) {
             return WorldType.PB_LOBBY;
         }

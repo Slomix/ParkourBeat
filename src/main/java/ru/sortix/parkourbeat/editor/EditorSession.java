@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat.editor;
 
+import lombok.Getter;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -20,7 +21,7 @@ import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 public class EditorSession {
 
     private final Player owner;
-    private final Level level;
+    @Getter private final Level level;
     private final LevelsManager levelsManager;
     private final ItemsContainer editorItems;
     private final GameManager gameManager;
