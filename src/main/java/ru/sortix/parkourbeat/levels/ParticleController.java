@@ -82,7 +82,7 @@ public class ParticleController {
         return p;
     }
 
-    public void loadParticleLocations(ArrayList<Waypoint> waypoints) {
+    public void loadParticleLocations(List<Waypoint> waypoints) {
         if (directionChecker == null || waypoints == null) {
             return;
         }

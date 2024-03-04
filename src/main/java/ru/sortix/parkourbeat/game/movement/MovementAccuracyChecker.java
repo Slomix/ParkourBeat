@@ -1,6 +1,6 @@
 package ru.sortix.parkourbeat.game.movement;
 
-import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
@@ -8,7 +8,7 @@ import ru.sortix.parkourbeat.location.Waypoint;
 
 public class MovementAccuracyChecker {
 
-    private final ArrayList<Waypoint> waypoint;
+    private final List<Waypoint> waypoints;
     private final DirectionChecker directionChecker;
     private double accuracy;
     private int currentSegment;
@@ -17,19 +17,19 @@ public class MovementAccuracyChecker {
 
     private static final double MAX_ALLOW_OFFSET = 0.1;
 
-    public MovementAccuracyChecker(ArrayList<Waypoint> waypoint, DirectionChecker directionChecker) {
-        this.waypoint = waypoint;
+    public MovementAccuracyChecker(List<Waypoint> waypoints, DirectionChecker directionChecker) {
+        this.waypoints = waypoints;
         this.directionChecker = directionChecker;
         reset();
     }
 
     public void onPlayerLocationChange(Location newLocation) {
-        if (currentSegment >= waypoint.size() - 1) {
+        if (currentSegment >= waypoints.size() - 1) {
             return;
         }
         Location previousLocation = null;
-        if (currentSegment < waypoint.size() - 2) {
-            previousLocation = waypoint.get(currentSegment + 1).getLocation();
+        if (currentSegment < waypoints.size() - 2) {
+            previousLocation = waypoints.get(currentSegment + 1).getLocation();
             if (directionChecker.isCorrectDirection(previousLocation, newLocation)) {
                 currentSegment++;
             } else {
@@ -38,8 +38,8 @@ public class MovementAccuracyChecker {
         }
 
         Location point1 =
-                previousLocation != null ? previousLocation : waypoint.get(currentSegment).getLocation();
-        Location point2 = waypoint.get(currentSegment + 1).getLocation();
+                previousLocation != null ? previousLocation : waypoints.get(currentSegment).getLocation();
+        Location point2 = waypoints.get(currentSegment + 1).getLocation();
 
         double distanceToLine = calculateDistanceToLine(newLocation, point1, point2);
 

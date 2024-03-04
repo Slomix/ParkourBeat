@@ -1,6 +1,6 @@
 package ru.sortix.parkourbeat.levels.dao.files;
 
-import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -21,7 +21,7 @@ public class WorldSettingsDAO {
         Location spawn = config.getSerializable("spawn", Location.class);
         Vector startBorder = config.getVector("start_border");
         Vector finishBorder = config.getVector("finish_border");
-        ArrayList<Waypoint> particleSegment = (ArrayList<Waypoint>) config.getList("waypoints");
+        List<Waypoint> particleSegment = (List<Waypoint>) config.getList("waypoints");
 
         return new WorldSettings(world, spawn, startBorder, finishBorder, particleSegment);
     }

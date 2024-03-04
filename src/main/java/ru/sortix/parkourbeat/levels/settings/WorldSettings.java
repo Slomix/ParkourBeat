@@ -1,6 +1,6 @@
 package ru.sortix.parkourbeat.levels.settings;
 
-import java.util.ArrayList;
+import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
@@ -13,7 +13,7 @@ import ru.sortix.parkourbeat.location.Waypoint;
 public class WorldSettings {
 
     private final World world;
-    private final ArrayList<Waypoint> waypoints;
+    private final List<Waypoint> waypoints;
     private final int minWorldHeight;
     @Setter private Location spawn;
     @Setter private Vector startBorder;
@@ -24,7 +24,7 @@ public class WorldSettings {
             Location spawn,
             Vector startRegion,
             Vector finishRegion,
-            ArrayList<Waypoint> waypoints) {
+            List<Waypoint> waypoints) {
         this.world = world;
         this.spawn = spawn;
         this.startBorder = startRegion;

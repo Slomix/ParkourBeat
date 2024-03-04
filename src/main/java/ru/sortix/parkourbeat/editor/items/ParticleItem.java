@@ -1,6 +1,8 @@
 package ru.sortix.parkourbeat.editor.items;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -57,7 +59,7 @@ public class ParticleItem extends EditorItem {
         if (action == Action.PHYSICAL) return;
 
         AtomicBoolean change = new AtomicBoolean(false);
-        ArrayList<Waypoint> waypoints = level.getLevelSettings().getWorldSettings().getWaypoints();
+        List<Waypoint> waypoints = level.getLevelSettings().getWorldSettings().getWaypoints();
 
         if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK) {
             DirectionChecker directionChecker = level.getLevelSettings().getDirectionChecker();
@@ -94,7 +96,7 @@ public class ParticleItem extends EditorItem {
     }
 
     private int findNearestWaypointIndex(
-            ArrayList<Waypoint> waypoints, double particleCoordinate, DirectionChecker directionChecker) {
+            List<Waypoint> waypoints, double particleCoordinate, DirectionChecker directionChecker) {
         int left = 0;
         int right = waypoints.size() - 1;
         boolean reversed = directionChecker.isNegative();
@@ -120,7 +122,7 @@ public class ParticleItem extends EditorItem {
     }
 
     private void insertWaypointInOrder(
-            ArrayList<Waypoint> waypoints,
+            List<Waypoint> waypoints,
             Waypoint newWaypoint,
             DirectionChecker directionChecker,
             AtomicBoolean change,
@@ -129,10 +131,11 @@ public class ParticleItem extends EditorItem {
                 findNearestWaypointIndex(
                         waypoints, directionChecker.getCoordinate(newWaypoint.getLocation()), directionChecker);
 
-        //TODO: May produce non-critical problems if many waypoints are close to each other
+        // TODO: May produce non-critical problems if many waypoints are close to each other
         for (int i = Math.max(0, index - 1); i <= Math.min(waypoints.size() - 1, index + 1); i++) {
             Waypoint waypoint = waypoints.get(i);
-            if (waypoint.getLocation().distance(newWaypoint.getLocation()) < MIN_DISTANCE_BETWEEN_POINTS) {
+            if (waypoint.getLocation().distance(newWaypoint.getLocation())
+                    < MIN_DISTANCE_BETWEEN_POINTS) {
                 return;
             }
         }
@@ -143,12 +146,12 @@ public class ParticleItem extends EditorItem {
     }
 
     private void removeWaypointIfCloseEnough(
-            ArrayList<Waypoint> waypoints,
+            List<Waypoint> waypoints,
             int index,
             Location particleLoc,
             Player player,
             AtomicBoolean change) {
-        //TODO: May produce non-critical problems if many waypoints are close to each other
+        // TODO: May produce non-critical problems if many waypoints are close to each other
         for (int i = Math.max(0, index - 1); i <= Math.min(waypoints.size() - 1, index + 1); i++) {
             Waypoint waypoint = waypoints.get(i);
             if (waypoint.getLocation().distance(particleLoc) < REMOVE_POINT_DISTANCE) {
@@ -161,13 +164,15 @@ public class ParticleItem extends EditorItem {
     }
 
     private void adjustWaypointHeight(
-            Action action, ArrayList<Waypoint> waypoints, Player player, AtomicBoolean change) {
+            Action action, List<Waypoint> waypoints, Player player, AtomicBoolean change) {
         Waypoint startSegment = getLookingSegment(player, waypoints);
 
         if (startSegment != null) {
             if (action == Action.RIGHT_CLICK_AIR) {
                 currentHeight =
-                        Math.min(255 - startSegment.getLocation().getY(), startSegment.getHeight() + HEIGHT_CHANGE_VALUE);
+                        Math.min(
+                                255 - startSegment.getLocation().getY(),
+                                startSegment.getHeight() + HEIGHT_CHANGE_VALUE);
             } else {
                 currentHeight = Math.max(0, startSegment.getHeight() - HEIGHT_CHANGE_VALUE);
             }
@@ -177,7 +182,7 @@ public class ParticleItem extends EditorItem {
     }
 
     private void updateParticleController(
-            ArrayList<Waypoint> waypoints, ParticleController particleController, Player player) {
+            List<Waypoint> waypoints, ParticleController particleController, Player player) {
         particleController.stopSpawnParticles(player);
         particleController.loadParticleLocations(waypoints);
         particleController.startSpawnParticles(player);
