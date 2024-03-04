@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import me.bomb.amusic.AMusic;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -126,17 +127,9 @@ public class Game {
         player.teleport(levelSettings.getWorldSettings().getSpawn());
         player.setHealth(20);
         player.setGameMode(GameMode.ADVENTURE);
-        if (reason == StopReason.WRONG_DIRECTION) {
-            player.sendTitle("§cНельзя бежать назад", null, 10, 10, 10);
-        } else if (reason == StopReason.STOP_MOVEMENT) {
-            player.sendTitle("§cВы остановились", null, 10, 10, 10);
-        } else if (reason == StopReason.FALL) {
-            player.sendTitle("§cВы упали", null, 10, 10, 10);
-        } else if (reason == StopReason.LOOSE) {
-            player.sendTitle("§cВы проиграли", null, 10, 10, 10);
-        } else if (reason == StopReason.FINISH) {
-            player.sendTitle("§aВы прошли уровень", null, 10, 10, 10);
-        }
+
+        player.sendTitle(reason.title, null, 10, 10, 10);
+
         AMusic.stopSound(player);
         player.playSound(player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
         levelSettings.getParticleController().stopSpawnParticles(player);
@@ -178,11 +171,14 @@ public class Game {
         RUNNING,
     }
 
+    @RequiredArgsConstructor
     public enum StopReason {
-        FINISH,
-        LOOSE,
-        WRONG_DIRECTION,
-        STOP_MOVEMENT,
-        FALL
+        FINISH("§aВы прошли уровень"),
+        DEATH("§cВы умерли"),
+        WRONG_DIRECTION("§cНельзя бежать назад"),
+        STOP_MOVEMENT("§cВы остановились"),
+        FALL("§cВы упали");
+
+        @NonNull private final String title;
     }
 }
