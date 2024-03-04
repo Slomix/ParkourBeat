@@ -21,6 +21,10 @@ public class ParticleItem extends EditorItem {
 
     private static final ItemStack particleItem;
     private static final int slot = 0;
+    public static final int MIN_DISTANCE_BETWEEN_POINTS = 1;
+    public static final double HEIGHT_CHANGE_VALUE = 0.5;
+    public static final int REMOVE_POINT_DISTANCE = 2;
+    public static final int REACH_DISTANCE = 5;
 
     static {
         particleItem = new ItemStack(Material.BLAZE_ROD);
@@ -61,8 +65,7 @@ public class ParticleItem extends EditorItem {
             if (action == Action.LEFT_CLICK_BLOCK) {
                 Location eyeLocation = player.getEyeLocation();
                 Vector direction = eyeLocation.getDirection();
-                int reachDistance = 5;
-                Block targetBlock = player.getTargetBlock(reachDistance);
+                Block targetBlock = player.getTargetBlock(REACH_DISTANCE);
 
                 if (targetBlock == null) return;
 
@@ -125,6 +128,15 @@ public class ParticleItem extends EditorItem {
         int index =
                 findNearestWaypointIndex(
                         waypoints, directionChecker.getCoordinate(newWaypoint.getLocation()), directionChecker);
+
+        //TODO: May produce non-critical problems if many waypoints are close to each other
+        for (int i = Math.max(0, index - 1); i <= Math.min(waypoints.size() - 1, index + 1); i++) {
+            Waypoint waypoint = waypoints.get(i);
+            if (waypoint.getLocation().distance(newWaypoint.getLocation()) < MIN_DISTANCE_BETWEEN_POINTS) {
+                return;
+            }
+        }
+
         waypoints.add(index, newWaypoint);
         player.sendMessage("Вы успешно добавили точку.");
         change.set(true);
@@ -136,9 +148,10 @@ public class ParticleItem extends EditorItem {
             Location particleLoc,
             Player player,
             AtomicBoolean change) {
+        //TODO: May produce non-critical problems if many waypoints are close to each other
         for (int i = Math.max(0, index - 1); i <= Math.min(waypoints.size() - 1, index + 1); i++) {
             Waypoint waypoint = waypoints.get(i);
-            if (waypoint.getLocation().distance(particleLoc) < 2) {
+            if (waypoint.getLocation().distance(particleLoc) < REMOVE_POINT_DISTANCE) {
                 waypoints.remove(i);
                 player.sendMessage("Вы успешно удалили точку.");
                 change.set(true);
@@ -154,9 +167,9 @@ public class ParticleItem extends EditorItem {
         if (startSegment != null) {
             if (action == Action.RIGHT_CLICK_AIR) {
                 currentHeight =
-                        Math.min(255 - startSegment.getLocation().getY(), startSegment.getHeight() + 0.5);
+                        Math.min(255 - startSegment.getLocation().getY(), startSegment.getHeight() + HEIGHT_CHANGE_VALUE);
             } else {
-                currentHeight = Math.max(0, startSegment.getHeight() - 0.5);
+                currentHeight = Math.max(0, startSegment.getHeight() - HEIGHT_CHANGE_VALUE);
             }
             startSegment.setHeight(currentHeight);
             change.set(true);

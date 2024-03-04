@@ -13,7 +13,9 @@ public class MovementAccuracyChecker {
     private double accuracy;
     private int currentSegment;
     private int totalSteps;
-    private double totalDeviation;
+    private double totalOffset;
+
+    private static final double MAX_ALLOW_OFFSET = 0.1;
 
     public MovementAccuracyChecker(ArrayList<Waypoint> waypoint, DirectionChecker directionChecker) {
         this.waypoint = waypoint;
@@ -40,25 +42,22 @@ public class MovementAccuracyChecker {
         Location point2 = waypoint.get(currentSegment + 1).getLocation();
 
         double distanceToLine = calculateDistanceToLine(newLocation, point1, point2);
-        double segmentLength = point1.distance(point2);
-        double accuracyChange = distanceToLine / segmentLength;
 
-        totalDeviation += accuracyChange;
+        if (distanceToLine > MAX_ALLOW_OFFSET) {
+            totalOffset += distanceToLine;
+        }
         totalSteps++;
 
-        double averageDeviation = totalDeviation / totalSteps;
+        double averageDeviation = totalOffset / totalSteps;
 
         accuracy = 1.0 / (1.0 + averageDeviation);
-
-        // Ограничиваем точность диапазоном от 0 до 1
-        accuracy = Math.max(0, Math.min(1, accuracy));
     }
 
     public void reset() {
         accuracy = 1;
         currentSegment = 0;
         totalSteps = 0;
-        totalDeviation = 0;
+        totalOffset = 0;
     }
 
     public double getAccuracy() {
