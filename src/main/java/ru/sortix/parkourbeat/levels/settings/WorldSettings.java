@@ -71,9 +71,10 @@ public class WorldSettings {
         Comparator<Waypoint> comparator =
                 Comparator.comparingDouble(
                         waypoint -> directionChecker.getCoordinate(waypoint.getLocation()));
-        if (directionChecker.getDirection() == DirectionChecker.Direction.NEGATIVE_X
-                || directionChecker.getDirection() == DirectionChecker.Direction.NEGATIVE_Z)
+
+        if (directionChecker.isNegative())
             comparator = comparator.reversed();
+
         this.waypoints.sort(comparator);
 
         Location prevLocation = null;

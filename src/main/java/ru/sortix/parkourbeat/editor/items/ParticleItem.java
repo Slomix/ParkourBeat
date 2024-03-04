@@ -97,26 +97,26 @@ public class ParticleItem extends EditorItem {
     }
 
     private int findNearestWaypointIndex(
-            List<Waypoint> waypoints, double particleCoordinate, DirectionChecker directionChecker) {
+        List<Waypoint> waypoints, double particleCoordinate, DirectionChecker directionChecker) {
         int left = 0;
         int right = waypoints.size() - 1;
-        boolean reversed = directionChecker.isNegative();
 
         while (left <= right) {
             int mid = left + (right - left) / 2;
             double midCoordinate = directionChecker.getCoordinate(waypoints.get(mid).getLocation());
 
-            if (reversed) {
-                midCoordinate = -midCoordinate;
-            }
-
-            if (midCoordinate < particleCoordinate) {
-                left = mid + 1;
-            } else if (midCoordinate > particleCoordinate) {
-                right = mid - 1;
+            if (directionChecker.isNegative()) {
+                if (midCoordinate > particleCoordinate) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
             } else {
-                left = mid;
-                break;
+                if (midCoordinate < particleCoordinate) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
             }
         }
         return left;
