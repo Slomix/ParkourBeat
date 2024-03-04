@@ -45,7 +45,7 @@ public class LevelSettings {
                         Settings.getStartBorder(),
                         Settings.getFinishBorder(),
                         new ArrayList<>()),
-                new GameSettings(levelId, levelName, null, null, ownerId, ownerName));
+                new GameSettings(levelId, levelName, ownerId, ownerName));
     }
 
     public void updateDirectionChecker() {

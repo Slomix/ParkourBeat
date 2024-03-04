@@ -28,6 +28,6 @@ public class GameSettingsDAO {
         String songName = config.getString("song_name");
         UUID ownerId = UUID.fromString(config.getString("owner_id", null));
         String ownerName = config.getString("owner_name");
-        return new GameSettings(levelId, levelName, songPlayListName, songName, ownerId, ownerName);
+        return new GameSettings(levelId, levelName, ownerId, ownerName, songPlayListName, songName);
     }
 }

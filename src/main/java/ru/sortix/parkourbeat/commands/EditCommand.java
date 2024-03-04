@@ -55,11 +55,7 @@ public class EditCommand implements CommandExecutor, TabCompleter {
                 .loadLevel(levelId)
                 .thenAccept(
                         level -> {
-                            if (!level
-                                    .getLevelSettings()
-                                    .getGameSettings()
-                                    .getOwnerName()
-                                    .equals(player.getName())) {
+                            if (!level.getLevelSettings().getGameSettings().isOwner(sender)) {
                                 player.sendMessage("Вы не являетесь владельцем этого уровня!");
                                 if (level.getWorld().getPlayers().isEmpty()) {
                                     levelsManager.unloadLevel(levelId);
