@@ -17,6 +17,8 @@ import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 
 public class GameMoveHandler {
+    private static final int NOT_SPRINT_DAMAGE_PER_PERIOD = 1;
+    private static final int NOT_SPRINT_DAMAGE_PERIOD_TICKS = 1;
 
     private final Game game;
     private final Location startBorder, finishBorder;
@@ -47,7 +49,7 @@ public class GameMoveHandler {
         if (settings.getDirectionChecker().isCorrectDirection(startBorder, player.getLocation())) {
             game.start();
             if ((task == null || task.isCancelled()) && !player.isSprinting()) {
-                startDamageTask(player, 6, "§cНе переставайте бежать", Game.StopReason.STOP_MOVEMENT);
+                startDamageTask(player, "§cНе переставайте бежать", Game.StopReason.STOP_MOVEMENT);
             }
         }
     }
@@ -75,7 +77,7 @@ public class GameMoveHandler {
     public void onRunningState(PlayerToggleSprintEvent event) {
         Player player = event.getPlayer();
         if (!event.isSprinting()) {
-            startDamageTask(player, 6, "§cНе переставайте бежать", Game.StopReason.STOP_MOVEMENT);
+            startDamageTask(player, "§cНе переставайте бежать", Game.StopReason.STOP_MOVEMENT);
         } else {
             if (task != null) {
                 task.cancel();
@@ -90,8 +92,7 @@ public class GameMoveHandler {
         return Math.toDegrees(angle) < 100;
     }
 
-    private void startDamageTask(
-            Player player, int damage, String reason, Game.StopReason stopReason) {
+    private void startDamageTask(Player player, String reason, Game.StopReason stopReason) {
         player.playSound(player.getLocation(), Sound.ENTITY_WOLF_HURT, 1, 1);
 
         this.task =
@@ -105,13 +106,13 @@ public class GameMoveHandler {
 
                         player.sendTitle(reason, null, 0, 5, 5);
                         boolean stopped;
-                        if (player.getHealth() <= damage) {
+                        if (player.getHealth() <= NOT_SPRINT_DAMAGE_PER_PERIOD) {
                             game.stopGame(stopReason);
                             stopped = true;
                         } else {
                             if (player.getNoDamageTicks() <= 0) {
-                                player.setHealth(player.getHealth() - damage);
-                                player.setNoDamageTicks(20);
+                                player.setHealth(player.getHealth() - NOT_SPRINT_DAMAGE_PER_PERIOD);
+                                player.setNoDamageTicks(NOT_SPRINT_DAMAGE_PERIOD_TICKS);
                             }
                             stopped = false;
                         }
