@@ -8,7 +8,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.util.Vector;
-import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.location.Waypoint;
 
@@ -39,17 +38,10 @@ public class WorldSettingsDAO {
     public WorldSettings load(FileConfiguration config, World world) {
         Location spawn = config.getSerializable("spawn", Location.class);
         spawn.setWorld(world);
+
         Vector startBorder = config.getVector("start_border");
         Vector finishBorder = config.getVector("finish_border");
-        if (startBorder == null || finishBorder == null) {
-            this.logger.warning("Unable to load border positions of world " + world.getName());
-        }
-        if (startBorder == null) {
-            startBorder = Settings.getStartBorder();
-        }
-        if (finishBorder == null) {
-            finishBorder = Settings.getFinishBorder();
-        }
+
         List<Waypoint> particleSegment = (List<Waypoint>) config.getList("waypoints");
         for (Waypoint waypoint : particleSegment) {
             waypoint.getLocation().setWorld(world);

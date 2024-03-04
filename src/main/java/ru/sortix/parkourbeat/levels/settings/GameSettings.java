@@ -8,6 +8,7 @@ import lombok.NonNull;
 public class GameSettings {
     private final UUID levelId;
     private final String levelName;
+    private final UUID ownerId;
     private final String ownerName;
     private String songPlayListName;
     private String songName;
@@ -17,11 +18,13 @@ public class GameSettings {
             @NonNull String levelName,
             String songPlayListName,
             String songName,
+            UUID ownerId,
             String ownerName) {
         this.levelId = levelId;
         this.levelName = levelName;
         this.songPlayListName = songPlayListName;
         this.songName = songName;
+        this.ownerId = ownerId;
         this.ownerName = ownerName;
     }
 

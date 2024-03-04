@@ -31,7 +31,11 @@ public class LevelSettings {
     }
 
     public static LevelSettings create(
-            @NonNull UUID levelId, @NonNull String levelName, World world, String owner) {
+            @NonNull UUID levelId,
+            @NonNull String levelName,
+            @NonNull World world,
+            @NonNull UUID ownerId,
+            @NonNull String ownerName) {
         Location defaultSpawn = Settings.getDefaultWorldSpawn().clone();
         defaultSpawn.setWorld(world);
         return new LevelSettings(
@@ -41,7 +45,7 @@ public class LevelSettings {
                         Settings.getStartBorder(),
                         Settings.getFinishBorder(),
                         new ArrayList<>()),
-                new GameSettings(levelId, levelName, null, null, owner));
+                new GameSettings(levelId, levelName, null, null, ownerId, ownerName));
     }
 
     public void updateDirectionChecker() {
