@@ -52,6 +52,10 @@ public class DirectionChecker {
         }
     }
 
+    public boolean isNegative() {
+        return direction == Direction.NEGATIVE_X || direction == Direction.NEGATIVE_Z;
+    }
+
     public Direction getDirection() {
         return direction;
     }
