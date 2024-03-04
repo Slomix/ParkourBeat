@@ -54,7 +54,7 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
             gameManager.removeGame(player);
         }
         levelsManager
-                .createLevel(levelName, environment, player.getName())
+                .createLevel(levelName, environment, player.getUniqueId(), player.getName())
                 .thenAccept(
                         level -> {
                             if (level == null) {

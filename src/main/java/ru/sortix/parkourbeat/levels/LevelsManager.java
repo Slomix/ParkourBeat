@@ -57,7 +57,10 @@ public class LevelsManager {
     }
 
     @NonNull public CompletableFuture<Level> createLevel(
-            @NonNull String levelName, @NonNull World.Environment environment, @NonNull String owner) {
+            @NonNull String levelName,
+            @NonNull World.Environment environment,
+            @NonNull UUID ownerId,
+            @NonNull String ownerName) {
 
         CompletableFuture<Level> result = new CompletableFuture<>();
         if (this.levelIdsByName.containsKey(levelName)) {
@@ -79,7 +82,8 @@ public class LevelsManager {
                         world -> {
                             prepareLevelWorld(world, true);
 
-                            LevelSettings levelSettings = LevelSettings.create(levelId, levelName, world, owner);
+                            LevelSettings levelSettings =
+                                    LevelSettings.create(levelId, levelName, world, ownerId, ownerName);
                             Level level = new Level(levelId, levelName, world, levelSettings);
                             level.setEditing(true);
 

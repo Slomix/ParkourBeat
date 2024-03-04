@@ -22,11 +22,11 @@ public class WorldSettings {
     @Setter private Vector finishBorder;
 
     public WorldSettings(
-            World world,
-            Location spawn,
-            Vector startRegion,
-            Vector finishRegion,
-            List<Waypoint> waypoints) {
+            @NonNull World world,
+            @NonNull Location spawn,
+            @NonNull Vector startRegion,
+            @NonNull Vector finishRegion,
+            @NonNull List<Waypoint> waypoints) {
         this.world = world;
         this.spawn = spawn;
         this.startBorder = startRegion;

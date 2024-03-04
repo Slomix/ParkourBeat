@@ -29,7 +29,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     public FileLevelSettingDAO(@NonNull Plugin plugin) {
         this.logger = plugin.getLogger();
         this.worldsDir = plugin.getServer().getWorldContainer();
-        this.gameSettingsDAO = new GameSettingsDAO();
+        this.gameSettingsDAO = new GameSettingsDAO(plugin.getLogger());
         this.worldSettingsDAO = new WorldSettingsDAO(plugin.getLogger());
     }
 
