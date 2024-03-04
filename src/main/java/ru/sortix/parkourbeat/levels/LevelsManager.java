@@ -95,6 +95,7 @@ public class LevelsManager {
         deleteDirectory(worldFolder);
         levels.remove(name);
         levelsSettings.deleteLevelSettings(name);
+        loadedLevels.remove(name);
     }
 
     @NonNull public CompletableFuture<Level> loadLevel(@NonNull String name) {

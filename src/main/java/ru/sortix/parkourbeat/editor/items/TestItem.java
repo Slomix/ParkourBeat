@@ -1,12 +1,14 @@
 package ru.sortix.parkourbeat.editor.items;
 
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.Nullable;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.Level;
 
@@ -33,7 +35,7 @@ public class TestItem extends EditorItem {
     }
 
     @Override
-    public void onClick(Action action, Block block) {
+    public void onClick(Action action, Block block, @Nullable Location interactionPoint) {
         if (action == Action.RIGHT_CLICK_AIR) {
             if (gameManager.isInGame(player)) {
                 gameManager.removeGame(player, false);

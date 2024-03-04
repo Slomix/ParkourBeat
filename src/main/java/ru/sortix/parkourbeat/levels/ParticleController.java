@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.levels;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -19,7 +20,7 @@ public class ParticleController {
     private final ConcurrentLinkedQueue<Location> particleLocations = new ConcurrentLinkedQueue<>();
     private final Map<Double, Color> colorsChangeLocations = new LinkedHashMap<>();
     private final Map<Player, BukkitTask> particleTasks = new HashMap<>();
-    private DirectionChecker directionChecker;
+    @Setter private DirectionChecker directionChecker;
     private boolean isLoaded = false;
 
     public ParticleController(Plugin plugin, DirectionChecker directionChecker) {
@@ -79,10 +80,6 @@ public class ParticleController {
         p.add(p3.clone().multiply(ttt));
 
         return p;
-    }
-
-    public void setDirectionChecker(DirectionChecker directionChecker) {
-        this.directionChecker = directionChecker;
     }
 
     public void loadParticleLocations(ArrayList<Waypoint> waypoints) {
