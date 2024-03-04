@@ -171,10 +171,7 @@ public final class GamesListener implements Listener {
     }
 
     @NonNull private WorldType getWorldType(@NonNull Player player) {
-        // TODO Стандартизировать названия миров и проверять по ним, а не при помощи gameManager:
-        //  https://github.com/Slomix/ParkourBeat/issues/9
-        Game game = this.gameManager.getCurrentGame(player);
-        if (game != null) {
+        if (this.gameManager.getCurrentGame(player) != null) {
             return WorldType.PB_LEVEL;
         }
         if (this.levelEditorsManager.getEditorSession(player) != null) {
@@ -183,6 +180,13 @@ public final class GamesListener implements Listener {
         if (Settings.getLobbySpawn().getWorld() == player.getWorld()) {
             return WorldType.PB_LOBBY;
         }
+
+        // TODO Стандартизировать названия миров и проверять по ним, а не при помощи gameManager:
+        //  https://github.com/Slomix/ParkourBeat/issues/9
+        if (true) {
+            return WorldType.PB_LEVEL;
+        }
+
         return WorldType.NON_PB;
     }
 
