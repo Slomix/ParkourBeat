@@ -5,12 +5,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.Location;
-import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.location.Waypoint;
+import ru.sortix.parkourbeat.utils.java.ParticleUtils;
 
 public class ParticleController {
     private static final double SEGMENT_LENGTH = 0.25;
@@ -120,6 +120,7 @@ public class ParticleController {
         if (particleTasks.containsKey(player)) {
             return;
         }
+
         particleTasks.put(
                 player,
                 this.plugin
@@ -128,22 +129,13 @@ public class ParticleController {
                         .runTaskTimerAsynchronously(
                                 this.plugin,
                                 () -> {
-                                    Location playerLoc = player.getLocation();
-                                    Color color = getCurrentColor(playerLoc);
-                                    for (Location location : this.particleLocations) {
-                                        // TODO Оптимизировать это:
-                                        if (location.distanceSquared(playerLoc) > MAX_PARTICLES_VIEW_DISTANCE_SQUARED)
-                                            continue;
-                                        player.spawnParticle(
-                                                Particle.REDSTONE,
-                                                location,
-                                                0,
-                                                0,
-                                                0,
-                                                0,
-                                                1,
-                                                new Particle.DustOptions(color, 1f));
-                                    }
+                                    Color color = getCurrentColor(player.getLocation());
+
+                                    // TODO Отправлять лишь частицы из двух ближайших секций:
+                                    //  https://github.com/Slomix/ParkourBeat/issues/17
+                                    Iterable<Location> locations = this.particleLocations;
+                                    ParticleUtils.displayRedstoneParticles(
+                                            player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
                                 },
                                 0,
                                 5));

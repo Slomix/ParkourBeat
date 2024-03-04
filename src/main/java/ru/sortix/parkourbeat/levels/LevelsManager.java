@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
+import ru.sortix.parkourbeat.utils.java.ClassUtils;
 
 public class LevelsManager {
     @Getter private final Plugin plugin;
@@ -23,6 +24,7 @@ public class LevelsManager {
     private final LevelSettingsManager levelsSettings;
     private final Set<String> levels = new HashSet<>();
     private final Map<String, Level> loadedLevels = new HashMap<>();
+    private final boolean gameRulesSupport = ClassUtils.isClassPresent("org.bukkit.GameRule");
 
     public LevelsManager(
             @NonNull Plugin plugin,
@@ -214,6 +216,10 @@ public class LevelsManager {
     }
 
     private void setBooleanGameRule(@NonNull World world, @NonNull String name, boolean newValue) {
+        if (!gameRulesSupport) {
+            world.setGameRuleValue(name, String.valueOf(newValue));
+            return;
+        }
         GameRule<?> byName = GameRule.getByName(name);
         if (byName == null) return;
         //noinspection unchecked
@@ -221,6 +227,10 @@ public class LevelsManager {
     }
 
     private void setIntegerGameRule(@NonNull World world, @NonNull String name, int newValue) {
+        if (!gameRulesSupport) {
+            world.setGameRuleValue(name, String.valueOf(newValue));
+            return;
+        }
         GameRule<?> byName = GameRule.getByName(name);
         if (byName == null) return;
         //noinspection unchecked
