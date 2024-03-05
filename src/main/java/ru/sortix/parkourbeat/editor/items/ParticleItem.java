@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import lombok.NonNull;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -22,16 +23,16 @@ import ru.sortix.parkourbeat.location.Waypoint;
 public class ParticleItem extends EditorItem {
     public static final Color DEFAULT_PARTICLES_COLOR = Color.LIME;
 
-    private static final ItemStack particleItem;
-    private static final int slot = 0;
+    private static final ItemStack ITEM;
+    private static final int SLOT = 0;
     public static final int MIN_DISTANCE_BETWEEN_POINTS = 1;
     public static final double HEIGHT_CHANGE_VALUE = 0.5;
     public static final int REMOVE_POINT_DISTANCE = 2;
     public static final int REACH_DISTANCE = 5;
 
     static {
-        particleItem = new ItemStack(Material.BLAZE_ROD);
-        ItemMeta meta = particleItem.getItemMeta();
+        ITEM = new ItemStack(Material.BLAZE_ROD);
+        ItemMeta meta = ITEM.getItemMeta();
         meta.setDisplayName("Путь");
         meta.setLore(
                 new ArrayList<>(
@@ -39,14 +40,14 @@ public class ParticleItem extends EditorItem {
                                 "ПКМ - установить точку",
                                 "ЛКМ - удалить точку",
                                 "SHIFT + ПКМ/ЛКМ - управление высотой")));
-        particleItem.setItemMeta(meta);
+        ITEM.setItemMeta(meta);
     }
 
     private Color currentColor;
     private double currentHeight;
 
-    public ParticleItem(Player player, Level level) {
-        super(particleItem.clone(), slot, player, level);
+    public ParticleItem(@NonNull Player player, @NonNull Level level) {
+        super(ITEM.clone(), SLOT, player, level);
         currentColor = DEFAULT_PARTICLES_COLOR;
         currentHeight = 0;
     }

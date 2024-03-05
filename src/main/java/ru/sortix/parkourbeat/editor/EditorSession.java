@@ -1,6 +1,7 @@
 package ru.sortix.parkourbeat.editor;
 
 import lombok.Getter;
+import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -28,13 +29,17 @@ public class EditorSession {
     private final Inventory songMenu;
 
     public EditorSession(
-            Player owner, Level level, LevelsManager levelsManager, GameManager gameManager) {
+            @NonNull Player owner,
+            @NonNull Level level,
+            @NonNull LevelsManager levelsManager,
+            @NonNull GameManager gameManager,
+            @NonNull LevelEditorsManager levelEditorsManager) {
         this.owner = owner;
         this.level = level;
         this.levelsManager = levelsManager;
         this.gameManager = gameManager;
-        this.editorItems = new ItemsContainer(owner, level, gameManager);
-        songMenu =
+        this.editorItems = new ItemsContainer(owner, level, gameManager, levelEditorsManager);
+        this.songMenu =
                 new SongMenu(ParkourBeat.getSongs(), owner, level.getLevelSettings().getGameSettings())
                         .getInventory();
     }
@@ -61,7 +66,7 @@ public class EditorSession {
 
         owner.setGameMode(GameMode.CREATIVE);
         owner.teleport(worldSettings.getSpawn());
-        owner.sendMessage("Редактор уровня " + level.getLevelName() + " успешно запущен");
+        owner.sendMessage("Редактор уровня \"" + level.getLevelName() + "\" успешно запущен");
 
         level.setEditing(true);
     }
@@ -75,7 +80,7 @@ public class EditorSession {
         owner.setGameMode(GameMode.ADVENTURE);
         owner.getInventory().clear();
         owner.teleport(Settings.getLobbySpawn());
-        owner.sendMessage("Редактор уровня " + level.getLevelName() + " успешно остановлен");
+        owner.sendMessage("Редактор уровня \"" + level.getLevelName() + "\" успешно остановлен");
 
         levelsManager.saveLevel(level);
         levelsManager.unloadLevel(level.getLevelId());

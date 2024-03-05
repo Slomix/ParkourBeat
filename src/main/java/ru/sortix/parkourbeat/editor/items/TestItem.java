@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat.editor.items;
 
+import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,22 +15,25 @@ import ru.sortix.parkourbeat.levels.Level;
 
 public class TestItem extends EditorItem {
 
-    private static final ItemStack testItem;
-    private static final int slot = 8;
+    private static final ItemStack ITEM;
+    private static final int SLOT = 6;
 
     static {
-        testItem = new ItemStack(Material.DIAMOND);
-        ItemMeta meta = testItem.getItemMeta();
+        ITEM = new ItemStack(Material.DIAMOND);
+        ItemMeta meta = ITEM.getItemMeta();
         meta.setDisplayName("Протестировать уровень");
-        testItem.setItemMeta(meta);
+        ITEM.setItemMeta(meta);
     }
 
     private final GameManager gameManager;
     private final ItemsContainer itemsContainer;
 
     public TestItem(
-            Player player, Level level, GameManager gameManager, ItemsContainer itemsContainer) {
-        super(testItem.clone(), slot, player, level);
+            @NonNull Player player,
+            @NonNull Level level,
+            @NonNull GameManager gameManager,
+            @NonNull ItemsContainer itemsContainer) {
+        super(ITEM.clone(), SLOT, player, level);
         this.gameManager = gameManager;
         this.itemsContainer = itemsContainer;
     }
@@ -54,11 +58,11 @@ public class TestItem extends EditorItem {
                                     player.setGameMode(GameMode.ADVENTURE);
                                     player.getInventory().clear();
 
-                                    ItemStack newItem = testItem.clone();
+                                    ItemStack newItem = ITEM.clone();
                                     itemsContainer.updateEditorItem(itemStack, newItem);
                                     itemStack = newItem;
 
-                                    player.getInventory().setItem(slot, itemStack);
+                                    player.getInventory().setItem(SLOT, itemStack);
                                     player.sendMessage("Вы вошли в режим тестирования");
                                 });
             }

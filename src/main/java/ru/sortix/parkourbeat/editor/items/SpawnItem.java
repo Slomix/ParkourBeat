@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.editor.items;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -14,19 +15,19 @@ import ru.sortix.parkourbeat.levels.Level;
 
 public class SpawnItem extends EditorItem {
 
-    private static final ItemStack spawnItem;
-    private static final int slot = 3;
+    private static final ItemStack ITEM;
+    private static final int SLOT = 2;
 
     static {
-        spawnItem = new ItemStack(Material.ENDER_PEARL);
-        ItemMeta meta = spawnItem.getItemMeta();
+        ITEM = new ItemStack(Material.ENDER_PEARL);
+        ItemMeta meta = ITEM.getItemMeta();
         meta.setDisplayName("Точка спавна");
         meta.setLore(new ArrayList<>(Collections.singletonList("Устанавливает точку спавна")));
-        spawnItem.setItemMeta(meta);
+        ITEM.setItemMeta(meta);
     }
 
-    public SpawnItem(Player player, Level level) {
-        super(spawnItem.clone(), slot, player, level);
+    public SpawnItem(@NonNull Player player, @NonNull Level level) {
+        super(ITEM.clone(), SLOT, player, level);
     }
 
     @Override

@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.editor.items;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -17,24 +18,24 @@ import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 
 public class StartFinishItem extends EditorItem {
 
-    private static final ItemStack startFinishItem;
-    private static final int slot = 5;
+    private static final ItemStack ITEM;
+    private static final int SLOT = 4;
 
     static {
-        startFinishItem = new ItemStack(Material.STICK);
-        ItemMeta meta = startFinishItem.getItemMeta();
+        ITEM = new ItemStack(Material.STICK);
+        ItemMeta meta = ITEM.getItemMeta();
         meta.setDisplayName("Зона старта/финиша");
         meta.setLore(
                 new ArrayList<>(
                         Arrays.asList("ПКМ - установить зону старта", "ЛКМ - установить зону финиша")));
-        startFinishItem.setItemMeta(meta);
+        ITEM.setItemMeta(meta);
     }
 
     private Vector startPoint;
     private Vector finishPoint;
 
-    public StartFinishItem(Player player, Level level) {
-        super(startFinishItem.clone(), slot, player, level);
+    public StartFinishItem(@NonNull Player player, @NonNull Level level) {
+        super(ITEM.clone(), SLOT, player, level);
         WorldSettings worldSettings = level.getLevelSettings().getWorldSettings();
         startPoint = worldSettings.getStartBorder();
         finishPoint = worldSettings.getFinishBorder();

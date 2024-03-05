@@ -2,8 +2,10 @@ package ru.sortix.parkourbeat.editor.items;
 
 import java.util.HashMap;
 import java.util.Map;
+import lombok.NonNull;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.Level;
 
@@ -13,23 +15,30 @@ public class ItemsContainer {
     private final Map<Class<? extends EditorItem>, EditorItem> editorItemsByClass = new HashMap<>();
     private final Player player;
 
-    public ItemsContainer(Player player, Level level, GameManager gameManager) {
+    public ItemsContainer(
+            @NonNull Player player,
+            @NonNull Level level,
+            @NonNull GameManager gameManager,
+            @NonNull LevelEditorsManager levelEditorsManager) {
         this.player = player;
-        editorItems = new HashMap<>();
-        ParticleItem particleItem = new ParticleItem(player, level);
-        StartFinishItem startFinishItem = new StartFinishItem(player, level);
-        SpawnItem spawnItem = new SpawnItem(player, level);
-        TestItem testItem = new TestItem(player, level, gameManager, this);
+        this.editorItems = new HashMap<>();
 
-        editorItems.put(particleItem.getItemStack(), particleItem);
-        editorItems.put(startFinishItem.getItemStack(), startFinishItem);
-        editorItems.put(spawnItem.getItemStack(), spawnItem);
-        editorItems.put(testItem.getItemStack(), testItem);
-
-        editorItemsByClass.put(ParticleItem.class, particleItem);
-        editorItemsByClass.put(StartFinishItem.class, startFinishItem);
-        editorItemsByClass.put(SpawnItem.class, spawnItem);
-        editorItemsByClass.put(TestItem.class, testItem);
+        for (EditorItem editorItem :
+                new EditorItem[] {
+                    new LeaveEditorItem(player, level, gameManager, levelEditorsManager),
+                    new ParticleItem(player, level),
+                    new StartFinishItem(player, level),
+                    new SpawnItem(player, level),
+                    new TestItem(player, level, gameManager, this)
+                }) {
+            ItemStack itemStack = editorItem.getItemStack();
+            if (!itemStack.getType().isItem()) {
+                System.err.println(editorItem.getClass().getName() + " is not an item");
+                continue;
+            }
+            this.editorItems.put(itemStack, editorItem);
+            this.editorItemsByClass.put(editorItem.getClass(), editorItem);
+        }
     }
 
     public void giveToPlayer() {
