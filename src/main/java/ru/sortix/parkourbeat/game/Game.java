@@ -66,6 +66,7 @@ public class Game {
             particleController.loadParticleLocations(worldSettings.getWaypoints());
         }
 
+        this.player.setGameMode(GameMode.ADVENTURE);
         this.player.teleport(worldSettings.getSpawn());
         this.gameMoveHandler = new GameMoveHandler(this);
 

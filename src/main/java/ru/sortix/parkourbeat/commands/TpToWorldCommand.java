@@ -56,7 +56,8 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
 
                                     player.teleport(level.getLevelSettings().getWorldSettings().getSpawn());
                                     player.setGameMode(GameMode.SPECTATOR);
-                                    player.sendMessage("Вы телепортированы на уровень \"" + level.getLevelName() + "\"");
+                                    player.sendMessage(
+                                            "Вы телепортированы на уровень \"" + level.getLevelName() + "\"");
                                 });
             } else {
                 player.teleport(Settings.getLobbySpawn());

@@ -41,6 +41,9 @@ public final class GamesListener implements Listener {
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             if (this.getWorldType(player) != WorldType.PB_LEVEL) continue;
             player.teleport(Settings.getLobbySpawn());
+            player.setGameMode(GameMode.ADVENTURE);
+            player.getInventory().clear();
+            player.sendMessage("Перезагрузка плагина привела к телепортации в лобби");
         }
     }
 
