@@ -28,7 +28,14 @@ public class GameSettings {
 
     public boolean isOwner(@NonNull CommandSender sender) {
         if (sender instanceof Player) {
-            return this.ownerId.equals(((Player) sender).getUniqueId());
+            if (this.ownerId.equals(((Player) sender).getUniqueId())) {
+                return true;
+            }
+            if (sender.isOp()) {
+                sender.sendMessage("Использован обход прав, поскольку вы являетесь оператором сервера");
+                return true;
+            }
+            return false;
         }
         return sender instanceof ConsoleCommandSender;
     }
