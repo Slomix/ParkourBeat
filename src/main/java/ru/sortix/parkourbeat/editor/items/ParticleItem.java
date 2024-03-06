@@ -25,10 +25,9 @@ public class ParticleItem extends EditorItem {
 
     private static final ItemStack ITEM;
     private static final int SLOT = 0;
-    public static final int MIN_DISTANCE_BETWEEN_POINTS = 1;
+    public static final double MIN_DISTANCE_BETWEEN_POINTS = 0.5;
     public static final double HEIGHT_CHANGE_VALUE = 0.5;
-    public static final int REMOVE_POINT_DISTANCE = 2;
-    public static final int REACH_DISTANCE = 5;
+    public static final int REMOVE_POINT_DISTANCE = 1;
 
     static {
         ITEM = new ItemStack(Material.BLAZE_ROD);
@@ -58,41 +57,43 @@ public class ParticleItem extends EditorItem {
 
     @Override
     public void onClick(Action action, Block block, @Nullable Location interactionPoint) {
-        if (action == Action.PHYSICAL) return;
-
-        AtomicBoolean change = new AtomicBoolean(false);
-        List<Waypoint> waypoints = level.getLevelSettings().getWorldSettings().getWaypoints();
-
-        if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK) {
-            DirectionChecker directionChecker = level.getLevelSettings().getDirectionChecker();
-
-            if (action == Action.LEFT_CLICK_BLOCK) {
-                Location eyeLocation = player.getEyeLocation();
-                Vector direction = eyeLocation.getDirection();
-                Block targetBlock = player.getTargetBlock(REACH_DISTANCE);
-
-                if (targetBlock == null) return;
-
-                Location particleLoc =
-                        eyeLocation.add(direction.multiply(eyeLocation.distance(targetBlock.getLocation())));
-                double particleCoordinate = directionChecker.getCoordinate(particleLoc);
-                int index = findNearestWaypointIndex(waypoints, particleCoordinate, directionChecker);
-
-                if (index != -1) {
-                    removeWaypointIfCloseEnough(waypoints, index, particleLoc, player, change);
-                }
-            } else {
-                if (interactionPoint == null) return;
-
-                Waypoint newWaypoint = new Waypoint(interactionPoint, currentColor, currentHeight);
-                insertWaypointInOrder(waypoints, newWaypoint, directionChecker, change, player);
-            }
-        } else if (player.isSneaking()
-                && (action == Action.RIGHT_CLICK_AIR || action == Action.LEFT_CLICK_AIR)) {
-            adjustWaypointHeight(action, waypoints, player, change);
+        if (action == Action.PHYSICAL) {
+            return;
         }
 
-        if (change.get()) {
+        AtomicBoolean isChanged = new AtomicBoolean(false);
+        List<Waypoint> waypoints = level.getLevelSettings().getWorldSettings().getWaypoints();
+
+        // Обработка точек
+        if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK) {
+            if (interactionPoint == null) {
+                return;
+            }
+
+            DirectionChecker directionChecker = level.getLevelSettings().getDirectionChecker();
+
+            // Обработка удаления точки
+            if (action == Action.LEFT_CLICK_BLOCK) {
+                double particleCoordinate = directionChecker.getCoordinate(interactionPoint);
+                int nearestWaypointIndex = findNearestWaypointIndex(waypoints, particleCoordinate, directionChecker);
+
+                if (nearestWaypointIndex != -1) {
+                    removeWaypointIfCloseEnough(waypoints, nearestWaypointIndex, interactionPoint, player, isChanged);
+                }
+            }
+            // Обработка добавления новой точки
+            else {
+                Waypoint newWaypoint = new Waypoint(interactionPoint, currentColor, currentHeight);
+                insertWaypointInOrder(waypoints, newWaypoint, directionChecker, isChanged, player);
+            }
+        }
+        // Обработка изменения высоты сегментов
+        else if (player.isSneaking() && (action == Action.RIGHT_CLICK_AIR || action == Action.LEFT_CLICK_AIR)) {
+            adjustWaypointHeight(action, waypoints, player, isChanged);
+        }
+
+        // Обновляем частицы если были изменения
+        if (isChanged.get()) {
             updateParticleController(waypoints, level.getLevelSettings().getParticleController(), player);
         }
     }
@@ -108,9 +109,9 @@ public class ParticleItem extends EditorItem {
 
             if (directionChecker.isNegative()) {
                 if (midCoordinate > particleCoordinate) {
-                    right = mid - 1;
-                } else {
                     left = mid + 1;
+                } else {
+                    right = mid - 1;
                 }
             } else {
                 if (midCoordinate < particleCoordinate) {
@@ -133,13 +134,18 @@ public class ParticleItem extends EditorItem {
                 findNearestWaypointIndex(
                         waypoints, directionChecker.getCoordinate(newWaypoint.getLocation()), directionChecker);
 
-        // TODO: May produce non-critical problems if many waypoints are close to each other
+        // TODO: Not working if there are many points on the same horizontal
         for (int i = Math.max(0, index - 1); i <= Math.min(waypoints.size() - 1, index + 1); i++) {
             Waypoint waypoint = waypoints.get(i);
             if (waypoint.getLocation().distance(newWaypoint.getLocation())
                     < MIN_DISTANCE_BETWEEN_POINTS) {
                 return;
             }
+        }
+
+        if (index == waypoints.size() || index == 0) {
+            player.sendMessage("Вы не можете добавить точку за границами.");
+            return;
         }
 
         waypoints.add(index, newWaypoint);
@@ -153,10 +159,14 @@ public class ParticleItem extends EditorItem {
             Location particleLoc,
             Player player,
             AtomicBoolean change) {
-        // TODO: May produce non-critical problems if many waypoints are close to each other
+        // TODO: Not working if there are many points on the same horizontal
         for (int i = Math.max(0, index - 1); i <= Math.min(waypoints.size() - 1, index + 1); i++) {
             Waypoint waypoint = waypoints.get(i);
             if (waypoint.getLocation().distance(particleLoc) < REMOVE_POINT_DISTANCE) {
+                if (i == 0 || i == waypoints.size() - 1) {
+                    player.sendMessage("Вы не можете удалить начальную или конечную точку.");
+                    return;
+                }
                 waypoints.remove(i);
                 player.sendMessage("Вы успешно удалили точку.");
                 change.set(true);
@@ -185,9 +195,7 @@ public class ParticleItem extends EditorItem {
 
     private void updateParticleController(
             List<Waypoint> waypoints, ParticleController particleController, Player player) {
-        particleController.stopSpawnParticles(player);
         particleController.loadParticleLocations(waypoints);
-        particleController.startSpawnParticles(player);
     }
 
     private Waypoint getLookingSegment(Player player, List<Waypoint> waypoints) {

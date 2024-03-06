@@ -3,10 +3,14 @@ package ru.sortix.parkourbeat.editor;
 import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.util.RayTraceResult;
+import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.editor.items.EditorItem;
@@ -86,13 +90,27 @@ public class EditorSession {
         levelsManager.unloadLevel(level.getLevelId());
     }
 
+    public static final int INTERACT_BLOCK_DISTANCE = 5;
+
     public void onPlayerInteract(PlayerInteractEvent e) {
         if (e.getItem() == null) {
             return;
         }
         EditorItem editorItem = editorItems.getEditorItems().get(e.getItem());
         if (editorItem != null) {
-            editorItem.onClick(e.getAction(), e.getClickedBlock(), e.getInteractionPoint());
+            Location interactionPoint = e.getInteractionPoint();
+
+            if (interactionPoint == null) {
+                Player player = e.getPlayer();
+                Location eyeLocation = player.getEyeLocation();
+                Vector direction = eyeLocation.getDirection();
+                RayTraceResult rayTrace = player.getWorld().rayTraceBlocks(eyeLocation, direction, INTERACT_BLOCK_DISTANCE);
+                if (rayTrace != null) {
+                    interactionPoint = rayTrace.getHitPosition().toLocation(player.getWorld());
+                }
+            }
+
+            editorItem.onClick(e.getAction(), e.getClickedBlock(), interactionPoint);
             e.setCancelled(true);
         }
     }

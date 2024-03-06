@@ -36,8 +36,8 @@ public class Settings {
         lobbySpawn.getWorld().setSpawnLocation(lobbySpawn);
 
         ConfigurationSection defaultLevelConfig = rootConfig.getConfigurationSection("default_level");
-        startBorder = getIntVector(defaultLevelConfig, "start_border");
-        finishBorder = getIntVector(defaultLevelConfig, "finish_border");
+        startBorder = getVector(defaultLevelConfig, "start_border");
+        finishBorder = getVector(defaultLevelConfig, "finish_border");
         defaultWorldSpawn = getLocation(defaultLevelConfig, "spawn_pos", null, true);
 
         isLoaded = true;
@@ -84,13 +84,13 @@ public class Settings {
         return new Location(world, x, y, z, yaw, pitch);
     }
 
-    @NonNull private static Vector getIntVector(@NonNull ConfigurationSection section, @NonNull String key) {
+    @NonNull private static Vector getVector(@NonNull ConfigurationSection section, @NonNull String key) {
         String vectorString = section.getString(key);
         String[] args = vectorString.split(" ");
         if (args.length != 3) {
             throw new IllegalArgumentException("Wrong vector: " + vectorString);
         }
         return new Vector(
-                Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]));
+                Double.parseDouble(args[0]), Double.parseDouble(args[1]), Double.parseDouble(args[2]));
     }
 }

@@ -5,6 +5,7 @@ import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
@@ -33,6 +34,11 @@ public class WorldSettings {
         this.finishBorder = finishRegion;
         this.waypoints = waypoints;
         this.minWorldHeight = this.findMinWorldHeight();
+
+        if (waypoints.isEmpty()) {
+            waypoints.add(new Waypoint(startBorder.toLocation(world), Color.LIME, 0));
+            waypoints.add(new Waypoint(finishBorder.toLocation(world), Color.LIME, 0));
+        }
 
         this.world.setSpawnLocation(spawn);
     }
@@ -97,5 +103,28 @@ public class WorldSettings {
 
     public boolean isWorldEmpty() {
         return this.world.getPlayers().isEmpty();
+    }
+
+    public void updateEndWaypoints(DirectionChecker directionChecker) {
+        Waypoint startWaypoint = this.waypoints.get(0);
+        Waypoint endWaypoint = this.waypoints.get(this.waypoints.size() - 1);
+        startWaypoint.setLocation(startBorder.toLocation(this.world));
+        endWaypoint.setLocation(finishBorder.toLocation(this.world));
+        double startCoordinate = directionChecker.getCoordinate(startWaypoint.getLocation());
+        double endCoordinate = directionChecker.getCoordinate(endWaypoint.getLocation());
+        waypoints.removeIf(waypoint -> {
+            if (directionChecker.isNegative()) {
+                return directionChecker.getCoordinate(waypoint.getLocation()) > startCoordinate;
+            } else {
+                return directionChecker.getCoordinate(waypoint.getLocation()) < startCoordinate;
+            }
+        });
+        waypoints.removeIf(waypoint -> {
+            if (directionChecker.isNegative()) {
+                return directionChecker.getCoordinate(waypoint.getLocation()) < endCoordinate;
+            } else {
+                return directionChecker.getCoordinate(waypoint.getLocation()) > endCoordinate;
+            }
+        });
     }
 }

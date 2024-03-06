@@ -40,7 +40,7 @@ public class TestItem extends EditorItem {
 
     @Override
     public void onClick(Action action, Block block, @Nullable Location interactionPoint) {
-        if (action == Action.RIGHT_CLICK_AIR) {
+        if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
             if (gameManager.isInGame(player)) {
                 gameManager.removeGame(player, false);
                 player.teleport(level.getLevelSettings().getWorldSettings().getSpawn());

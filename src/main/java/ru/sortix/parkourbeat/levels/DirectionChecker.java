@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.levels;
 
 import lombok.NonNull;
 import org.bukkit.Location;
+import org.bukkit.util.Vector;
 
 public class DirectionChecker {
     private final Direction direction;
@@ -40,14 +41,41 @@ public class DirectionChecker {
         }
     }
 
+    public void add(Vector vector, double value) {
+        switch (direction) {
+            case NEGATIVE_X:
+                vector.setX(vector.getX() - value);
+                break;
+            case POSITIVE_X:
+                vector.setX(vector.getX() + value);
+                break;
+            case NEGATIVE_Z:
+                vector.setZ(vector.getZ() - value);
+                break;
+            case POSITIVE_Z:
+                vector.setZ(vector.getZ() + value);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid direction: " + direction);
+        }
+    }
+
+    public void subtract(Vector vector, double value) {
+        add(vector, -value);
+    }
+
     public double getCoordinate(Location location) {
+        return getCoordinate(location.toVector());
+    }
+
+    public double getCoordinate(Vector vector) {
         switch (direction) {
             case NEGATIVE_X:
             case POSITIVE_X:
-                return location.getX();
+                return vector.getX();
             case NEGATIVE_Z:
             case POSITIVE_Z:
-                return location.getZ();
+                return vector.getZ();
             default:
                 throw new IllegalArgumentException("Invalid direction: " + direction);
         }
