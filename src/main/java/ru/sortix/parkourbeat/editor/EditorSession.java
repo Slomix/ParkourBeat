@@ -64,12 +64,12 @@ public class EditorSession {
         WorldSettings worldSettings = levelSettings.getWorldSettings();
         ParticleController particleController = levelSettings.getParticleController();
 
-        particleController.loadParticleLocations(worldSettings.getWaypoints());
-        particleController.startSpawnParticles(owner);
-
         owner.setGameMode(GameMode.CREATIVE);
         owner.teleport(worldSettings.getSpawn());
         owner.sendMessage("Редактор уровня \"" + level.getLevelName() + "\" успешно запущен");
+
+        particleController.loadParticleLocations(worldSettings.getWaypoints());
+        particleController.startSpawnParticles(owner);
 
         level.setEditing(true);
     }
