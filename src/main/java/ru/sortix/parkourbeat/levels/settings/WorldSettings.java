@@ -52,7 +52,7 @@ public class WorldSettings {
         for (Waypoint waypoint : this.waypoints) {
             minWorldHeight = Math.min(minWorldHeight, waypoint.getLocation().getBlockY());
         }
-        return minWorldHeight - 1;
+        return minWorldHeight;
     }
 
     public DirectionChecker.Direction getDirection() {

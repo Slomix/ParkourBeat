@@ -121,13 +121,17 @@ public final class GamesListener implements Listener {
         if (this.getWorldType(player) == WorldType.NON_PB) return;
 
         Level level = this.getEditOrGameLevel(player);
-        int minWorldHeight =
-                level == null ? 0 : level.getLevelSettings().getWorldSettings().getMinWorldHeight();
+        int minWorldHeight = this.getFallHeight(level, this.gameManager.getCurrentGame(player) != null);
         if (event.getTo().getY() > minWorldHeight) return;
 
         Game game = this.gameManager.getCurrentGame(player);
         if (game != null) game.stopGame(Game.StopReason.FALL);
         else player.teleport(player.getWorld().getSpawnLocation());
+    }
+
+    private int getFallHeight(@Nullable Level level, boolean play) {
+        return (level == null ? 0 : level.getLevelSettings().getWorldSettings().getMinWorldHeight())
+                - (play ? 1 : 5);
     }
 
     @EventHandler
