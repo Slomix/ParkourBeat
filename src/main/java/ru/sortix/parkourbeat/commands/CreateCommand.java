@@ -3,6 +3,7 @@ package ru.sortix.parkourbeat.commands;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import org.bukkit.World;
@@ -16,6 +17,8 @@ import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
 public class CreateCommand implements CommandExecutor, TabCompleter {
+    private static final UUID CONSOLE_UUID = new UUID(0, 0);
+    private static final String CONSOLE_NAME = "CONSOLE";
 
     private final LevelEditorsManager levelEditorsManager;
     private final LevelsManager levelsManager;
@@ -36,7 +39,6 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
             @NonNull Command command,
             @NonNull String label,
             @NonNull String[] args) {
-        Player player = (Player) sender;
 
         if (args.length < 1) {
             sender.sendMessage("Недостаточно аргументов! Используйте: /create <имя уровня> [окружение]");
@@ -57,20 +59,29 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        if (!levelEditorsManager.removeEditorSession(player)) {
-            gameManager.removeGame(player);
+        Player player = sender instanceof Player ? (Player) sender : null;
+        if (player != null) {
+            if (!levelEditorsManager.removeEditorSession(player)) {
+                gameManager.removeGame(player);
+            }
         }
 
-        levelsManager
-                .createLevel(levelName, environment, player.getUniqueId(), player.getName())
+        this.levelsManager
+                .createLevel(
+                        levelName,
+                        environment,
+                        player == null ? CONSOLE_UUID : player.getUniqueId(),
+                        player == null ? CONSOLE_NAME : player.getName())
                 .thenAccept(
                         level -> {
                             if (level == null) {
-                                player.sendMessage("Не удалось создать уровень \"" + levelName + "\"");
+                                sender.sendMessage("Не удалось создать уровень \"" + levelName + "\"");
                                 return;
                             }
-                            player.sendMessage("Уровень \"" + levelName + "\" создан");
-                            levelEditorsManager.createEditorSession(player, level).start();
+                            sender.sendMessage("Уровень \"" + levelName + "\" создан");
+                            if (player != null) {
+                                levelEditorsManager.createEditorSession(player, level).start();
+                            }
                         });
         return true;
     }
