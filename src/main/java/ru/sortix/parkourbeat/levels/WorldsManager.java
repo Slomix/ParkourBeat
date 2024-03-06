@@ -38,8 +38,7 @@ public class WorldsManager {
 
     @NonNull public CompletableFuture<World> createWorldFromDefaultContainer(
             @NonNull WorldCreator worldCreator, @NonNull Executor executor) {
-        String worldName = worldCreator.name();
-        File worldDir = new File(this.server.getWorldContainer(), worldName);
+        File worldDir = this.getWorldDir(worldCreator);
         if (!worldDir.isDirectory()) {
             return CompletableFuture.failedFuture(
                     new IllegalArgumentException("Is not a directory: " + worldDir.getAbsolutePath()));
@@ -51,7 +50,7 @@ public class WorldsManager {
             @NonNull WorldCreator worldCreator, @NonNull File worldDir) {
         CompletableFuture<World> result = new CompletableFuture<>();
 
-        File realWorldDir = new File(this.server.getWorldContainer(), worldCreator.name());
+        File realWorldDir = this.getWorldDir(worldCreator);
 
         this.copyWorldData(worldDir, realWorldDir)
                 .thenAccept(
@@ -75,7 +74,7 @@ public class WorldsManager {
         return result;
     }
 
-    private CompletableFuture<Boolean> copyWorldData(@NonNull File source, @NonNull File target) {
+    @NonNull private CompletableFuture<Boolean> copyWorldData(@NonNull File source, @NonNull File target) {
         return CompletableFuture.supplyAsync(
                 () -> {
                     try {
@@ -106,9 +105,17 @@ public class WorldsManager {
                                     + worldCreator.name()
                                     + "\""
                                     + " from directory "
-                                    + new File(this.server.getWorldContainer(), worldCreator.name())
-                                            .getAbsolutePath());
+                                    + this.getWorldDir(worldCreator).getAbsolutePath());
                 },
                 executor);
+    }
+
+    @NonNull private File getWorldDir(@NonNull WorldCreator worldCreator) {
+        if (false) {
+            // Incorrect impl from CraftBukkit
+            return new File(this.server.getWorldContainer(), worldCreator.name());
+        }
+        // Correct impl from NMS
+        return this.server.getWorldContainer().toPath().resolve(worldCreator.name()).toFile();
     }
 }
