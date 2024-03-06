@@ -6,6 +6,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldInitEvent;
 import ru.sortix.parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 
 @RequiredArgsConstructor
 public class WorldsListener implements Listener {
@@ -15,8 +16,8 @@ public class WorldsListener implements Listener {
 
     @EventHandler
     private void on(WorldInitEvent event) {
-        // if (!event.getWorld().getName().startsWith("pb_level_")) return; // TODO See
-        // https://github.com/Slomix/ParkourBeat/issues/9
+        LevelSettingDAO levelSettingDAO = this.levelsManager.getLevelsSettings().getLevelSettingDAO();
+        if (!levelSettingDAO.isLevelWorld(event.getWorld())) return;
         this.levelsManager.prepareLevelWorld(event.getWorld(), false);
     }
 
