@@ -96,6 +96,7 @@ public class ParticleController {
         if (isLoaded) {
             particleLocations.clear();
             colorsChangeLocations.clear();
+            particleTask.cancel();
         }
 
         Color previousColor = null;
