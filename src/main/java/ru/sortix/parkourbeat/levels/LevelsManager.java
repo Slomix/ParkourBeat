@@ -76,6 +76,7 @@ public class LevelsManager {
 
                             this.availableLevelIdsByName.put(level.getLevelName(), levelId);
                             this.levelsSettings.addLevelSettings(levelId, levelSettings);
+                            this.loadedLevels.put(levelId, level);
 
                             result.complete(level);
                         });

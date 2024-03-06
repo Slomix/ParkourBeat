@@ -145,7 +145,7 @@ public class Game {
 
         AMusic.stopSound(player);
         player.playSound(player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
-        settings.getParticleController().stopSpawnParticles(player);
+        settings.getParticleController().stopSpawnParticlesForPlayer(player);
         gameMoveHandler.getAccuracyChecker().reset();
 
         Plugin plugin = this.getPlugin();
@@ -180,7 +180,7 @@ public class Game {
             player.showPlayer(plugin, onlinePlayer);
         }
 
-        settings.getParticleController().stopSpawnParticles(player);
+        settings.getParticleController().stopSpawnParticlesForPlayer(player);
     }
 
     public enum State {

@@ -75,7 +75,7 @@ public class EditorSession {
     }
 
     public void stop() {
-        level.getLevelSettings().getParticleController().stopSpawnParticles(owner);
+        level.getLevelSettings().getParticleController().stopSpawnParticles();
         level.setEditing(false);
 
         gameManager.removeGame(owner, false);

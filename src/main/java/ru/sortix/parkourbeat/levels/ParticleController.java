@@ -131,8 +131,11 @@ public class ParticleController {
                             return;
                         }
                         particleViewers.forEach((player) -> {
-                            if (player == null || !player.isOnline() || player.getWorld() != world) {
-                                particleViewers.remove(player);
+                            if (player == null || !player.isOnline()) {
+                                throw new NullPointerException("Player is not online!");
+                            } else if (player.getWorld() != world) {
+                                throw new IllegalStateException("Player is not in world " + world.getName() +
+                                    "!\nPlayer world: " + player.getWorld());
                             } else {
                                 updatePlayerParticles(player);
                             }
@@ -148,7 +151,7 @@ public class ParticleController {
             throw new IllegalStateException("Player is not in world " + world.getName() + "!\nPlayer world: " + player.getWorld());
         }
         if (particleTask == null || particleTask.isCancelled()) {
-            return;
+            throw new IllegalStateException("Particle task is not running!");
         }
 
         particleViewers.add(player);
@@ -164,8 +167,12 @@ public class ParticleController {
             player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
     }
 
-    public void stopSpawnParticles(Player player) {
+    public void stopSpawnParticlesForPlayer(Player player) {
         particleViewers.remove(player);
+    }
+
+    public void stopSpawnParticles() {
+        particleTask.cancel();
     }
 
     public boolean isLoaded() {

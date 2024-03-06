@@ -49,7 +49,7 @@ public class TestItem extends EditorItem {
                 level.getLevelSettings().getParticleController().startSpawnParticles(player);
                 player.sendMessage("Вы вышли из режима тестирования");
             } else {
-                level.getLevelSettings().getParticleController().stopSpawnParticles(player);
+                level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(player);
                 player.sendMessage("Загрузка уровня...");
                 gameManager
                         .createNewGame(player, level.getLevelId())
