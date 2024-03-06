@@ -1,11 +1,13 @@
 package ru.sortix.parkourbeat.levels;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -21,12 +23,15 @@ public class ParticleController {
     private final Plugin plugin;
     private final ConcurrentLinkedQueue<Location> particleLocations = new ConcurrentLinkedQueue<>();
     private final Map<Double, Color> colorsChangeLocations = new LinkedHashMap<>();
-    private final Map<Player, BukkitTask> particleTasks = new HashMap<>();
+    private final Set<Player> particleViewers = ConcurrentHashMap.newKeySet();
     @Setter private DirectionChecker directionChecker;
+    private final World world;
+    private BukkitTask particleTask = null;
     private boolean isLoaded = false;
 
-    public ParticleController(Plugin plugin, DirectionChecker directionChecker) {
+    public ParticleController(Plugin plugin, World world, DirectionChecker directionChecker) {
         this.plugin = plugin;
+        this.world = world;
         this.directionChecker = directionChecker;
     }
 
@@ -114,40 +119,53 @@ public class ParticleController {
                 particleLocations.addAll(curvedPath);
             }
         }
-
+        particleTask =
+            this.plugin
+                .getServer()
+                .getScheduler()
+                .runTaskTimerAsynchronously(
+                    this.plugin,
+                    () -> {
+                        if (world == null) {
+                            particleTask.cancel();
+                            return;
+                        }
+                        particleViewers.forEach((player) -> {
+                            if (player == null || !player.isOnline() || player.getWorld() != world) {
+                                particleViewers.remove(player);
+                            } else {
+                                updatePlayerParticles(player);
+                            }
+                        });
+                    },
+                    0,
+                    5);
         isLoaded = true;
     }
 
     public void startSpawnParticles(Player player) {
-        if (particleTasks.containsKey(player)) {
+        if (player.getWorld() != world) {
+            throw new IllegalStateException("Player is not in world " + world.getName() + "!\nPlayer world: " + player.getWorld());
+        }
+        if (particleTask == null || particleTask.isCancelled()) {
             return;
         }
 
-        particleTasks.put(
-                player,
-                this.plugin
-                        .getServer()
-                        .getScheduler()
-                        .runTaskTimerAsynchronously(
-                                this.plugin,
-                                () -> {
-                                    Color color = getCurrentColor(player.getLocation());
+        particleViewers.add(player);
+    }
 
-                                    // TODO Отправлять лишь частицы из двух ближайших секций:
-                                    //  https://github.com/Slomix/ParkourBeat/issues/17
-                                    Iterable<Location> locations = this.particleLocations;
-                                    ParticleUtils.displayRedstoneParticles(
-                                            player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
-                                },
-                                0,
-                                5));
+    private void updatePlayerParticles(Player player) {
+        Color color = getCurrentColor(player.getLocation());
+
+        // TODO Отправлять лишь частицы из двух ближайших секций:
+        //  https://github.com/Slomix/ParkourBeat/issues/17
+        Iterable<Location> locations = this.particleLocations;
+        ParticleUtils.displayRedstoneParticles(
+            player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
     }
 
     public void stopSpawnParticles(Player player) {
-        BukkitTask task = particleTasks.remove(player);
-        if (task != null) {
-            task.cancel();
-        }
+        particleViewers.remove(player);
     }
 
     public boolean isLoaded() {
