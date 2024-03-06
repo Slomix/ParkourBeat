@@ -1,6 +1,5 @@
 package ru.sortix.parkourbeat.listeners;
 
-import java.util.UUID;
 import javax.annotation.Nullable;
 import lombok.NonNull;
 import org.bukkit.GameMode;
@@ -25,11 +24,12 @@ import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
 import ru.sortix.parkourbeat.levels.Level;
-import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
+import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 
 public final class GamesListener implements Listener {
     private final GameManager gameManager;
     private final LevelEditorsManager levelEditorsManager;
+    private final LevelSettingDAO levelSettingDAO;
 
     public GamesListener(
             @NonNull ParkourBeat plugin,
@@ -37,6 +37,8 @@ public final class GamesListener implements Listener {
             @NonNull LevelEditorsManager levelEditorsManager) {
         this.gameManager = gameManager;
         this.levelEditorsManager = levelEditorsManager;
+        this.levelSettingDAO =
+                this.levelEditorsManager.getLevelsManager().getLevelsSettings().getLevelSettingDAO();
 
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             if (this.getWorldType(player) != WorldType.PB_LEVEL) continue;
@@ -203,8 +205,7 @@ public final class GamesListener implements Listener {
     }
 
     @NonNull private WorldType getWorldType(@NonNull World world) {
-        UUID levelId = FileLevelSettingDAO.getLevelId(world.getName());
-        if (levelId != null) {
+        if (this.levelSettingDAO.isLevelWorld(world)) {
             return WorldType.PB_LEVEL;
         }
         if (Settings.getLobbySpawn().getWorld() == world) {

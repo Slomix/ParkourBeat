@@ -2,6 +2,8 @@ package ru.sortix.parkourbeat.levels.dao.files;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,27 +21,20 @@ import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 
 public class FileLevelSettingDAO implements LevelSettingDAO {
-    private static final String WORLD_NAME_PREFIX = "pb_level_";
-    private static final int WORLD_NAME_PREFIX_LENGTH = WORLD_NAME_PREFIX.length();
-
     private final Logger logger;
     private final Server server;
-    private final File worldsDir;
+    private final File levelsDir;
     private final GameSettingsDAO gameSettingsDAO;
     private final WorldSettingsDAO worldSettingsDAO;
 
     public FileLevelSettingDAO(@NonNull Plugin plugin) {
         this.logger = plugin.getLogger();
         this.server = plugin.getServer();
-        this.worldsDir = plugin.getServer().getWorldContainer();
+        this.levelsDir = new File(plugin.getDataFolder(), "levels").getAbsoluteFile();
+        //noinspection ResultOfMethodCallIgnored
+        this.levelsDir.mkdirs();
         this.gameSettingsDAO = new GameSettingsDAO();
         this.worldSettingsDAO = new WorldSettingsDAO();
-    }
-
-    @Nullable public String loadLevelName(@NonNull UUID levelId) {
-        GameSettings gameSettings = this.loadLevelGameSettings(levelId);
-        if (gameSettings == null) return null;
-        return gameSettings.getLevelName();
     }
 
     @Override
@@ -76,14 +71,13 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     }
 
     @Override
-    @NonNull public String getLevelWorldName(@NonNull UUID levelId) {
-        return FileLevelSettingDAO.getWorldDirName(levelId);
+    @Nullable public World getBukkitWorld(@NonNull UUID levelId) {
+        return this.server.getWorld(this.getBukkitWorldName(levelId));
     }
 
     @Override
     public void deleteLevelWorldAndSettings(@NonNull UUID levelId) {
-        String worldDirName = FileLevelSettingDAO.getWorldDirName(levelId);
-        File worldFolder = new File(this.server.getWorldContainer(), worldDirName);
+        File worldFolder = this.getBukkitWorldDirectory(levelId);
         if (!worldFolder.isDirectory()) return;
         deleteDirectory(worldFolder);
     }
@@ -115,6 +109,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
                 deleteDirectory(file);
             }
         }
+        //noinspection ResultOfMethodCallIgnored
         directory.delete();
     }
 
@@ -128,7 +123,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
 
         FileConfiguration worldConfig = YamlConfiguration.loadConfiguration(worldSettingsFile);
 
-        World world = this.server.getWorld(getWorldDirName(levelId));
+        World world = this.server.getWorld(getBukkitWorldName(levelId));
         if (world == null) return null;
 
         try {
@@ -143,6 +138,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         File settingsDir = getSettingsDirectory(levelId);
         File gameSettingsFile = new File(settingsDir, "game_settings.yml");
         if (!gameSettingsFile.isFile()) {
+            this.logger.warning("Not a file: " + gameSettingsFile.getAbsolutePath());
             return null;
         }
         try {
@@ -155,23 +151,60 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     }
 
     @NonNull private File getSettingsDirectory(@NonNull UUID levelId) {
-        return new File(getWorldDirectory(levelId), "parkourbeat");
+        return new File(getBukkitWorldDirectory(levelId), "parkourbeat");
     }
 
-    @NonNull public File getWorldDirectory(@NonNull UUID levelId) {
-        return new File(this.worldsDir, getWorldDirName(levelId));
+    @NonNull public File getBukkitWorldDirectory(@NonNull UUID levelId) {
+        return new File(this.levelsDir, levelId.toString());
     }
 
-    @NonNull public static WorldCreator newWorldCreator(@NonNull UUID levelId) {
-        return new WorldCreator(FileLevelSettingDAO.getWorldDirName(levelId));
+    @Override
+    @NonNull public WorldCreator newWorldCreator(@NonNull UUID levelId) {
+        return new WorldCreator(this.getBukkitWorldName(levelId));
     }
 
-    @Nullable public static UUID getLevelId(@NonNull String worldName) {
-        if (!worldName.startsWith(WORLD_NAME_PREFIX)) return null;
-        return UUID.fromString(worldName.substring(WORLD_NAME_PREFIX_LENGTH));
+    @Override
+    public boolean isLevelWorld(@NonNull World world) {
+        // TODO Optimize it
+        return world.getWorldFolder().getParentFile().equals(this.levelsDir);
     }
 
-    @NonNull private static String getWorldDirName(@NonNull UUID levelId) {
-        return WORLD_NAME_PREFIX + levelId;
+    @NonNull private String getBukkitWorldName(@NonNull UUID levelId) {
+        return this.getBukkitWorldDirectory(levelId).getAbsolutePath();
+    }
+
+    @NonNull public Map<String, UUID> loadAllAvailableLevelNamesSync() {
+        Map<String, UUID> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+        File worldsDirectory = this.levelsDir;
+        if (!worldsDirectory.isDirectory()) return result;
+
+        File[] files = worldsDirectory.listFiles();
+        if (files == null) return result;
+
+        for (File file : files) {
+            if (!file.isDirectory()) {
+                this.logger.warning("Not a directory: " + file.getAbsolutePath());
+                continue;
+            }
+            UUID levelId;
+            try {
+                levelId = UUID.fromString(file.getName());
+            } catch (IllegalArgumentException e) {
+                this.logger.warning(
+                        "Unable to parse level UUID by world dir name: " + file.getAbsolutePath());
+                continue;
+            }
+            GameSettings gameSettings = this.loadLevelGameSettings(levelId);
+            if (gameSettings == null) {
+                this.logger.warning("Unable to load name of level " + levelId);
+                continue;
+            }
+            String levelName = gameSettings.getLevelName();
+            if (result.put(levelName, levelId) != null) {
+                this.logger.warning("Duplicate level name: " + levelName);
+            }
+        }
+        return result;
     }
 }

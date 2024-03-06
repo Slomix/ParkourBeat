@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
-class LevelSettingsManager {
+public class LevelSettingsManager {
     private final Map<UUID, LevelSettings> levelSettings = new HashMap<>();
     @Getter private final LevelSettingDAO levelSettingDAO;
 

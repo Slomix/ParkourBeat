@@ -69,6 +69,9 @@ public class Settings {
             world = null;
         } else {
             String worldName = section.getString("world");
+            if (worldName == null) {
+                throw new IllegalArgumentException("World name not provided");
+            }
             try {
                 WorldCreator worldCreator = newWorldCreator(worldName);
                 world =

@@ -42,8 +42,8 @@ public class ParkourBeat extends JavaPlugin {
         songs = new Songs();
 
         ConfigurationSerialization.registerClass(Waypoint.class);
-        LevelSettingDAO fileLevelSettingDAO = new FileLevelSettingDAO(this);
-        LevelsManager levelsManager = new LevelsManager(this, worldsManager, fileLevelSettingDAO);
+        LevelSettingDAO levelSettingDAO = new FileLevelSettingDAO(this);
+        LevelsManager levelsManager = new LevelsManager(this, worldsManager, levelSettingDAO);
         GameManager gameManager = new GameManager(levelsManager);
         LevelEditorsManager levelEditorsManager = new LevelEditorsManager(gameManager, levelsManager);
 

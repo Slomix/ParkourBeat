@@ -8,21 +8,19 @@ import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.GameRule;
-import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
-import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.utils.java.ClassUtils;
 
 public class LevelsManager {
     @Getter private final Plugin plugin;
     private final WorldsManager worldsManager;
-    private final LevelSettingsManager levelsSettings;
+    @Getter private final LevelSettingsManager levelsSettings;
     private final Map<String, UUID> availableLevelIdsByName =
             new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     private final Map<UUID, Level> loadedLevels = new HashMap<>();
@@ -35,25 +33,12 @@ public class LevelsManager {
         this.plugin = plugin;
         this.worldsManager = worldsManager;
         this.levelsSettings = new LevelSettingsManager(levelSettingDAO);
-        loadAvailableLevelNames(levelSettingDAO);
+        loadAvailableLevelNames();
     }
 
-    private void loadAvailableLevelNames(@NonNull LevelSettingDAO levelSettingDAO) {
-        File worldDirectory = this.plugin.getServer().getWorldContainer();
-        if (!worldDirectory.isDirectory()) return;
-
-        File[] files = worldDirectory.listFiles();
-        if (files == null) return;
-        for (File file : files) {
-            if (!file.isDirectory()) continue;
-            UUID levelId = FileLevelSettingDAO.getLevelId(file.getName());
-            if (levelId == null) continue;
-            String levelName = levelSettingDAO.loadLevelName(levelId);
-            if (levelName == null) continue;
-            if (this.availableLevelIdsByName.put(levelName, levelId) != null) {
-                this.plugin.getLogger().warning("Duplicate level name: " + levelName);
-            }
-        }
+    private void loadAvailableLevelNames() {
+        this.availableLevelIdsByName.putAll(
+                this.levelsSettings.getLevelSettingDAO().loadAllAvailableLevelNamesSync());
         for (Map.Entry<String, UUID> entry : this.availableLevelIdsByName.entrySet()) {
             this.plugin.getLogger().info("Loaded world " + entry.getValue() + ": " + entry.getKey());
         }
@@ -72,7 +57,7 @@ public class LevelsManager {
         }
 
         UUID levelId = UUID.randomUUID();
-        WorldCreator worldCreator = FileLevelSettingDAO.newWorldCreator(levelId);
+        WorldCreator worldCreator = this.levelsSettings.getLevelSettingDAO().newWorldCreator(levelId);
         worldCreator.generator(this.worldsManager.getEmptyGenerator());
         if (false) worldCreator.environment(environment); // creates a new world not a copy
 
@@ -97,12 +82,6 @@ public class LevelsManager {
         return result;
     }
 
-    @Nullable public LevelSettings getLevelSettings(World world) {
-        UUID levelId = FileLevelSettingDAO.getLevelId(world.getName());
-        if (levelId == null) return null;
-        return levelsSettings.getLevelSettings(levelId);
-    }
-
     @NonNull public CompletableFuture<Level> loadLevel(@NonNull UUID levelId) {
         CompletableFuture<Level> result = new CompletableFuture<>();
 
@@ -111,7 +90,7 @@ public class LevelsManager {
             return result;
         }
 
-        WorldCreator worldCreator = FileLevelSettingDAO.newWorldCreator(levelId);
+        WorldCreator worldCreator = this.levelsSettings.getLevelSettingDAO().newWorldCreator(levelId);
         this.worldsManager
                 .createWorldFromDefaultContainer(worldCreator, this.worldsManager.getSyncExecutor())
                 .thenAccept(
@@ -143,12 +122,11 @@ public class LevelsManager {
     }
 
     public boolean unloadLevel(@NonNull UUID levelId) {
-        Server server = this.plugin.getServer();
         LevelSettingDAO dao = this.levelsSettings.getLevelSettingDAO();
 
         if (!this.loadedLevels.containsKey(levelId)) return true;
 
-        World world = server.getWorld(dao.getLevelWorldName(levelId));
+        World world = dao.getBukkitWorld(levelId);
         boolean success = true;
         if (world != null) {
             for (Player player : world.getPlayers()) {

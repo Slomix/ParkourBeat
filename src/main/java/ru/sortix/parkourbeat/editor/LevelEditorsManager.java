@@ -3,6 +3,7 @@ package ru.sortix.parkourbeat.editor;
 import java.util.HashMap;
 import java.util.Map;
 import javax.annotation.Nullable;
+import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -14,7 +15,7 @@ public class LevelEditorsManager {
 
     private final Map<Player, EditorSession> editorSessions = new HashMap<>();
     private final GameManager gameManager;
-    private final LevelsManager levelsManager;
+    @Getter private final LevelsManager levelsManager;
 
     public LevelEditorsManager(
             @NonNull GameManager gameManager, @NonNull LevelsManager levelsManager) {
