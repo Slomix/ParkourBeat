@@ -28,7 +28,7 @@ public class StartFinishItem extends EditorItem {
         meta.setDisplayName("Зона старта/финиша");
         meta.setLore(
                 new ArrayList<>(
-                        Arrays.asList("ПКМ - установить зону старта", "ЛКМ - установить зону финиша")));
+                        Arrays.asList("ЛКМ - установить зону старта", "ПКМ - установить зону финиша")));
         ITEM.setItemMeta(meta);
     }
 
