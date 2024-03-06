@@ -70,7 +70,9 @@ public class GameMoveHandler {
                 .sendMessage(
                         ChatMessageType.ACTION_BAR,
                         TextComponent.fromLegacyText(
-                                "§aТочность: " + accuracyChecker.getAccuracy() * 100 + "%"));
+                                "§aТочность: "
+                                        + String.format("%.2f", accuracyChecker.getAccuracy() * 100f)
+                                        + "%"));
     }
 
     public void onRunningState(PlayerToggleSprintEvent event) {
