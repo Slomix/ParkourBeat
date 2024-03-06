@@ -7,7 +7,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Nullable;
 import lombok.NonNull;
-import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
@@ -33,8 +32,8 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         this.logger = plugin.getLogger();
         this.server = plugin.getServer();
         this.worldsDir = plugin.getServer().getWorldContainer();
-        this.gameSettingsDAO = new GameSettingsDAO(plugin.getLogger());
-        this.worldSettingsDAO = new WorldSettingsDAO(plugin.getLogger());
+        this.gameSettingsDAO = new GameSettingsDAO();
+        this.worldSettingsDAO = new WorldSettingsDAO();
     }
 
     @Nullable public String loadLevelName(@NonNull UUID levelId) {
@@ -129,10 +128,15 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
 
         FileConfiguration worldConfig = YamlConfiguration.loadConfiguration(worldSettingsFile);
 
-        World world = Bukkit.getWorld(getWorldDirName(levelId));
+        World world = this.server.getWorld(getWorldDirName(levelId));
         if (world == null) return null;
 
-        return this.worldSettingsDAO.load(worldConfig, world);
+        try {
+            return this.worldSettingsDAO.load(worldConfig, world);
+        } catch (Exception e) {
+            this.logger.log(Level.SEVERE, "Unable to load world_settings.yml of level " + levelId, e);
+            return null;
+        }
     }
 
     @Nullable private GameSettings loadLevelGameSettings(@NonNull UUID levelId) {
@@ -141,8 +145,13 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         if (!gameSettingsFile.isFile()) {
             return null;
         }
-        FileConfiguration gameConfig = YamlConfiguration.loadConfiguration(gameSettingsFile);
-        return gameSettingsDAO.load(levelId, gameConfig);
+        try {
+            FileConfiguration gameConfig = YamlConfiguration.loadConfiguration(gameSettingsFile);
+            return this.gameSettingsDAO.load(levelId, gameConfig);
+        } catch (Exception e) {
+            this.logger.log(Level.SEVERE, "Unable to load game_settings.yml of level " + levelId, e);
+            return null;
+        }
     }
 
     @NonNull private File getSettingsDirectory(@NonNull UUID levelId) {

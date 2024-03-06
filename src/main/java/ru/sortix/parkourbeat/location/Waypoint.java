@@ -2,7 +2,6 @@ package ru.sortix.parkourbeat.location;
 
 import java.util.HashMap;
 import java.util.Map;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Color;

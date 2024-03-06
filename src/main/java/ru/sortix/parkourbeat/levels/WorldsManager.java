@@ -22,7 +22,7 @@ import ru.sortix.parkourbeat.utils.shedule.CurrentThreadExecutor;
 public class WorldsManager {
     private final Logger logger;
     private final Server server;
-    @Getter private final ChunkGenerator emptyGenerator = new EmptyChunkGenerator();
+    @Getter private final ChunkGenerator emptyGenerator;
     @Getter private final Executor currentThreadExecutor;
     @Getter private final Executor syncExecutor;
     @Getter private final Executor asyncExecutor;
@@ -30,6 +30,7 @@ public class WorldsManager {
     public WorldsManager(@NonNull Plugin plugin) {
         this.logger = plugin.getLogger();
         this.server = plugin.getServer();
+        this.emptyGenerator = new EmptyChunkGenerator(this.server);
         this.currentThreadExecutor = new CurrentThreadExecutor();
         this.syncExecutor = new BukkitSyncExecutor(plugin);
         this.asyncExecutor = new BukkitAsyncExecutor(plugin);

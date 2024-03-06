@@ -1,5 +1,7 @@
 package ru.sortix.parkourbeat.editor.items;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,9 +17,6 @@ import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-
 public class StartFinishItem extends EditorItem {
 
     private static final ItemStack ITEM;
@@ -28,8 +27,8 @@ public class StartFinishItem extends EditorItem {
         ItemMeta meta = ITEM.getItemMeta();
         meta.setDisplayName("Зона старта/финиша");
         meta.setLore(
-            new ArrayList<>(
-                Arrays.asList("ПКМ - установить зону старта", "ЛКМ - установить зону финиша")));
+                new ArrayList<>(
+                        Arrays.asList("ПКМ - установить зону старта", "ЛКМ - установить зону финиша")));
         ITEM.setItemMeta(meta);
     }
 
@@ -45,11 +44,13 @@ public class StartFinishItem extends EditorItem {
         if (action == Action.RIGHT_CLICK_BLOCK) {
             Vector finishPoint = interactionPoint.toVector();
             updateRegion(finishPoint, false);
-            player.sendMessage("Finish border at: " + level.getLevelSettings().getWorldSettings().getFinishBorder());
+            player.sendMessage(
+                    "Finish border at: " + level.getLevelSettings().getWorldSettings().getFinishBorder());
         } else if (action == Action.LEFT_CLICK_BLOCK) {
             Vector startPoint = interactionPoint.toVector();
             updateRegion(startPoint, true);
-            player.sendMessage("Start border at: " + level.getLevelSettings().getWorldSettings().getStartBorder());
+            player.sendMessage(
+                    "Start border at: " + level.getLevelSettings().getWorldSettings().getStartBorder());
         }
     }
 
@@ -63,7 +64,8 @@ public class StartFinishItem extends EditorItem {
             worldSettings.setFinishBorder(point);
         }
 
-        DirectionChecker.Direction previousDirection = levelSettings.getDirectionChecker().getDirection();
+        DirectionChecker.Direction previousDirection =
+                levelSettings.getDirectionChecker().getDirection();
         levelSettings.updateDirectionChecker();
         DirectionChecker.Direction newDirection = levelSettings.getDirectionChecker().getDirection();
         DirectionChecker directionChecker = levelSettings.getDirectionChecker();
@@ -74,8 +76,6 @@ public class StartFinishItem extends EditorItem {
             worldSettings.sortWaypoints(directionChecker);
         }
 
-        levelSettings.getParticleController().loadParticleLocations(
-            worldSettings.getWaypoints()
-        );
+        levelSettings.getParticleController().loadParticleLocations(worldSettings.getWaypoints());
     }
 }

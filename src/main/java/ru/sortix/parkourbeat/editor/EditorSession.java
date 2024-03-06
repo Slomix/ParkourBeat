@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
@@ -104,7 +103,8 @@ public class EditorSession {
                 Player player = e.getPlayer();
                 Location eyeLocation = player.getEyeLocation();
                 Vector direction = eyeLocation.getDirection();
-                RayTraceResult rayTrace = player.getWorld().rayTraceBlocks(eyeLocation, direction, INTERACT_BLOCK_DISTANCE);
+                RayTraceResult rayTrace =
+                        player.getWorld().rayTraceBlocks(eyeLocation, direction, INTERACT_BLOCK_DISTANCE);
                 if (rayTrace != null) {
                     interactionPoint = rayTrace.getHitPosition().toLocation(player.getWorld());
                 }

@@ -112,19 +112,21 @@ public class WorldSettings {
         endWaypoint.setLocation(finishBorder.toLocation(this.world));
         double startCoordinate = directionChecker.getCoordinate(startWaypoint.getLocation());
         double endCoordinate = directionChecker.getCoordinate(endWaypoint.getLocation());
-        waypoints.removeIf(waypoint -> {
-            if (directionChecker.isNegative()) {
-                return directionChecker.getCoordinate(waypoint.getLocation()) > startCoordinate;
-            } else {
-                return directionChecker.getCoordinate(waypoint.getLocation()) < startCoordinate;
-            }
-        });
-        waypoints.removeIf(waypoint -> {
-            if (directionChecker.isNegative()) {
-                return directionChecker.getCoordinate(waypoint.getLocation()) < endCoordinate;
-            } else {
-                return directionChecker.getCoordinate(waypoint.getLocation()) > endCoordinate;
-            }
-        });
+        waypoints.removeIf(
+                waypoint -> {
+                    if (directionChecker.isNegative()) {
+                        return directionChecker.getCoordinate(waypoint.getLocation()) > startCoordinate;
+                    } else {
+                        return directionChecker.getCoordinate(waypoint.getLocation()) < startCoordinate;
+                    }
+                });
+        waypoints.removeIf(
+                waypoint -> {
+                    if (directionChecker.isNegative()) {
+                        return directionChecker.getCoordinate(waypoint.getLocation()) < endCoordinate;
+                    } else {
+                        return directionChecker.getCoordinate(waypoint.getLocation()) > endCoordinate;
+                    }
+                });
     }
 }

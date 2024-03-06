@@ -1,9 +1,8 @@
 package ru.sortix.parkourbeat.levels.dao.files;
 
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -11,10 +10,7 @@ import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.location.Waypoint;
 
-@RequiredArgsConstructor
 public class WorldSettingsDAO {
-    private final Logger logger;
-
     public void set(WorldSettings worldSettings, FileConfiguration config) {
         Location spawn = worldSettings.getSpawn().clone();
         spawn.setWorld(null);
@@ -35,14 +31,27 @@ public class WorldSettingsDAO {
                         .collect(Collectors.toList()));
     }
 
-    public WorldSettings load(FileConfiguration config, World world) {
+    @NonNull public WorldSettings load(@NonNull FileConfiguration config, @NonNull World world) {
         Location spawn = config.getSerializable("spawn", Location.class);
+        if (spawn == null) {
+            throw new IllegalArgumentException("Object \"spawn\" not found");
+        }
         spawn.setWorld(world);
 
         Vector startBorder = config.getVector("start_border");
+        if (startBorder == null) {
+            throw new IllegalArgumentException("Vector \"start_border\" not found");
+        }
         Vector finishBorder = config.getVector("finish_border");
+        if (finishBorder == null) {
+            throw new IllegalArgumentException("Vector \"finish_border\" not found");
+        }
 
+        //noinspection unchecked
         List<Waypoint> particleSegment = (List<Waypoint>) config.getList("waypoints");
+        if (particleSegment == null) {
+            throw new IllegalArgumentException("List not found: \"waypoints\"");
+        }
         for (Waypoint waypoint : particleSegment) {
             waypoint.getLocation().setWorld(world);
         }

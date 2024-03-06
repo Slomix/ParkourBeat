@@ -75,10 +75,12 @@ public class ParticleItem extends EditorItem {
             // Обработка удаления точки
             if (action == Action.LEFT_CLICK_BLOCK) {
                 double particleCoordinate = directionChecker.getCoordinate(interactionPoint);
-                int nearestWaypointIndex = findNearestWaypointIndex(waypoints, particleCoordinate, directionChecker);
+                int nearestWaypointIndex =
+                        findNearestWaypointIndex(waypoints, particleCoordinate, directionChecker);
 
                 if (nearestWaypointIndex != -1) {
-                    removeWaypointIfCloseEnough(waypoints, nearestWaypointIndex, interactionPoint, player, isChanged);
+                    removeWaypointIfCloseEnough(
+                            waypoints, nearestWaypointIndex, interactionPoint, player, isChanged);
                 }
             }
             // Обработка добавления новой точки
@@ -88,7 +90,8 @@ public class ParticleItem extends EditorItem {
             }
         }
         // Обработка изменения высоты сегментов
-        else if (player.isSneaking() && (action == Action.RIGHT_CLICK_AIR || action == Action.LEFT_CLICK_AIR)) {
+        else if (player.isSneaking()
+                && (action == Action.RIGHT_CLICK_AIR || action == Action.LEFT_CLICK_AIR)) {
             adjustWaypointHeight(action, waypoints, player, isChanged);
         }
 
