@@ -15,6 +15,7 @@ import org.bukkit.plugin.Plugin;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
+import ru.sortix.parkourbeat.utils.TeleportUtils;
 import ru.sortix.parkourbeat.utils.java.ClassUtils;
 
 public class LevelsManager {
@@ -132,7 +133,7 @@ public class LevelsManager {
         if (world != null) {
             for (Player player : world.getPlayers()) {
                 player.sendMessage("Уровень, на которым вы находились, был удалён");
-                player.teleport(Settings.getLobbySpawn());
+                TeleportUtils.teleport(player, Settings.getLobbySpawn());
             }
             success = this.plugin.getServer().unloadWorld(world, false);
         }

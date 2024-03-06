@@ -12,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.Level;
+import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class TestItem extends EditorItem {
 
@@ -43,7 +44,7 @@ public class TestItem extends EditorItem {
         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
             if (gameManager.isInGame(player)) {
                 gameManager.removeGame(player, false);
-                player.teleport(level.getLevelSettings().getWorldSettings().getSpawn());
+                TeleportUtils.teleport(player, level.getLevelSettings().getWorldSettings().getSpawn());
                 player.setGameMode(GameMode.CREATIVE);
                 itemsContainer.giveToPlayer();
                 level.getLevelSettings().getParticleController().startSpawnParticles(player);

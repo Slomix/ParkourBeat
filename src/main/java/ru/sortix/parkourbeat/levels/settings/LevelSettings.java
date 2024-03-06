@@ -24,7 +24,8 @@ public class LevelSettings {
         this.gameSettings = gameSettings;
         this.directionChecker = new DirectionChecker(worldSettings.getDirection());
         this.particleController =
-                new ParticleController(ParkourBeat.getPlugin(), worldSettings.getWorld(), this.directionChecker);
+                new ParticleController(
+                        ParkourBeat.getPlugin(), worldSettings.getWorld(), this.directionChecker);
 
         // optional check is list sorted
         this.worldSettings.sortWaypoints(this.directionChecker);

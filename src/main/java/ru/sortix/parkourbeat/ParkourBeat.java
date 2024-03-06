@@ -23,6 +23,7 @@ import ru.sortix.parkourbeat.listeners.WorldsListener;
 import ru.sortix.parkourbeat.location.Waypoint;
 import ru.sortix.parkourbeat.utils.NonWorldAndYawPitchLocation;
 import ru.sortix.parkourbeat.utils.NonWorldLocation;
+import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class ParkourBeat extends JavaPlugin {
 
@@ -36,6 +37,8 @@ public class ParkourBeat extends JavaPlugin {
     public void onEnable() {
         ConfigurationSerialization.registerClass(NonWorldAndYawPitchLocation.class);
         ConfigurationSerialization.registerClass(NonWorldLocation.class);
+
+        TeleportUtils.logger = this.getLogger();
 
         WorldsManager worldsManager = new WorldsManager(this);
         Settings.load(this, worldsManager);

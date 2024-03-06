@@ -21,6 +21,7 @@ import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
+import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class EditorSession {
 
@@ -65,7 +66,7 @@ public class EditorSession {
         ParticleController particleController = levelSettings.getParticleController();
 
         owner.setGameMode(GameMode.CREATIVE);
-        owner.teleport(worldSettings.getSpawn());
+        TeleportUtils.teleport(this.owner, worldSettings.getSpawn());
         owner.sendMessage("Редактор уровня \"" + level.getLevelName() + "\" успешно запущен");
 
         particleController.loadParticleLocations(worldSettings.getWaypoints());
@@ -82,7 +83,7 @@ public class EditorSession {
 
         owner.setGameMode(GameMode.ADVENTURE);
         owner.getInventory().clear();
-        owner.teleport(Settings.getLobbySpawn());
+        TeleportUtils.teleport(owner, Settings.getLobbySpawn());
         owner.sendMessage("Редактор уровня \"" + level.getLevelName() + "\" успешно остановлен");
 
         levelsManager.saveLevel(level);

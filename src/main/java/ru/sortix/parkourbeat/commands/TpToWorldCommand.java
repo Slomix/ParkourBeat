@@ -13,6 +13,7 @@ import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class TpToWorldCommand implements CommandExecutor, TabCompleter {
 
@@ -54,13 +55,14 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
                                         return;
                                     }
 
-                                    player.teleport(level.getLevelSettings().getWorldSettings().getSpawn());
+                                    TeleportUtils.teleport(
+                                            player, level.getLevelSettings().getWorldSettings().getSpawn());
                                     player.setGameMode(GameMode.SPECTATOR);
                                     player.sendMessage(
                                             "Вы телепортированы на уровень \"" + level.getLevelName() + "\"");
                                 });
             } else {
-                player.teleport(Settings.getLobbySpawn());
+                TeleportUtils.teleport(player, Settings.getLobbySpawn());
                 player.setGameMode(GameMode.ADVENTURE);
             }
             if (!levelEditorsManager.removeEditorSession(player)) {

@@ -25,6 +25,7 @@ import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
+import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public final class GamesListener implements Listener {
     private final GameManager gameManager;
@@ -42,7 +43,7 @@ public final class GamesListener implements Listener {
 
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             if (this.getWorldType(player) != WorldType.PB_LEVEL) continue;
-            player.teleport(Settings.getLobbySpawn());
+            TeleportUtils.teleport(player, Settings.getLobbySpawn());
             player.setGameMode(GameMode.ADVENTURE);
             player.getInventory().clear();
             player.sendMessage("Перезагрузка плагина привела к телепортации в лобби");
@@ -64,7 +65,7 @@ public final class GamesListener implements Listener {
     private void on(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (this.getWorldType(player) == WorldType.NON_PB) return;
-        player.teleport(Settings.getLobbySpawn());
+        TeleportUtils.teleport(player, Settings.getLobbySpawn());
         player.setHealth(20);
         player.setFoodLevel(20);
         player.setSaturation(5.0F);
@@ -126,7 +127,7 @@ public final class GamesListener implements Listener {
 
         Game game = this.gameManager.getCurrentGame(player);
         if (game != null) game.stopGame(Game.StopReason.FALL);
-        else player.teleport(player.getWorld().getSpawnLocation());
+        else TeleportUtils.teleport(player, player.getWorld().getSpawnLocation());
     }
 
     private int getFallHeight(@Nullable Level level, boolean play) {
@@ -168,7 +169,8 @@ public final class GamesListener implements Listener {
                 || event.getStatus() == PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) {
             player.sendMessage("Не удалось установить ресурс-пак для воспроизведения мелодии");
         } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
-            player.teleport(game.getLevel().getLevelSettings().getWorldSettings().getSpawn());
+            TeleportUtils.teleport(
+                    player, game.getLevel().getLevelSettings().getWorldSettings().getSpawn());
             game.setCurrentState(Game.State.READY);
         }
     }

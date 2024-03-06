@@ -18,6 +18,7 @@ import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
+import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class Game {
 
@@ -67,7 +68,9 @@ public class Game {
         }
 
         this.player.setGameMode(GameMode.ADVENTURE);
-        this.player.teleport(worldSettings.getSpawn());
+
+        TeleportUtils.teleport(this.player, worldSettings.getSpawn());
+
         this.gameMoveHandler = new GameMoveHandler(this);
 
         String songPlayListName = gameSettings.getSongPlayListName();
@@ -137,7 +140,7 @@ public class Game {
     public void stopGame(StopReason reason) {
         LevelSettings settings = this.level.getLevelSettings();
         player.setFallDistance(0f);
-        player.teleport(settings.getWorldSettings().getSpawn());
+        TeleportUtils.teleport(player, settings.getWorldSettings().getSpawn());
         player.setHealth(20);
         player.setGameMode(GameMode.ADVENTURE);
 

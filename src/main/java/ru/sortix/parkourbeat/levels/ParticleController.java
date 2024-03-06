@@ -121,35 +121,40 @@ public class ParticleController {
             }
         }
         particleTask =
-            this.plugin
-                .getServer()
-                .getScheduler()
-                .runTaskTimerAsynchronously(
-                    this.plugin,
-                    () -> {
-                        if (world == null) {
-                            particleTask.cancel();
-                            return;
-                        }
-                        particleViewers.forEach((player) -> {
-                            if (player == null || !player.isOnline()) {
-                                throw new NullPointerException("Player is not online!");
-                            } else if (player.getWorld() != world) {
-                                throw new IllegalStateException("Player is not in world " + world.getName() +
-                                    "!\nPlayer world: " + player.getWorld());
-                            } else {
-                                updatePlayerParticles(player);
-                            }
-                        });
-                    },
-                    0,
-                    5);
+                this.plugin
+                        .getServer()
+                        .getScheduler()
+                        .runTaskTimerAsynchronously(
+                                this.plugin,
+                                () -> {
+                                    if (world == null) {
+                                        particleTask.cancel();
+                                        return;
+                                    }
+                                    particleViewers.forEach(
+                                            (player) -> {
+                                                if (player == null || !player.isOnline()) {
+                                                    throw new NullPointerException("Player is not online!");
+                                                } else if (player.getWorld() != world) {
+                                                    throw new IllegalStateException(
+                                                            "Player is not in world "
+                                                                    + world.getName()
+                                                                    + "!\nPlayer world: "
+                                                                    + player.getWorld());
+                                                } else {
+                                                    updatePlayerParticles(player);
+                                                }
+                                            });
+                                },
+                                0,
+                                5);
         isLoaded = true;
     }
 
     public void startSpawnParticles(Player player) {
         if (player.getWorld() != world) {
-            throw new IllegalStateException("Player is not in world " + world.getName() + "!\nPlayer world: " + player.getWorld());
+            throw new IllegalStateException(
+                    "Player is not in world " + world.getName() + "!\nPlayer world: " + player.getWorld());
         }
         if (particleTask == null || particleTask.isCancelled()) {
             throw new IllegalStateException("Particle task is not running!");
@@ -165,7 +170,7 @@ public class ParticleController {
         //  https://github.com/Slomix/ParkourBeat/issues/17
         Iterable<Location> locations = this.particleLocations;
         ParticleUtils.displayRedstoneParticles(
-            player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
+                player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
     }
 
     public void stopSpawnParticlesForPlayer(Player player) {

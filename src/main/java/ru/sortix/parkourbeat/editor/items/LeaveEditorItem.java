@@ -14,6 +14,7 @@ import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.Level;
+import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class LeaveEditorItem extends EditorItem {
 
@@ -42,7 +43,7 @@ public class LeaveEditorItem extends EditorItem {
 
     @Override
     public void onClick(Action action, Block block, @Nullable Location interactionPoint) {
-        this.player.teleport(Settings.getLobbySpawn());
+        TeleportUtils.teleport(this.player, Settings.getLobbySpawn());
         this.player.setGameMode(GameMode.ADVENTURE);
         if (!this.levelEditorsManager.removeEditorSession(this.player)) {
             this.gameManager.removeGame(this.player);
