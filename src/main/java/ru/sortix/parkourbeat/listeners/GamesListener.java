@@ -165,15 +165,29 @@ public final class GamesListener implements Listener {
         Game game = this.gameManager.getCurrentGame(player);
         if (game == null) return;
 
-        if (event.getStatus() == PlayerResourcePackStatusEvent.Status.DECLINED
-                || event.getStatus() == PlayerResourcePackStatusEvent.Status.FAILED_DOWNLOAD) {
-            player.sendMessage("Не удалось установить ресурс-пак для воспроизведения мелодии");
-        } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
-            TeleportUtils.teleport(
-                    player,
-                    game.getLevel().getLevelSettings().getWorldSettings().getSpawn());
-            game.setCurrentState(Game.State.READY);
+        switch (event.getStatus()) {
+            case ACCEPTED: {
+                player.sendMessage("Началась загрузка мелодии. " + " После окончания загрузки вы сможете начать игру");
+                return;
+            }
+            case FAILED_DOWNLOAD: {
+                player.sendMessage("Ошибка загрузки мелодии."
+                        + " Вам доступна игра без ресурс-пака, "
+                        + "однако мы рекомендуем всё же установить пакет ресурсов для более комфортной игры");
+                return;
+            }
+            case DECLINED: {
+                player.sendMessage("Вы отказались от загрузки мелодии. "
+                        + "Если вы захотите вновь загрузить ресурс-пак - убедитесь, "
+                        + "что в настройках сервера у вас разрешено принятие пакетов ресурсов");
+                break;
+            }
+            case SUCCESSFULLY_LOADED: {
+                player.sendMessage("Мелодия успешно загружена, приятной игры!");
+                break;
+            }
         }
+        game.setCurrentState(Game.State.READY);
     }
 
     @EventHandler
