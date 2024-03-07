@@ -32,9 +32,7 @@ public class SpawnItem extends EditorItem {
 
     @Override
     public void onClick(Action action, Block block, @Nullable Location interactionPoint) {
-        if (action == Action.RIGHT_CLICK_AIR) {
-            level.getLevelSettings().getWorldSettings().setSpawn(player.getLocation());
-            player.sendMessage("Точка спавна установлена");
-        }
+        level.getLevelSettings().getWorldSettings().setSpawn(player.getLocation());
+        player.sendMessage("Точка спауна установлена на уровне ваших ног");
     }
 }
