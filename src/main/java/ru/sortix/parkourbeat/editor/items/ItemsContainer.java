@@ -26,7 +26,6 @@ public class ItemsContainer {
         for (EditorItem editorItem : new EditorItem[] {
             new LeaveEditorItem(player, level, gameManager, levelEditorsManager),
             new ParticleItem(player, level),
-            new StartFinishItem(player, level),
             new SpawnItem(player, level),
             new TestItem(player, level, gameManager, this)
         }) {

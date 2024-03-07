@@ -39,8 +39,7 @@ public class LevelSettings {
         Location defaultSpawn = Settings.getDefaultWorldSpawn().clone();
         defaultSpawn.setWorld(world);
         return new LevelSettings(
-                new WorldSettings(
-                        world, defaultSpawn, Settings.getStartBorder(), Settings.getFinishBorder(), new ArrayList<>()),
+                new WorldSettings(world, defaultSpawn, Settings.getDirection(), new ArrayList<>()),
                 new GameSettings(levelId, levelName, ownerId, ownerName));
     }
 

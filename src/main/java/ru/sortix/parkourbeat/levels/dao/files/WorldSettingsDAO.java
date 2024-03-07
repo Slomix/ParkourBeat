@@ -6,7 +6,8 @@ import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.util.Vector;
+import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.location.Waypoint;
 
@@ -17,6 +18,7 @@ public class WorldSettingsDAO {
         config.set("spawn", spawn);
         config.set("start_border", worldSettings.getStartBorder());
         config.set("finish_border", worldSettings.getFinishBorder());
+        config.set("direction", worldSettings.getDirection().name());
         config.set(
                 "waypoints",
                 worldSettings.getWaypoints().stream()
@@ -36,14 +38,11 @@ public class WorldSettingsDAO {
             throw new IllegalArgumentException("Object \"spawn\" not found");
         }
         spawn.setWorld(world);
-
-        Vector startBorder = config.getVector("start_border");
-        if (startBorder == null) {
-            throw new IllegalArgumentException("Vector \"start_border\" not found");
-        }
-        Vector finishBorder = config.getVector("finish_border");
-        if (finishBorder == null) {
-            throw new IllegalArgumentException("Vector \"finish_border\" not found");
+        DirectionChecker.Direction direction;
+        try {
+            direction = DirectionChecker.Direction.valueOf(config.getString("direction"));
+        } catch (NullPointerException e) {
+            direction = Settings.getDirection();
         }
 
         //noinspection unchecked
@@ -55,6 +54,6 @@ public class WorldSettingsDAO {
             waypoint.getLocation().setWorld(world);
         }
 
-        return new WorldSettings(world, spawn, startBorder, finishBorder, particleSegment);
+        return new WorldSettings(world, spawn, direction, particleSegment);
     }
 }

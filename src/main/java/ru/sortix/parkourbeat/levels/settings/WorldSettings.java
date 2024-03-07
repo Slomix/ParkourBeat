@@ -9,6 +9,7 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
+import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.location.Waypoint;
 
@@ -18,6 +19,7 @@ public class WorldSettings {
     private final World world;
     private final List<Waypoint> waypoints;
     private final int minWorldHeight;
+    private final DirectionChecker.Direction direction;
 
     @Setter
     private Location spawn;
@@ -31,20 +33,21 @@ public class WorldSettings {
     public WorldSettings(
             @NonNull World world,
             @NonNull Location spawn,
-            @NonNull Vector startRegion,
-            @NonNull Vector finishRegion,
+            @NonNull DirectionChecker.Direction direction,
             @NonNull List<Waypoint> waypoints) {
         this.world = world;
         this.spawn = spawn;
-        this.startBorder = startRegion;
-        this.finishBorder = finishRegion;
         this.waypoints = waypoints;
+        this.direction = direction;
         this.minWorldHeight = this.findMinWorldHeight();
 
         if (waypoints.isEmpty()) {
-            waypoints.add(new Waypoint(startBorder.toLocation(world), Color.LIME, 0));
-            waypoints.add(new Waypoint(finishBorder.toLocation(world), Color.LIME, 0));
+            waypoints.add(new Waypoint(Settings.getStartBorder().toLocation(world), Color.LIME, 0));
+            waypoints.add(new Waypoint(Settings.getFinishBorder().toLocation(world), Color.LIME, 0));
         }
+
+        this.startBorder = waypoints.get(0).getLocation().toVector();
+        this.finishBorder = waypoints.get(waypoints.size() - 1).getLocation().toVector();
 
         this.world.setSpawnLocation(spawn);
     }
@@ -59,25 +62,6 @@ public class WorldSettings {
             minWorldHeight = Math.min(minWorldHeight, waypoint.getLocation().getBlockY());
         }
         return minWorldHeight;
-    }
-
-    public DirectionChecker.Direction getDirection() {
-        if (startBorder == null || finishBorder == null) {
-            return null;
-        }
-        if (Math.abs(startBorder.getX() - finishBorder.getX()) > Math.abs(startBorder.getZ() - finishBorder.getZ())) {
-            if (startBorder.getX() < finishBorder.getX()) {
-                return DirectionChecker.Direction.POSITIVE_X;
-            } else {
-                return DirectionChecker.Direction.NEGATIVE_X;
-            }
-        } else {
-            if (startBorder.getZ() < finishBorder.getZ()) {
-                return DirectionChecker.Direction.POSITIVE_Z;
-            } else {
-                return DirectionChecker.Direction.NEGATIVE_Z;
-            }
-        }
     }
 
     public void sortWaypoints(@NonNull DirectionChecker directionChecker) {
@@ -97,6 +81,11 @@ public class WorldSettings {
         }
     }
 
+    public void updateBorders() {
+        this.startBorder = waypoints.get(0).getLocation().toVector();
+        this.finishBorder = waypoints.get(waypoints.size() - 1).getLocation().toVector();
+    }
+
     @NonNull public Location getStartBorderLoc() {
         return this.startBorder.toLocation(this.world);
     }
@@ -107,28 +96,5 @@ public class WorldSettings {
 
     public boolean isWorldEmpty() {
         return this.world.getPlayers().isEmpty();
-    }
-
-    public void updateEndWaypoints(DirectionChecker directionChecker) {
-        Waypoint startWaypoint = this.waypoints.get(0);
-        Waypoint endWaypoint = this.waypoints.get(this.waypoints.size() - 1);
-        startWaypoint.setLocation(startBorder.toLocation(this.world));
-        endWaypoint.setLocation(finishBorder.toLocation(this.world));
-        double startCoordinate = directionChecker.getCoordinate(startWaypoint.getLocation());
-        double endCoordinate = directionChecker.getCoordinate(endWaypoint.getLocation());
-        waypoints.removeIf(waypoint -> {
-            if (directionChecker.isNegative()) {
-                return directionChecker.getCoordinate(waypoint.getLocation()) > startCoordinate;
-            } else {
-                return directionChecker.getCoordinate(waypoint.getLocation()) < startCoordinate;
-            }
-        });
-        waypoints.removeIf(waypoint -> {
-            if (directionChecker.isNegative()) {
-                return directionChecker.getCoordinate(waypoint.getLocation()) < endCoordinate;
-            } else {
-                return directionChecker.getCoordinate(waypoint.getLocation()) > endCoordinate;
-            }
-        });
     }
 }

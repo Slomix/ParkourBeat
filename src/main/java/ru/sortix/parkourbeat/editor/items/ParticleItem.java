@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.ParticleController;
+import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.location.Waypoint;
 
 public class ParticleItem extends EditorItem {
@@ -90,7 +91,7 @@ public class ParticleItem extends EditorItem {
 
         // Обновляем частицы если были изменения
         if (isChanged.get()) {
-            updateParticleController(waypoints, level.getLevelSettings().getParticleController(), player);
+            updateParticleController(waypoints, level.getLevelSettings().getParticleController());
         }
     }
 
@@ -138,12 +139,9 @@ public class ParticleItem extends EditorItem {
             }
         }
 
-        if (index == waypoints.size() || index == 0) {
-            player.sendMessage("Вы не можете добавить точку за границами.");
-            return;
-        }
-
         waypoints.add(index, newWaypoint);
+        updateBorders(index);
+
         player.sendMessage("Вы успешно добавили точку.");
         change.set(true);
     }
@@ -154,11 +152,13 @@ public class ParticleItem extends EditorItem {
         for (int i = Math.max(0, index - 1); i <= Math.min(waypoints.size() - 1, index + 1); i++) {
             Waypoint waypoint = waypoints.get(i);
             if (waypoint.getLocation().distance(particleLoc) < REMOVE_POINT_DISTANCE) {
-                if (i == 0 || i == waypoints.size() - 1) {
-                    player.sendMessage("Вы не можете удалить начальную или конечную точку.");
+                if (waypoints.size() <= 2) {
+                    player.sendMessage("Точек должно быть минимум две!");
                     return;
                 }
                 waypoints.remove(i);
+                updateBorders(i);
+
                 player.sendMessage("Вы успешно удалили точку.");
                 change.set(true);
                 break;
@@ -181,8 +181,14 @@ public class ParticleItem extends EditorItem {
         }
     }
 
-    private void updateParticleController(
-            List<Waypoint> waypoints, ParticleController particleController, Player player) {
+    private void updateBorders(int index) {
+        WorldSettings worldSettings = level.getLevelSettings().getWorldSettings();
+        if (index == 0 || index == worldSettings.getWaypoints().size() - 1) {
+            worldSettings.updateBorders();
+        }
+    }
+
+    private void updateParticleController(List<Waypoint> waypoints, ParticleController particleController) {
         particleController.loadParticleLocations(waypoints);
     }
 

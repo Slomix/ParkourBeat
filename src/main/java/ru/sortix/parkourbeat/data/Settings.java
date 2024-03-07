@@ -11,10 +11,12 @@ import org.bukkit.WorldType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.WorldsManager;
 
 @UtilityClass
 public class Settings {
+
     @Getter
     private Location lobbySpawn;
 
@@ -26,6 +28,9 @@ public class Settings {
 
     @Getter
     private Location defaultWorldSpawn;
+
+    @Getter
+    private DirectionChecker.Direction direction;
 
     private boolean isLoaded = false;
 
@@ -47,6 +52,7 @@ public class Settings {
         startBorder = getVector(defaultLevelConfig, "start_border");
         finishBorder = getVector(defaultLevelConfig, "finish_border");
         defaultWorldSpawn = getLocation(defaultLevelConfig, "spawn_pos", null, true);
+        direction = getDirection(defaultLevelConfig, "direction");
 
         isLoaded = true;
     }
@@ -100,5 +106,13 @@ public class Settings {
             throw new IllegalArgumentException("Wrong vector: " + vectorString);
         }
         return new Vector(Double.parseDouble(args[0]), Double.parseDouble(args[1]), Double.parseDouble(args[2]));
+    }
+
+    @NonNull private static DirectionChecker.Direction getDirection(ConfigurationSection defaultLevelConfig, String direction) {
+        try {
+            return DirectionChecker.Direction.valueOf(defaultLevelConfig.getString(direction));
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid direction: " + direction);
+        }
     }
 }
