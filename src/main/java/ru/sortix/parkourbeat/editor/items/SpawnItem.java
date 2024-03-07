@@ -32,7 +32,9 @@ public class SpawnItem extends EditorItem {
 
     @Override
     public void onClick(Action action, Block block, @Nullable Location interactionPoint) {
-        level.getLevelSettings().getWorldSettings().setSpawn(player.getLocation());
-        player.sendMessage("Точка спауна установлена на уровне ваших ног");
+        this.level.getLevelSettings().getWorldSettings().setSpawn(this.player.getLocation());
+        this.player.sendMessage("Точка спауна установлена на уровне ваших ног. "
+                + "Убедитесь, что направление взгляда выбрано корректно! "
+                + "Именно в эту сторону будут повёрнуты игроки при телепортации");
     }
 }
