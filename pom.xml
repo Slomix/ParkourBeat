@@ -57,14 +57,10 @@
                     <include>src/main/java/**/*.java</include>
                     <include>src/test/java/**/*.java</include>
                   </includes>
-                  <googleJavaFormat>
-                    <version>1.19.2</version>
-                    <style>GOOGLE</style>
-                    <reflowLongStrings>true</reflowLongStrings>
-                    <formatJavadoc>false</formatJavadoc>
-                  </googleJavaFormat>
-                    <indent><tabs>true</tabs><spacesPerTab>2</spacesPerTab></indent>
-                    <indent><spaces>true</spaces><spacesPerTab>4</spacesPerTab></indent>
+                  <palantirJavaFormat>
+                    <style>PALANTIR</style>
+                  </palantirJavaFormat>
+                    <indent><spaces>true</spaces></indent>
                   <removeUnusedImports />
                   <formatAnnotations />
                 </java>
