@@ -9,10 +9,18 @@ import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 @RequiredArgsConstructor
 public class Level {
-    @Getter private final @NonNull UUID levelId;
-    @Getter private final @NonNull String levelName;
-    @Getter private final @NonNull World world;
-    @Getter private final @NonNull LevelSettings levelSettings;
+    @Getter
+    private final @NonNull UUID levelId;
+
+    @Getter
+    private final @NonNull String levelName;
+
+    @Getter
+    private final @NonNull World world;
+
+    @Getter
+    private final @NonNull LevelSettings levelSettings;
+
     private boolean isEditing = false;
 
     public boolean isEditing() {

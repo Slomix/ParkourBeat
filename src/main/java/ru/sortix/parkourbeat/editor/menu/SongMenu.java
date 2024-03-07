@@ -38,8 +38,7 @@ public class SongMenu implements InventoryHolder {
             if (songID < songs.size()) {
                 String songName = songs.get(songID);
                 SongMenuItem item =
-                        new SongItem(
-                                slot, this.songs.getSongPlaylist(songName), songName, player, gameSettings);
+                        new SongItem(slot, this.songs.getSongPlaylist(songName), songName, player, gameSettings);
                 inventory.setItem(slot, item.getItemStack());
                 items.put(slot, item);
             }

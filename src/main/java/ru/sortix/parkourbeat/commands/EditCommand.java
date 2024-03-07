@@ -18,10 +18,7 @@ public class EditCommand implements CommandExecutor, TabCompleter {
     private final LevelsManager levelsManager;
     private final GameManager gameManager;
 
-    public EditCommand(
-            LevelEditorsManager levelEditorsManager,
-            LevelsManager levelsManager,
-            GameManager gameManager) {
+    public EditCommand(LevelEditorsManager levelEditorsManager, LevelsManager levelsManager, GameManager gameManager) {
         this.levelEditorsManager = levelEditorsManager;
         this.levelsManager = levelsManager;
         this.gameManager = gameManager;
@@ -29,10 +26,7 @@ public class EditCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(
-            @NonNull CommandSender sender,
-            @NonNull Command command,
-            @NonNull String label,
-            @NonNull String[] args) {
+            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("Команда только для игроков!");
             return true;
@@ -51,37 +45,31 @@ public class EditCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
             return true;
         }
-        levelsManager
-                .loadLevel(levelId)
-                .thenAccept(
-                        level -> {
-                            if (!level.getLevelSettings().getGameSettings().isOwner(sender)) {
-                                player.sendMessage("Вы не являетесь владельцем этого уровня!");
-                                if (level.getWorld().getPlayers().isEmpty()) {
-                                    levelsManager.unloadLevel(levelId);
-                                }
-                                return;
-                            }
-                            if (level.isEditing()) {
-                                player.sendMessage("Вы и так уже редактируете данный уровень!");
-                                return;
-                            }
-                            if (!this.gameManager.getPlayersOnLevel(level).isEmpty()) {
-                                player.sendMessage("Нельзя редактировать уровень, на котором находятся игроки");
-                                return;
-                            }
-                            if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
-                            levelEditorsManager.createEditorSession(player, level).start();
-                        });
+        levelsManager.loadLevel(levelId).thenAccept(level -> {
+            if (!level.getLevelSettings().getGameSettings().isOwner(sender)) {
+                player.sendMessage("Вы не являетесь владельцем этого уровня!");
+                if (level.getWorld().getPlayers().isEmpty()) {
+                    levelsManager.unloadLevel(levelId);
+                }
+                return;
+            }
+            if (level.isEditing()) {
+                player.sendMessage("Вы и так уже редактируете данный уровень!");
+                return;
+            }
+            if (!this.gameManager.getPlayersOnLevel(level).isEmpty()) {
+                player.sendMessage("Нельзя редактировать уровень, на котором находятся игроки");
+                return;
+            }
+            if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
+            levelEditorsManager.createEditorSession(player, level).start();
+        });
         return true;
     }
 
     @Override
     public List<String> onTabComplete(
-            @NonNull CommandSender sender,
-            @NonNull Command command,
-            @NonNull String label,
-            @NonNull String[] args) {
+            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (args.length == 0) return null;
         return this.levelsManager.getValidLevelNames(String.join(" ", args).toLowerCase());
     }

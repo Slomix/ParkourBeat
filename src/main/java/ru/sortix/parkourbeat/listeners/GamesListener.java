@@ -131,8 +131,7 @@ public final class GamesListener implements Listener {
     }
 
     private int getFallHeight(@Nullable Level level, boolean play) {
-        return (level == null ? 0 : level.getLevelSettings().getWorldSettings().getMinWorldHeight())
-                - (play ? 1 : 5);
+        return (level == null ? 0 : level.getLevelSettings().getWorldSettings().getMinWorldHeight()) - (play ? 1 : 5);
     }
 
     @EventHandler
@@ -170,7 +169,8 @@ public final class GamesListener implements Listener {
             player.sendMessage("Не удалось установить ресурс-пак для воспроизведения мелодии");
         } else if (event.getStatus() == PlayerResourcePackStatusEvent.Status.SUCCESSFULLY_LOADED) {
             TeleportUtils.teleport(
-                    player, game.getLevel().getLevelSettings().getWorldSettings().getSpawn());
+                    player,
+                    game.getLevel().getLevelSettings().getWorldSettings().getSpawn());
             game.setCurrentState(Game.State.READY);
         }
     }
@@ -191,7 +191,8 @@ public final class GamesListener implements Listener {
         Block block = event.getClickedBlock();
         if (block == null) return;
         EditorSession editorSession = this.levelEditorsManager.getEditorSession(event.getPlayer());
-        if (editorSession != null && block.getWorld() == editorSession.getLevel().getWorld()) return;
+        if (editorSession != null
+                && block.getWorld() == editorSession.getLevel().getWorld()) return;
         if (event.getPlayer().hasPermission("parkourbeat.level.edit.anytime")) return;
         event.setUseInteractedBlock(Event.Result.DENY);
     }

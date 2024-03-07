@@ -15,17 +15,17 @@ public class LevelEditorsManager {
 
     private final Map<Player, EditorSession> editorSessions = new HashMap<>();
     private final GameManager gameManager;
-    @Getter private final LevelsManager levelsManager;
 
-    public LevelEditorsManager(
-            @NonNull GameManager gameManager, @NonNull LevelsManager levelsManager) {
+    @Getter
+    private final LevelsManager levelsManager;
+
+    public LevelEditorsManager(@NonNull GameManager gameManager, @NonNull LevelsManager levelsManager) {
         this.gameManager = gameManager;
         this.levelsManager = levelsManager;
     }
 
     public EditorSession createEditorSession(@NonNull Player player, @NonNull Level level) {
-        EditorSession editorSession =
-                new EditorSession(player, level, levelsManager, gameManager, this);
+        EditorSession editorSession = new EditorSession(player, level, levelsManager, gameManager, this);
         editorSessions.put(player, editorSession);
         return editorSession;
     }

@@ -15,10 +15,18 @@ import ru.sortix.parkourbeat.levels.WorldsManager;
 
 @UtilityClass
 public class Settings {
-    @Getter private Location lobbySpawn;
-    @Getter private Vector startBorder;
-    @Getter private Vector finishBorder;
-    @Getter private Location defaultWorldSpawn;
+    @Getter
+    private Location lobbySpawn;
+
+    @Getter
+    private Vector startBorder;
+
+    @Getter
+    private Vector finishBorder;
+
+    @Getter
+    private Location defaultWorldSpawn;
+
     private boolean isLoaded = false;
 
     public void load(@NonNull ParkourBeat plugin, @NonNull WorldsManager worldsManager) {
@@ -74,11 +82,9 @@ public class Settings {
             }
             try {
                 WorldCreator worldCreator = newWorldCreator(worldName);
-                world =
-                        worldsManager
-                                .createWorldFromDefaultContainer(
-                                        worldCreator, worldsManager.getCurrentThreadExecutor())
-                                .join();
+                world = worldsManager
+                        .createWorldFromDefaultContainer(worldCreator, worldsManager.getCurrentThreadExecutor())
+                        .join();
             } catch (Exception e) {
                 throw new RuntimeException("Unable to load lobby world", e);
             }
@@ -93,7 +99,6 @@ public class Settings {
         if (args.length != 3) {
             throw new IllegalArgumentException("Wrong vector: " + vectorString);
         }
-        return new Vector(
-                Double.parseDouble(args[0]), Double.parseDouble(args[1]), Double.parseDouble(args[2]));
+        return new Vector(Double.parseDouble(args[0]), Double.parseDouble(args[1]), Double.parseDouble(args[2]));
     }
 }

@@ -17,8 +17,7 @@ public class SongItem extends SongMenuItem {
     private final Player player;
     private final ItemStack item;
 
-    public SongItem(
-            int slot, String playlist, String name, Player player, GameSettings gameSettings) {
+    public SongItem(int slot, String playlist, String name, Player player, GameSettings gameSettings) {
         super(slot);
         this.name = name;
         this.playlist = playlist;

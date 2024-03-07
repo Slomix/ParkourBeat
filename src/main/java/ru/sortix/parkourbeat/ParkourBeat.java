@@ -27,7 +27,8 @@ import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class ParkourBeat extends JavaPlugin {
 
-    @Getter private static Songs songs;
+    @Getter
+    private static Songs songs;
 
     public static JavaPlugin getPlugin() {
         return JavaPlugin.getPlugin(ParkourBeat.class);
@@ -50,8 +51,7 @@ public class ParkourBeat extends JavaPlugin {
         GameManager gameManager = new GameManager(levelsManager);
         LevelEditorsManager levelEditorsManager = new LevelEditorsManager(gameManager, levelsManager);
 
-        registerCommand(
-                "tptoworld", new TpToWorldCommand(levelEditorsManager, gameManager, levelsManager));
+        registerCommand("tptoworld", new TpToWorldCommand(levelEditorsManager, gameManager, levelsManager));
         registerCommand("play", new PlayCommand(gameManager, levelsManager, levelEditorsManager));
         registerCommand("edit", new EditCommand(levelEditorsManager, levelsManager, gameManager));
         registerCommand("create", new CreateCommand(levelEditorsManager, levelsManager, gameManager));
@@ -70,8 +70,7 @@ public class ParkourBeat extends JavaPlugin {
     public void registerCommand(String commandName, CommandExecutor executor) {
         PluginCommand command = getCommand(commandName);
         if (command == null) {
-            this.getLogger()
-                    .severe("Unable to register command " + commandName + ". Is it specified in plugin.yml?");
+            this.getLogger().severe("Unable to register command " + commandName + ". Is it specified in plugin.yml?");
             return;
         }
         command.setExecutor(executor);

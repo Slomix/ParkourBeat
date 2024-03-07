@@ -20,10 +20,7 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
     private final LevelsManager levelsManager;
     private final LevelEditorsManager levelEditorsManager;
 
-    public PlayCommand(
-            GameManager gameManager,
-            LevelsManager levelsManager,
-            LevelEditorsManager levelEditorsManager) {
+    public PlayCommand(GameManager gameManager, LevelsManager levelsManager, LevelEditorsManager levelEditorsManager) {
         this.gameManager = gameManager;
         this.levelsManager = levelsManager;
         this.levelEditorsManager = levelEditorsManager;
@@ -31,10 +28,7 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(
-            @NonNull CommandSender sender,
-            @NonNull Command command,
-            @NonNull String label,
-            @NonNull String[] args) {
+            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("Команда только для игроков!");
             return true;
@@ -79,27 +73,21 @@ public class PlayCommand implements CommandExecutor, TabCompleter {
             player.sendMessage("Загрузка уровня...");
         }
 
-        gameManager
-                .createNewGame(player, levelId)
-                .thenAccept(
-                        success -> {
-                            if (level == null) {
-                                player.sendMessage("Уровень загружен");
-                            }
-                            if (!success) {
-                                player.sendMessage("Не удалось начать игру");
-                            }
-                        });
+        gameManager.createNewGame(player, levelId).thenAccept(success -> {
+            if (level == null) {
+                player.sendMessage("Уровень загружен");
+            }
+            if (!success) {
+                player.sendMessage("Не удалось начать игру");
+            }
+        });
 
         return true;
     }
 
     @Override
     public List<String> onTabComplete(
-            @NonNull CommandSender sender,
-            @NonNull Command command,
-            @NonNull String label,
-            @NonNull String[] args) {
+            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (args.length == 0) return null;
         return this.levelsManager.getValidLevelNames(String.join(" ", args).toLowerCase());
     }

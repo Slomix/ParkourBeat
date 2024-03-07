@@ -19,9 +19,7 @@ public class DeleteCommand implements CommandExecutor, TabCompleter {
     private final GameManager gameManager;
 
     public DeleteCommand(
-            LevelEditorsManager levelEditorsManager,
-            LevelsManager levelsManager,
-            GameManager gameManager) {
+            LevelEditorsManager levelEditorsManager, LevelsManager levelsManager, GameManager gameManager) {
         this.levelEditorsManager = levelEditorsManager;
         this.levelsManager = levelsManager;
         this.gameManager = gameManager;
@@ -29,10 +27,7 @@ public class DeleteCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(
-            @NonNull CommandSender sender,
-            @NonNull Command command,
-            @NonNull String label,
-            @NonNull String[] args) {
+            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (args.length == 0) {
             sender.sendMessage("Пожалуйста, укажите уровень!");
             return true;
@@ -45,42 +40,36 @@ public class DeleteCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        levelsManager
-                .loadLevel(levelId)
-                .thenAccept(
-                        level -> {
-                            if (!level.getLevelSettings().getGameSettings().isOwner(sender)) {
-                                sender.sendMessage("Вы не являетесь владельцем этого уровня");
-                                if (level.getWorld().getPlayers().isEmpty()) {
-                                    levelsManager.unloadLevel(level.getLevelId());
-                                }
-                                return;
-                            }
-                            if (level.isEditing()) {
-                                Player editorPlayer = level.getWorld().getPlayers().iterator().next();
-                                levelEditorsManager.removeEditorSession(editorPlayer);
-                                editorPlayer.sendMessage("Уровень \"" + levelName + "\" был удален");
-                            } else {
-                                for (Player player : level.getWorld().getPlayers()) {
-                                    player.sendMessage("Уровень \"" + levelName + "\" был удален");
-                                    gameManager.removeGame(player);
-                                }
-                            }
-                            if (levelsManager.deleteLevel(level)) {
-                                sender.sendMessage("Вы успешно удалили уровень \"" + levelName + "\"");
-                            } else {
-                                sender.sendMessage("Не удалось удалить уровень \"" + levelName + "\"");
-                            }
-                        });
+        levelsManager.loadLevel(levelId).thenAccept(level -> {
+            if (!level.getLevelSettings().getGameSettings().isOwner(sender)) {
+                sender.sendMessage("Вы не являетесь владельцем этого уровня");
+                if (level.getWorld().getPlayers().isEmpty()) {
+                    levelsManager.unloadLevel(level.getLevelId());
+                }
+                return;
+            }
+            if (level.isEditing()) {
+                Player editorPlayer = level.getWorld().getPlayers().iterator().next();
+                levelEditorsManager.removeEditorSession(editorPlayer);
+                editorPlayer.sendMessage("Уровень \"" + levelName + "\" был удален");
+            } else {
+                for (Player player : level.getWorld().getPlayers()) {
+                    player.sendMessage("Уровень \"" + levelName + "\" был удален");
+                    gameManager.removeGame(player);
+                }
+            }
+            if (levelsManager.deleteLevel(level)) {
+                sender.sendMessage("Вы успешно удалили уровень \"" + levelName + "\"");
+            } else {
+                sender.sendMessage("Не удалось удалить уровень \"" + levelName + "\"");
+            }
+        });
         return true;
     }
 
     @Override
     public List<String> onTabComplete(
-            @NonNull CommandSender sender,
-            @NonNull Command command,
-            @NonNull String label,
-            @NonNull String[] args) {
+            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (args.length == 0) return null;
         return this.levelsManager.getValidLevelNames(String.join(" ", args).toLowerCase());
     }

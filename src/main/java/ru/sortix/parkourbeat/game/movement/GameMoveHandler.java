@@ -23,16 +23,18 @@ public class GameMoveHandler {
 
     private final Game game;
     private final Location startBorder, finishBorder;
-    @Getter private final MovementAccuracyChecker accuracyChecker;
+
+    @Getter
+    private final MovementAccuracyChecker accuracyChecker;
+
     private BukkitTask task;
 
     public GameMoveHandler(Game game) {
         this.game = game;
 
         WorldSettings worldSettings = game.getLevel().getLevelSettings().getWorldSettings();
-        this.accuracyChecker =
-                new MovementAccuracyChecker(
-                        worldSettings.getWaypoints(), game.getLevel().getLevelSettings().getDirectionChecker());
+        this.accuracyChecker = new MovementAccuracyChecker(
+                worldSettings.getWaypoints(), game.getLevel().getLevelSettings().getDirectionChecker());
 
         startBorder = worldSettings.getStartBorderLoc();
         finishBorder = worldSettings.getFinishBorderLoc();
@@ -65,14 +67,11 @@ public class GameMoveHandler {
             return;
         }
         accuracyChecker.onPlayerLocationChange(event.getTo());
-        player
-                .spigot()
+        player.spigot()
                 .sendMessage(
                         ChatMessageType.ACTION_BAR,
                         TextComponent.fromLegacyText(
-                                "§aТочность: "
-                                        + String.format("%.2f", accuracyChecker.getAccuracy() * 100f)
-                                        + "%"));
+                                "§aТочность: " + String.format("%.2f", accuracyChecker.getAccuracy() * 100f) + "%"));
     }
 
     public void onRunningState(PlayerToggleSprintEvent event) {
@@ -96,33 +95,32 @@ public class GameMoveHandler {
     private void startDamageTask(Player player, String reason, Game.StopReason stopReason) {
         player.playSound(player.getLocation(), Sound.ENTITY_WOLF_HURT, 1, 1);
 
-        this.task =
-                new BukkitRunnable() {
-                    @Override
-                    public void run() {
-                        if (!player.isOnline() || game.getCurrentState() != Game.State.RUNNING) {
-                            this.cancel();
-                            return;
-                        }
+        this.task = new BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!player.isOnline() || game.getCurrentState() != Game.State.RUNNING) {
+                    this.cancel();
+                    return;
+                }
 
-                        player.sendTitle(reason, null, 0, 5, 5);
-                        boolean stopped;
-                        if (player.getHealth() <= NOT_SPRINT_DAMAGE_PER_PERIOD) {
-                            game.stopGame(stopReason);
-                            stopped = true;
-                        } else {
-                            if (player.getNoDamageTicks() <= 0) {
-                                player.setHealth(player.getHealth() - NOT_SPRINT_DAMAGE_PER_PERIOD);
-                                player.setNoDamageTicks(NOT_SPRINT_DAMAGE_PERIOD_TICKS);
-                            }
-                            stopped = false;
-                        }
-
-                        if (stopped) {
-                            this.cancel();
-                        }
+                player.sendTitle(reason, null, 0, 5, 5);
+                boolean stopped;
+                if (player.getHealth() <= NOT_SPRINT_DAMAGE_PER_PERIOD) {
+                    game.stopGame(stopReason);
+                    stopped = true;
+                } else {
+                    if (player.getNoDamageTicks() <= 0) {
+                        player.setHealth(player.getHealth() - NOT_SPRINT_DAMAGE_PER_PERIOD);
+                        player.setNoDamageTicks(NOT_SPRINT_DAMAGE_PERIOD_TICKS);
                     }
-                }.runTaskTimer(this.getPlugin(), 0, 2);
+                    stopped = false;
+                }
+
+                if (stopped) {
+                    this.cancel();
+                }
+            }
+        }.runTaskTimer(this.getPlugin(), 0, 2);
     }
 
     @NonNull public Plugin getPlugin() {

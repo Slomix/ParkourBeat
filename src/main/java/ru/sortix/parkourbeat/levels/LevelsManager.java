@@ -19,18 +19,20 @@ import ru.sortix.parkourbeat.utils.TeleportUtils;
 import ru.sortix.parkourbeat.utils.java.ClassUtils;
 
 public class LevelsManager {
-    @Getter private final Plugin plugin;
+    @Getter
+    private final Plugin plugin;
+
     private final WorldsManager worldsManager;
-    @Getter private final LevelSettingsManager levelsSettings;
-    private final Map<String, UUID> availableLevelIdsByName =
-            new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+
+    @Getter
+    private final LevelSettingsManager levelsSettings;
+
+    private final Map<String, UUID> availableLevelIdsByName = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
     private final Map<UUID, Level> loadedLevels = new HashMap<>();
     private final boolean gameRulesSupport = ClassUtils.isClassPresent("org.bukkit.GameRule");
 
     public LevelsManager(
-            @NonNull Plugin plugin,
-            @NonNull WorldsManager worldsManager,
-            @NonNull LevelSettingDAO levelSettingDAO) {
+            @NonNull Plugin plugin, @NonNull WorldsManager worldsManager, @NonNull LevelSettingDAO levelSettingDAO) {
         this.plugin = plugin;
         this.worldsManager = worldsManager;
         this.levelsSettings = new LevelSettingsManager(levelSettingDAO);
@@ -66,21 +68,19 @@ public class LevelsManager {
 
         this.worldsManager
                 .createWorldFromCustomDirectory(worldCreator, worldDir)
-                .thenAccept(
-                        world -> {
-                            prepareLevelWorld(world, true);
+                .thenAccept(world -> {
+                    prepareLevelWorld(world, true);
 
-                            LevelSettings levelSettings =
-                                    LevelSettings.create(levelId, levelName, world, ownerId, ownerName);
-                            Level level = new Level(levelId, levelName, world, levelSettings);
-                            level.setEditing(true);
+                    LevelSettings levelSettings = LevelSettings.create(levelId, levelName, world, ownerId, ownerName);
+                    Level level = new Level(levelId, levelName, world, levelSettings);
+                    level.setEditing(true);
 
-                            this.availableLevelIdsByName.put(level.getLevelName(), levelId);
-                            this.levelsSettings.addLevelSettings(levelId, levelSettings);
-                            this.loadedLevels.put(levelId, level);
+                    this.availableLevelIdsByName.put(level.getLevelName(), levelId);
+                    this.levelsSettings.addLevelSettings(levelId, levelSettings);
+                    this.loadedLevels.put(levelId, level);
 
-                            result.complete(level);
-                        });
+                    result.complete(level);
+                });
         return result;
     }
 
@@ -95,22 +95,21 @@ public class LevelsManager {
         WorldCreator worldCreator = this.levelsSettings.getLevelSettingDAO().newWorldCreator(levelId);
         this.worldsManager
                 .createWorldFromDefaultContainer(worldCreator, this.worldsManager.getSyncExecutor())
-                .thenAccept(
-                        world -> {
-                            try {
-                                this.prepareLevelWorld(world, false);
+                .thenAccept(world -> {
+                    try {
+                        this.prepareLevelWorld(world, false);
 
-                                LevelSettings levelSettings = this.levelsSettings.loadLevelSettings(levelId);
-                                String levelName = levelSettings.getGameSettings().getLevelName();
-                                Level loadedLevel = new Level(levelId, levelName, world, levelSettings);
-                                this.loadedLevels.put(levelId, loadedLevel);
+                        LevelSettings levelSettings = this.levelsSettings.loadLevelSettings(levelId);
+                        String levelName = levelSettings.getGameSettings().getLevelName();
+                        Level loadedLevel = new Level(levelId, levelName, world, levelSettings);
+                        this.loadedLevels.put(levelId, loadedLevel);
 
-                                result.complete(loadedLevel);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                result.complete(null);
-                            }
-                        });
+                        result.complete(loadedLevel);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        result.complete(null);
+                    }
+                });
         return result;
     }
 
@@ -197,8 +196,7 @@ public class LevelsManager {
         setBooleanGameRule(world, "LOG_ADMIN_COMMANDS", true);
         setBooleanGameRule(world, "MOB_GRIEFING", false);
         setBooleanGameRule(world, "NATURAL_REGENERATION", false);
-        setBooleanGameRule(
-                world, "REDUCED_DEBUG_INFO", false); // Should be switched to "true" after level publication
+        setBooleanGameRule(world, "REDUCED_DEBUG_INFO", false); // Should be switched to "true" after level publication
         if (false) setBooleanGameRule(world, "SEND_COMMAND_FEEDBACK", false);
         setBooleanGameRule(world, "SHOW_DEATH_MESSAGES", false);
         setBooleanGameRule(world, "SPECTATORS_GENERATE_CHUNKS", false);

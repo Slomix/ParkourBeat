@@ -24,7 +24,10 @@ public class ParticleController {
     private final ConcurrentLinkedQueue<Location> particleLocations = new ConcurrentLinkedQueue<>();
     private final Map<Double, Color> colorsChangeLocations = new LinkedHashMap<>();
     private final Set<Player> particleViewers = ConcurrentHashMap.newKeySet();
-    @Setter private DirectionChecker directionChecker;
+
+    @Setter
+    private DirectionChecker directionChecker;
+
     private final World world;
     private BukkitTask particleTask = null;
     private boolean isLoaded = false;
@@ -51,12 +54,10 @@ public class ParticleController {
         for (int t = 0; t <= segments; t++) {
             double ratio = t / (double) segments;
 
-            Vector interpolated =
-                    cubicBezierInterpolation(startVector, control1, control2, endVector, ratio);
+            Vector interpolated = cubicBezierInterpolation(startVector, control1, control2, endVector, ratio);
 
             Location location =
-                    new Location(
-                            start.getWorld(), interpolated.getX(), interpolated.getY(), interpolated.getZ());
+                    new Location(start.getWorld(), interpolated.getX(), interpolated.getY(), interpolated.getZ());
             path.add(location);
         }
 
@@ -73,8 +74,7 @@ public class ParticleController {
         return segments;
     }
 
-    private static Vector cubicBezierInterpolation(
-            Vector p0, Vector p1, Vector p2, Vector p3, double t) {
+    private static Vector cubicBezierInterpolation(Vector p0, Vector p1, Vector p2, Vector p3, double t) {
         double u = 1 - t;
         double tt = t * t;
         double uu = u * u;
@@ -111,8 +111,7 @@ public class ParticleController {
 
             double height = currentPoint.getHeight();
             if (height == 0) {
-                List<Location> straightPath =
-                        createStraightPath(currentPoint.getLocation(), nextPoint.getLocation());
+                List<Location> straightPath = createStraightPath(currentPoint.getLocation(), nextPoint.getLocation());
                 particleLocations.addAll(straightPath);
             } else {
                 List<Location> curvedPath =
@@ -120,34 +119,31 @@ public class ParticleController {
                 particleLocations.addAll(curvedPath);
             }
         }
-        particleTask =
-                this.plugin
-                        .getServer()
-                        .getScheduler()
-                        .runTaskTimerAsynchronously(
-                                this.plugin,
-                                () -> {
-                                    if (world == null) {
-                                        particleTask.cancel();
-                                        return;
-                                    }
-                                    particleViewers.forEach(
-                                            (player) -> {
-                                                if (player == null || !player.isOnline()) {
-                                                    throw new NullPointerException("Player is not online!");
-                                                } else if (player.getWorld() != world) {
-                                                    throw new IllegalStateException(
-                                                            "Player is not in world "
-                                                                    + world.getName()
-                                                                    + "!\nPlayer world: "
-                                                                    + player.getWorld());
-                                                } else {
-                                                    updatePlayerParticles(player);
-                                                }
-                                            });
-                                },
-                                0,
-                                5);
+        particleTask = this.plugin
+                .getServer()
+                .getScheduler()
+                .runTaskTimerAsynchronously(
+                        this.plugin,
+                        () -> {
+                            if (world == null) {
+                                particleTask.cancel();
+                                return;
+                            }
+                            particleViewers.forEach((player) -> {
+                                if (player == null || !player.isOnline()) {
+                                    throw new NullPointerException("Player is not online!");
+                                } else if (player.getWorld() != world) {
+                                    throw new IllegalStateException("Player is not in world "
+                                            + world.getName()
+                                            + "!\nPlayer world: "
+                                            + player.getWorld());
+                                } else {
+                                    updatePlayerParticles(player);
+                                }
+                            });
+                        },
+                        0,
+                        5);
         isLoaded = true;
     }
 
@@ -169,8 +165,7 @@ public class ParticleController {
         // TODO Отправлять лишь частицы из двух ближайших секций:
         //  https://github.com/Slomix/ParkourBeat/issues/17
         Iterable<Location> locations = this.particleLocations;
-        ParticleUtils.displayRedstoneParticles(
-                player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
+        ParticleUtils.displayRedstoneParticles(player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
     }
 
     public void stopSpawnParticlesForPlayer(Player player) {

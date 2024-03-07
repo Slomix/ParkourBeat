@@ -20,14 +20,13 @@ public class WorldSettingsDAO {
         config.set(
                 "waypoints",
                 worldSettings.getWaypoints().stream()
-                        .map(
-                                waypoint -> {
-                                    Location loc = waypoint.getLocation();
-                                    return new Waypoint(
-                                            new Location(null, loc.getX(), loc.getY(), loc.getZ()),
-                                            waypoint.getColor(),
-                                            waypoint.getHeight());
-                                })
+                        .map(waypoint -> {
+                            Location loc = waypoint.getLocation();
+                            return new Waypoint(
+                                    new Location(null, loc.getX(), loc.getY(), loc.getZ()),
+                                    waypoint.getColor(),
+                                    waypoint.getHeight());
+                        })
                         .collect(Collectors.toList()));
     }
 

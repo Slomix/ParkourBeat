@@ -22,10 +22,18 @@ import ru.sortix.parkourbeat.utils.shedule.CurrentThreadExecutor;
 public class WorldsManager {
     private final Logger logger;
     private final Server server;
-    @Getter private final ChunkGenerator emptyGenerator;
-    @Getter private final Executor currentThreadExecutor;
-    @Getter private final Executor syncExecutor;
-    @Getter private final Executor asyncExecutor;
+
+    @Getter
+    private final ChunkGenerator emptyGenerator;
+
+    @Getter
+    private final Executor currentThreadExecutor;
+
+    @Getter
+    private final Executor syncExecutor;
+
+    @Getter
+    private final Executor asyncExecutor;
 
     public WorldsManager(@NonNull Plugin plugin) {
         this.logger = plugin.getLogger();
@@ -52,25 +60,19 @@ public class WorldsManager {
 
         File realWorldDir = this.getWorldDir(worldCreator);
 
-        this.copyWorldData(worldDir, realWorldDir)
-                .thenAccept(
-                        dataPrepared -> {
-                            if (!dataPrepared) {
-                                result.completeExceptionally(
-                                        new IllegalArgumentException("Unable to prepare world data"));
-                                return;
-                            }
-                            this.createBukkitWorld(worldCreator, this.syncExecutor)
-                                    .thenAccept(
-                                            world -> {
-                                                if (world == null) {
-                                                    result.completeExceptionally(
-                                                            new IllegalArgumentException("Unable to create Bukkit world"));
-                                                    return;
-                                                }
-                                                result.complete(world);
-                                            });
-                        });
+        this.copyWorldData(worldDir, realWorldDir).thenAccept(dataPrepared -> {
+            if (!dataPrepared) {
+                result.completeExceptionally(new IllegalArgumentException("Unable to prepare world data"));
+                return;
+            }
+            this.createBukkitWorld(worldCreator, this.syncExecutor).thenAccept(world -> {
+                if (world == null) {
+                    result.completeExceptionally(new IllegalArgumentException("Unable to create Bukkit world"));
+                    return;
+                }
+                result.complete(world);
+            });
+        });
         return result;
     }
 
@@ -79,8 +81,7 @@ public class WorldsManager {
                 () -> {
                     try {
                         if (target.exists()) throw new IOException("Target directory already exist");
-                        CopyDirVisitor visitor =
-                                new CopyDirVisitor(this.logger, source.toPath(), target.toPath());
+                        CopyDirVisitor visitor = new CopyDirVisitor(this.logger, source.toPath(), target.toPath());
                         Files.walkFileTree(source.toPath(), visitor);
                         return !visitor.isFailed();
                     } catch (IOException e) {
@@ -90,8 +91,7 @@ public class WorldsManager {
                 this.asyncExecutor);
     }
 
-    @NonNull private CompletableFuture<World> createBukkitWorld(
-            @NonNull WorldCreator worldCreator, @NonNull Executor executor) {
+    @NonNull private CompletableFuture<World> createBukkitWorld(@NonNull WorldCreator worldCreator, @NonNull Executor executor) {
         return CompletableFuture.supplyAsync(
                 () -> {
                     World world = this.server.getWorld(worldCreator.name());
@@ -100,12 +100,11 @@ public class WorldsManager {
                     world = this.server.createWorld(worldCreator);
                     if (world != null) return world;
 
-                    throw new UnsupportedOperationException(
-                            "Unable to create world \""
-                                    + worldCreator.name()
-                                    + "\""
-                                    + " from directory "
-                                    + this.getWorldDir(worldCreator).getAbsolutePath());
+                    throw new UnsupportedOperationException("Unable to create world \""
+                            + worldCreator.name()
+                            + "\""
+                            + " from directory "
+                            + this.getWorldDir(worldCreator).getAbsolutePath());
                 },
                 executor);
     }
@@ -116,6 +115,10 @@ public class WorldsManager {
             return new File(this.server.getWorldContainer(), worldCreator.name());
         }
         // Correct impl from NMS
-        return this.server.getWorldContainer().toPath().resolve(worldCreator.name()).toFile();
+        return this.server
+                .getWorldContainer()
+                .toPath()
+                .resolve(worldCreator.name())
+                .toFile();
     }
 }

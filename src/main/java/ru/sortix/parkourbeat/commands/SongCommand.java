@@ -18,10 +18,7 @@ public class SongCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(
-            @NonNull CommandSender sender,
-            @NonNull Command command,
-            @NonNull String label,
-            @NonNull String[] args) {
+            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (!(sender instanceof Player)) {
             sender.sendMessage("Команда только для игроков!");
             return true;

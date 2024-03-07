@@ -23,14 +23,13 @@ public class ItemsContainer {
         this.player = player;
         this.editorItems = new HashMap<>();
 
-        for (EditorItem editorItem :
-                new EditorItem[] {
-                    new LeaveEditorItem(player, level, gameManager, levelEditorsManager),
-                    new ParticleItem(player, level),
-                    new StartFinishItem(player, level),
-                    new SpawnItem(player, level),
-                    new TestItem(player, level, gameManager, this)
-                }) {
+        for (EditorItem editorItem : new EditorItem[] {
+            new LeaveEditorItem(player, level, gameManager, levelEditorsManager),
+            new ParticleItem(player, level),
+            new StartFinishItem(player, level),
+            new SpawnItem(player, level),
+            new TestItem(player, level, gameManager, this)
+        }) {
             ItemStack itemStack = editorItem.getItemStack();
             if (!itemStack.getType().isItem()) {
                 System.err.println(editorItem.getClass().getName() + " is not an item");

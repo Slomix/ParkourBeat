@@ -9,8 +9,7 @@ public class SongMenuListener implements Listener {
 
     @EventHandler
     public void onMenuClick(InventoryClickEvent event) {
-        if (event.getClickedInventory() == null
-                || !(event.getClickedInventory().getHolder() instanceof SongMenu)) {
+        if (event.getClickedInventory() == null || !(event.getClickedInventory().getHolder() instanceof SongMenu)) {
             return;
         }
         event.setCancelled(true);

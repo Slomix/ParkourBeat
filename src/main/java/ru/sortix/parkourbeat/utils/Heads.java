@@ -19,8 +19,7 @@ import org.bukkit.inventory.meta.SkullMeta;
 public class Heads {
 
     private static final boolean USE_MODERN_HEADS = Material.getMaterial("PLAYER_HEAD") != null;
-    private static final Material HEAD_MATERIAL =
-            Material.valueOf(USE_MODERN_HEADS ? "PLAYER_HEAD" : "SKULL_ITEM");
+    private static final Material HEAD_MATERIAL = Material.valueOf(USE_MODERN_HEADS ? "PLAYER_HEAD" : "SKULL_ITEM");
 
     public static void cloneProfile(@NonNull ItemStack from, @NonNull ItemStack to) {
         ItemMeta fromMeta = from.getItemMeta();
@@ -61,10 +60,7 @@ public class Heads {
 
     @NonNull public static ItemStack getHeadByHash(@NonNull String hash) {
         return getHeadByTextureData(
-                "{\"textures\":{\"SKIN\":{\"url\":\"https://textures.minecraft.net/texture/"
-                        + hash
-                        + "\"}}}",
-                false);
+                "{\"textures\":{\"SKIN\":{\"url\":\"https://textures.minecraft.net/texture/" + hash + "\"}}}", false);
     }
 
     @NonNull public static ItemStack getHeadByTextureData(@NonNull String value, boolean base64) {

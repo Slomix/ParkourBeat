@@ -11,10 +11,14 @@ import ru.sortix.parkourbeat.levels.Level;
 
 public abstract class EditorItem {
 
-    @Getter protected final int slot;
+    @Getter
+    protected final int slot;
+
     protected final Player player;
     protected final Level level;
-    @Getter protected ItemStack itemStack;
+
+    @Getter
+    protected ItemStack itemStack;
 
     public EditorItem(ItemStack itemStack, int slot, Player player, Level level) {
         this.itemStack = itemStack;

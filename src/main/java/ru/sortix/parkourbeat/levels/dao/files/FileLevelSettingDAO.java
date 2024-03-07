@@ -55,8 +55,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
             File worldSettingsFile = getFile(gameSettings.getLevelId(), "world_settings.yml");
             File gameSettingFile = getFile(gameSettings.getLevelId(), "game_settings.yml");
 
-            FileConfiguration worldSettingsConfig =
-                    YamlConfiguration.loadConfiguration(worldSettingsFile);
+            FileConfiguration worldSettingsConfig = YamlConfiguration.loadConfiguration(worldSettingsFile);
             FileConfiguration gameSettingsConfig = YamlConfiguration.loadConfiguration(gameSettingFile);
 
             gameSettingsDAO.set(gameSettings, gameSettingsConfig);
@@ -66,7 +65,9 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
             saveConfig(worldSettingsConfig, worldSettingsFile);
         } catch (Exception e) {
             this.logger.log(
-                    Level.SEVERE, "Unable to save level " + settings.getGameSettings().getLevelId(), e);
+                    Level.SEVERE,
+                    "Unable to save level " + settings.getGameSettings().getLevelId(),
+                    e);
         }
     }
 
@@ -96,8 +97,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         return worldSettingsFile;
     }
 
-    private void saveConfig(
-            @NonNull FileConfiguration gameSettingsConfig, @NonNull File gameSettingFile)
+    private void saveConfig(@NonNull FileConfiguration gameSettingsConfig, @NonNull File gameSettingFile)
             throws IOException {
         gameSettingsConfig.save(gameSettingFile);
     }
@@ -191,8 +191,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
             try {
                 levelId = UUID.fromString(file.getName());
             } catch (IllegalArgumentException e) {
-                this.logger.warning(
-                        "Unable to parse level UUID by world dir name: " + file.getAbsolutePath());
+                this.logger.warning("Unable to parse level UUID by world dir name: " + file.getAbsolutePath());
                 continue;
             }
             GameSettings gameSettings = this.loadLevelGameSettings(levelId);

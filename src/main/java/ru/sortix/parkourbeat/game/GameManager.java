@@ -23,16 +23,14 @@ public class GameManager {
         }
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         Game game = new Game(this.levelsManager);
-        game.prepare(player, levelId)
-                .thenAccept(
-                        success -> {
-                            if (!success) {
-                                result.complete(false);
-                                return;
-                            }
-                            this.currentGames.put(player, game);
-                            result.complete(true);
-                        });
+        game.prepare(player, levelId).thenAccept(success -> {
+            if (!success) {
+                result.complete(false);
+                return;
+            }
+            this.currentGames.put(player, game);
+            result.complete(true);
+        });
         return result;
     }
 

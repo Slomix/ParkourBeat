@@ -22,9 +22,7 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
     private final LevelEditorsManager levelEditorsManager;
 
     public TpToWorldCommand(
-            LevelEditorsManager levelEditorsManager,
-            GameManager gameManager,
-            LevelsManager levelsManager) {
+            LevelEditorsManager levelEditorsManager, GameManager gameManager, LevelsManager levelsManager) {
         this.levelsManager = levelsManager;
         this.gameManager = gameManager;
         this.levelEditorsManager = levelEditorsManager;
@@ -32,10 +30,7 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(
-            @NonNull CommandSender sender,
-            @NonNull Command command,
-            @NonNull String label,
-            @NonNull String[] args) {
+            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
             if (args.length > 0) {
@@ -46,21 +41,17 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
 
-                this.levelsManager
-                        .loadLevel(levelId)
-                        .thenAccept(
-                                level -> {
-                                    if (level.getWorld() == player.getWorld()) {
-                                        sender.sendMessage("You are already in this world!");
-                                        return;
-                                    }
+                this.levelsManager.loadLevel(levelId).thenAccept(level -> {
+                    if (level.getWorld() == player.getWorld()) {
+                        sender.sendMessage("You are already in this world!");
+                        return;
+                    }
 
-                                    TeleportUtils.teleport(
-                                            player, level.getLevelSettings().getWorldSettings().getSpawn());
-                                    player.setGameMode(GameMode.SPECTATOR);
-                                    player.sendMessage(
-                                            "Вы телепортированы на уровень \"" + level.getLevelName() + "\"");
-                                });
+                    TeleportUtils.teleport(
+                            player, level.getLevelSettings().getWorldSettings().getSpawn());
+                    player.setGameMode(GameMode.SPECTATOR);
+                    player.sendMessage("Вы телепортированы на уровень \"" + level.getLevelName() + "\"");
+                });
             } else {
                 TeleportUtils.teleport(player, Settings.getLobbySpawn());
                 player.setGameMode(GameMode.ADVENTURE);
@@ -76,10 +67,7 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public List<String> onTabComplete(
-            @NonNull CommandSender sender,
-            @NonNull Command command,
-            @NonNull String label,
-            @NonNull String[] args) {
+            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (!(sender instanceof Player)) return null;
         if (args.length == 0) return null;
         return this.levelsManager.getValidLevelNames(String.join(" ", args).toLowerCase());

@@ -26,9 +26,7 @@ public class StartFinishItem extends EditorItem {
         ITEM = new ItemStack(Material.STICK);
         ItemMeta meta = ITEM.getItemMeta();
         meta.setDisplayName("Зона старта/финиша");
-        meta.setLore(
-                new ArrayList<>(
-                        Arrays.asList("ЛКМ - установить зону старта", "ПКМ - установить зону финиша")));
+        meta.setLore(new ArrayList<>(Arrays.asList("ЛКМ - установить зону старта", "ПКМ - установить зону финиша")));
         ITEM.setItemMeta(meta);
     }
 
@@ -44,13 +42,13 @@ public class StartFinishItem extends EditorItem {
         if (action == Action.RIGHT_CLICK_BLOCK) {
             Vector finishPoint = interactionPoint.toVector();
             updateRegion(finishPoint, false);
-            player.sendMessage(
-                    "Finish border at: " + level.getLevelSettings().getWorldSettings().getFinishBorder());
+            player.sendMessage("Finish border at: "
+                    + level.getLevelSettings().getWorldSettings().getFinishBorder());
         } else if (action == Action.LEFT_CLICK_BLOCK) {
             Vector startPoint = interactionPoint.toVector();
             updateRegion(startPoint, true);
-            player.sendMessage(
-                    "Start border at: " + level.getLevelSettings().getWorldSettings().getStartBorder());
+            player.sendMessage("Start border at: "
+                    + level.getLevelSettings().getWorldSettings().getStartBorder());
         }
     }
 
@@ -67,7 +65,8 @@ public class StartFinishItem extends EditorItem {
         DirectionChecker.Direction previousDirection =
                 levelSettings.getDirectionChecker().getDirection();
         levelSettings.updateDirectionChecker();
-        DirectionChecker.Direction newDirection = levelSettings.getDirectionChecker().getDirection();
+        DirectionChecker.Direction newDirection =
+                levelSettings.getDirectionChecker().getDirection();
         DirectionChecker directionChecker = levelSettings.getDirectionChecker();
 
         worldSettings.updateEndWaypoints(directionChecker);

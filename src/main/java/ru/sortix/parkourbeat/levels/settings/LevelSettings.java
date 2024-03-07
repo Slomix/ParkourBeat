@@ -24,8 +24,7 @@ public class LevelSettings {
         this.gameSettings = gameSettings;
         this.directionChecker = new DirectionChecker(worldSettings.getDirection());
         this.particleController =
-                new ParticleController(
-                        ParkourBeat.getPlugin(), worldSettings.getWorld(), this.directionChecker);
+                new ParticleController(ParkourBeat.getPlugin(), worldSettings.getWorld(), this.directionChecker);
 
         // optional check is list sorted
         this.worldSettings.sortWaypoints(this.directionChecker);
@@ -41,11 +40,7 @@ public class LevelSettings {
         defaultSpawn.setWorld(world);
         return new LevelSettings(
                 new WorldSettings(
-                        world,
-                        defaultSpawn,
-                        Settings.getStartBorder(),
-                        Settings.getFinishBorder(),
-                        new ArrayList<>()),
+                        world, defaultSpawn, Settings.getStartBorder(), Settings.getFinishBorder(), new ArrayList<>()),
                 new GameSettings(levelId, levelName, ownerId, ownerName));
     }
 

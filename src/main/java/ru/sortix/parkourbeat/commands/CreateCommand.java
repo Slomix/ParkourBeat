@@ -25,9 +25,7 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
     private final GameManager gameManager;
 
     public CreateCommand(
-            LevelEditorsManager levelEditorsManager,
-            LevelsManager levelsManager,
-            GameManager gameManager) {
+            LevelEditorsManager levelEditorsManager, LevelsManager levelsManager, GameManager gameManager) {
         this.levelEditorsManager = levelEditorsManager;
         this.levelsManager = levelsManager;
         this.gameManager = gameManager;
@@ -35,10 +33,7 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(
-            @NonNull CommandSender sender,
-            @NonNull Command command,
-            @NonNull String label,
-            @NonNull String[] args) {
+            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
 
         if (args.length < 1) {
             sender.sendMessage("Недостаточно аргументов! Используйте: /create <имя уровня> [окружение]");
@@ -53,8 +48,7 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
                 environment = World.Environment.valueOf(args[1].toUpperCase());
             } catch (IllegalArgumentException e) {
                 sender.sendMessage(
-                        "Неверное окружение! Допустимые значения: "
-                                + Arrays.toString(World.Environment.values()));
+                        "Неверное окружение! Допустимые значения: " + Arrays.toString(World.Environment.values()));
                 return true;
             }
         }
@@ -72,23 +66,21 @@ public class CreateCommand implements CommandExecutor, TabCompleter {
                         environment,
                         player == null ? CONSOLE_UUID : player.getUniqueId(),
                         player == null ? CONSOLE_NAME : player.getName())
-                .thenAccept(
-                        level -> {
-                            if (level == null) {
-                                sender.sendMessage("Не удалось создать уровень \"" + levelName + "\"");
-                                return;
-                            }
-                            sender.sendMessage("Уровень \"" + levelName + "\" создан");
-                            if (player != null) {
-                                levelEditorsManager.createEditorSession(player, level).start();
-                            }
-                        });
+                .thenAccept(level -> {
+                    if (level == null) {
+                        sender.sendMessage("Не удалось создать уровень \"" + levelName + "\"");
+                        return;
+                    }
+                    sender.sendMessage("Уровень \"" + levelName + "\" создан");
+                    if (player != null) {
+                        levelEditorsManager.createEditorSession(player, level).start();
+                    }
+                });
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(
-            CommandSender sender, Command command, String label, String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 2) {
             String environment = args[1].toLowerCase();
             return Arrays.stream(World.Environment.values())

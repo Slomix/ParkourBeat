@@ -37,8 +37,9 @@ public class MovementAccuracyChecker {
             }
         }
 
-        Location point1 =
-                previousLocation != null ? previousLocation : waypoints.get(currentSegment).getLocation();
+        Location point1 = previousLocation != null
+                ? previousLocation
+                : waypoints.get(currentSegment).getLocation();
         Location point2 = waypoints.get(currentSegment + 1).getLocation();
 
         double distanceToLine = calculateDistanceToLine(newLocation, point1, point2);

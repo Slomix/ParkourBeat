@@ -26,7 +26,10 @@ import ru.sortix.parkourbeat.utils.TeleportUtils;
 public class EditorSession {
 
     private final Player owner;
-    @Getter private final Level level;
+
+    @Getter
+    private final Level level;
+
     private final LevelsManager levelsManager;
     private final ItemsContainer editorItems;
     private final GameManager gameManager;
@@ -43,9 +46,9 @@ public class EditorSession {
         this.levelsManager = levelsManager;
         this.gameManager = gameManager;
         this.editorItems = new ItemsContainer(owner, level, gameManager, levelEditorsManager);
-        this.songMenu =
-                new SongMenu(ParkourBeat.getSongs(), owner, level.getLevelSettings().getGameSettings())
-                        .getInventory();
+        this.songMenu = new SongMenu(
+                        ParkourBeat.getSongs(), owner, level.getLevelSettings().getGameSettings())
+                .getInventory();
     }
 
     public void openSongMenu() {

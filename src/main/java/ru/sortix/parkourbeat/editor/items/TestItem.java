@@ -44,7 +44,8 @@ public class TestItem extends EditorItem {
         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
             if (gameManager.isInGame(player)) {
                 gameManager.removeGame(player, false);
-                TeleportUtils.teleport(player, level.getLevelSettings().getWorldSettings().getSpawn());
+                TeleportUtils.teleport(
+                        player, level.getLevelSettings().getWorldSettings().getSpawn());
                 player.setGameMode(GameMode.CREATIVE);
                 itemsContainer.giveToPlayer();
                 level.getLevelSettings().getParticleController().startSpawnParticles(player);
@@ -52,20 +53,17 @@ public class TestItem extends EditorItem {
             } else {
                 level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(player);
                 player.sendMessage("Загрузка уровня...");
-                gameManager
-                        .createNewGame(player, level.getLevelId())
-                        .thenAccept(
-                                unused -> {
-                                    player.setGameMode(GameMode.ADVENTURE);
-                                    player.getInventory().clear();
+                gameManager.createNewGame(player, level.getLevelId()).thenAccept(unused -> {
+                    player.setGameMode(GameMode.ADVENTURE);
+                    player.getInventory().clear();
 
-                                    ItemStack newItem = ITEM.clone();
-                                    itemsContainer.updateEditorItem(itemStack, newItem);
-                                    itemStack = newItem;
+                    ItemStack newItem = ITEM.clone();
+                    itemsContainer.updateEditorItem(itemStack, newItem);
+                    itemStack = newItem;
 
-                                    player.getInventory().setItem(SLOT, itemStack);
-                                    player.sendMessage("Вы вошли в режим тестирования");
-                                });
+                    player.getInventory().setItem(SLOT, itemStack);
+                    player.sendMessage("Вы вошли в режим тестирования");
+                });
             }
         }
     }

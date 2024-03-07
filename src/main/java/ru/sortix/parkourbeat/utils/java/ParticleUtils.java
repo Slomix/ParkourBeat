@@ -9,8 +9,7 @@ import org.bukkit.entity.Player;
 
 @UtilityClass
 public class ParticleUtils {
-    private final boolean dustOptionsSupport =
-            ClassUtils.isClassPresent("org.bukkit.Particle$DustOptions");
+    private final boolean dustOptionsSupport = ClassUtils.isClassPresent("org.bukkit.Particle$DustOptions");
 
     public void displayRedstoneParticles(
             @NonNull Player player,
@@ -29,8 +28,7 @@ public class ParticleUtils {
             Particle.DustOptions dustOptions = new Particle.DustOptions(color, 1f);
             for (Location location : locations) {
                 if (location.distanceSquared(playerLoc) > maxDistanceSquared) continue;
-                player.spawnParticle(
-                        Particle.REDSTONE, location, 0, offsetX, offsetY, offsetZ, 1, dustOptions);
+                player.spawnParticle(Particle.REDSTONE, location, 0, offsetX, offsetY, offsetZ, 1, dustOptions);
             }
         } else {
             for (Location location : locations) {

@@ -11,9 +11,13 @@ import org.bukkit.configuration.serialization.ConfigurationSerializable;
 @Getter
 public class Waypoint implements ConfigurationSerializable {
 
-    @Setter private Location location;
+    @Setter
+    private Location location;
+
     private final Color color;
-    @Setter private double height;
+
+    @Setter
+    private double height;
 
     public Waypoint(Location location, Color color, double height) {
         this.location = location;

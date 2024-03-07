@@ -17,7 +17,9 @@ public class CopyDirVisitor extends SimpleFileVisitor<Path> {
     private final @NonNull Logger logger;
     private final @NonNull Path sourceDir;
     private final @NonNull Path targetDir;
-    @Getter private boolean failed = false;
+
+    @Getter
+    private boolean failed = false;
 
     @Override
     public FileVisitResult visitFile(@NonNull Path file, @NonNull BasicFileAttributes attrs) {

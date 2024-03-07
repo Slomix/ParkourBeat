@@ -24,8 +24,13 @@ public class Game {
 
     private final LevelsManager levelsManager;
     private Level level;
-    @Getter private Player player;
-    @Getter private State currentState;
+
+    @Getter
+    private Player player;
+
+    @Getter
+    private State currentState;
+
     private GameMoveHandler gameMoveHandler;
 
     public Game(LevelsManager levelsManager) {
@@ -41,19 +46,16 @@ public class Game {
         currentState = State.PREPARING;
         this.player = player;
 
-        this.levelsManager
-                .loadLevel(levelId)
-                .thenAccept(
-                        level -> {
-                            try {
-                                this.level = level;
-                                this.prepareGame();
-                                result.complete(true);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                result.complete(false);
-                            }
-                        });
+        this.levelsManager.loadLevel(levelId).thenAccept(level -> {
+            try {
+                this.level = level;
+                this.prepareGame();
+                result.complete(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+                result.complete(false);
+            }
+        });
         return result;
     }
 
@@ -74,8 +76,7 @@ public class Game {
         this.gameMoveHandler = new GameMoveHandler(this);
 
         String songPlayListName = gameSettings.getSongPlayListName();
-        if (gameSettings.getSongName() != null
-                && !songPlayListName.equals(AMusic.getPackName(player))) {
+        if (gameSettings.getSongName() != null && !songPlayListName.equals(AMusic.getPackName(player))) {
             this.getPlugin()
                     .getServer()
                     .getScheduler()

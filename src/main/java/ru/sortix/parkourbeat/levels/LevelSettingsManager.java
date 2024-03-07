@@ -12,7 +12,9 @@ import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 public class LevelSettingsManager {
     private final Map<UUID, LevelSettings> levelSettings = new HashMap<>();
-    @Getter private final LevelSettingDAO levelSettingDAO;
+
+    @Getter
+    private final LevelSettingDAO levelSettingDAO;
 
     protected LevelSettingsManager(@NonNull LevelSettingDAO levelSettingDAO) {
         this.levelSettingDAO = levelSettingDAO;

@@ -24,18 +24,15 @@ public class Songs {
 
     public void reload() {
         try (Stream<Path> paths = Files.walk(path)) {
-            paths
-                    .filter(Files::isRegularFile)
-                    .forEach(
-                            file -> {
-                                String parent = file.getParent().getFileName().toString();
-                                String filename = file.getFileName().toString();
-                                int dotIndex = filename.lastIndexOf(".");
-                                if (dotIndex > 0) {
-                                    filename = filename.substring(0, dotIndex);
-                                }
-                                allSongs.put(filename, parent);
-                            });
+            paths.filter(Files::isRegularFile).forEach(file -> {
+                String parent = file.getParent().getFileName().toString();
+                String filename = file.getFileName().toString();
+                int dotIndex = filename.lastIndexOf(".");
+                if (dotIndex > 0) {
+                    filename = filename.substring(0, dotIndex);
+                }
+                allSongs.put(filename, parent);
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
