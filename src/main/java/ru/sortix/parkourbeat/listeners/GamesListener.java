@@ -131,7 +131,8 @@ public final class GamesListener implements Listener {
     }
 
     private int getFallHeight(@Nullable Level level, boolean play) {
-        return (level == null ? 0 : level.getLevelSettings().getWorldSettings().getMinWorldHeight()) - (play ? 1 : 5);
+        if (!play) return -5;
+        return (level == null ? 0 : level.getLevelSettings().getWorldSettings().getMinWorldHeight()) - 1;
     }
 
     @EventHandler
