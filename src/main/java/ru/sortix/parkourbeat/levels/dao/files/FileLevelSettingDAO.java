@@ -185,7 +185,8 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         return this.worldsContainerPath
                 .relativize(this.getBukkitWorldDirectory(levelId).toPath())
                 .toFile()
-                .getPath();
+                .getPath()
+                .replace("\\", "/"); // fix Windows issues
     }
 
     @NonNull public Map<String, UUID> loadAllAvailableLevelNamesSync() {

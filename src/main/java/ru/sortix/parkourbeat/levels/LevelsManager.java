@@ -23,6 +23,7 @@ public class LevelsManager {
     private final Plugin plugin;
 
     private final WorldsManager worldsManager;
+    private final File defaultLevelDirectory;
 
     @Getter
     private final LevelSettingsManager levelsSettings;
@@ -35,6 +36,11 @@ public class LevelsManager {
             @NonNull Plugin plugin, @NonNull WorldsManager worldsManager, @NonNull LevelSettingDAO levelSettingDAO) {
         this.plugin = plugin;
         this.worldsManager = worldsManager;
+        this.defaultLevelDirectory = new File(this.plugin.getDataFolder(), "pb_default_level");
+        if (!this.defaultLevelDirectory.isDirectory()) {
+            throw new IllegalStateException(
+                    "Default level directory not found: " + this.defaultLevelDirectory.getAbsolutePath());
+        }
         this.levelsSettings = new LevelSettingsManager(levelSettingDAO);
         loadAvailableLevelNames();
     }
@@ -64,10 +70,16 @@ public class LevelsManager {
         worldCreator.generator(this.worldsManager.getEmptyGenerator());
         if (false) worldCreator.environment(environment); // creates a new world not a copy
 
-        File worldDir = new File(this.plugin.getDataFolder(), "pb_default_level");
+        if (!this.defaultLevelDirectory.isDirectory()) {
+            this.plugin
+                    .getLogger()
+                    .severe("Default level directory not found: " + this.defaultLevelDirectory.getAbsolutePath());
+            result.complete(null);
+            return result;
+        }
 
         this.worldsManager
-                .createWorldFromCustomDirectory(worldCreator, worldDir)
+                .createWorldFromCustomDirectory(worldCreator, this.defaultLevelDirectory)
                 .thenAccept(world -> {
                     if (world == null) {
                         result.complete(null);
