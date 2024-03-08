@@ -24,7 +24,7 @@ import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 public class FileLevelSettingDAO implements LevelSettingDAO {
     private final Logger logger;
     private final Server server;
-    private final Path worldsContinerPath;
+    private final Path worldsContainerPath;
     private final File levelsDir;
     private final GameSettingsDAO gameSettingsDAO;
     private final WorldSettingsDAO worldSettingsDAO;
@@ -32,7 +32,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     public FileLevelSettingDAO(@NonNull Plugin plugin) {
         this.logger = plugin.getLogger();
         this.server = plugin.getServer();
-        this.worldsContinerPath = this.server.getWorldContainer().toPath();
+        this.worldsContainerPath = this.server.getWorldContainer().toPath();
         this.levelsDir = new File(plugin.getDataFolder(), "levels");
         //noinspection ResultOfMethodCallIgnored
         this.levelsDir.mkdirs();
@@ -178,7 +178,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     }
 
     @NonNull private String getBukkitWorldName(@NonNull UUID levelId) {
-        return this.worldsContinerPath
+        return this.worldsContainerPath
                 .relativize(this.getBukkitWorldDirectory(levelId).toPath())
                 .toFile()
                 .getPath();
