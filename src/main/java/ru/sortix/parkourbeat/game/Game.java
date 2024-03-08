@@ -1,5 +1,7 @@
 package ru.sortix.parkourbeat.game;
 
+import static ru.sortix.parkourbeat.utils.LocationUtils.isValidSpawnPoint;
+
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
@@ -49,6 +51,20 @@ public class Game {
         this.levelsManager.loadLevel(levelId).thenAccept(level -> {
             try {
                 this.level = level;
+
+                // TODO: Проверять это на этапе загрузки настроек мира и мне кажется
+                // лучше чтобы мир отгружался при result.complete(false)
+                LevelSettings levelSettings = level.getLevelSettings();
+                if (!isValidSpawnPoint(levelSettings.getWorldSettings().getSpawn(), levelSettings)) {
+                    player.sendMessage("Точка спауна установлена неверно. Невозможно начать игру.");
+                    result.complete(false);
+
+                    if (level.getWorld().getPlayers().isEmpty()) {
+                        levelsManager.unloadLevel(levelId);
+                    }
+                    return;
+                }
+
                 this.prepareGame();
                 result.complete(true);
             } catch (Exception e) {

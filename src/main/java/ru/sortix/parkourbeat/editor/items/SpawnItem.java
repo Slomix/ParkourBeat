@@ -1,5 +1,7 @@
 package ru.sortix.parkourbeat.editor.items;
 
+import static ru.sortix.parkourbeat.utils.LocationUtils.isValidSpawnPoint;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import lombok.NonNull;
@@ -12,6 +14,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 import ru.sortix.parkourbeat.levels.Level;
+import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 public class SpawnItem extends EditorItem {
 
@@ -32,7 +35,15 @@ public class SpawnItem extends EditorItem {
 
     @Override
     public void onClick(Action action, Block block, @Nullable Location interactionPoint) {
-        this.level.getLevelSettings().getWorldSettings().setSpawn(this.player.getLocation());
+        LevelSettings levelSettings = this.level.getLevelSettings();
+        Location playerLocation = player.getLocation();
+        levelSettings.getWorldSettings().setSpawn(playerLocation);
+
+        if (!isValidSpawnPoint(playerLocation, levelSettings)) {
+            this.player.sendMessage("Точка спауна не может быть установлена здесь.");
+            return;
+        }
+
         this.player.sendMessage("Точка спауна установлена на уровне ваших ног. "
                 + "Убедитесь, что направление взгляда выбрано корректно! "
                 + "Именно в эту сторону будут повёрнуты игроки при телепортации");

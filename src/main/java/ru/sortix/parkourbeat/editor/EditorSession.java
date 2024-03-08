@@ -69,6 +69,7 @@ public class EditorSession {
         ParticleController particleController = levelSettings.getParticleController();
 
         owner.setGameMode(GameMode.CREATIVE);
+        owner.setFlying(true);
         TeleportUtils.teleport(this.owner, worldSettings.getSpawn());
         owner.sendMessage("Редактор уровня \"" + level.getLevelName() + "\" успешно запущен");
 

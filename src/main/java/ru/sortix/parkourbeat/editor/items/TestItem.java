@@ -51,9 +51,14 @@ public class TestItem extends EditorItem {
                 level.getLevelSettings().getParticleController().startSpawnParticles(player);
                 player.sendMessage("Вы вышли из режима тестирования");
             } else {
-                level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(player);
                 player.sendMessage("Загрузка уровня...");
-                gameManager.createNewGame(player, level.getLevelId()).thenAccept(unused -> {
+                gameManager.createNewGame(player, level.getLevelId()).thenAccept(success -> {
+                    if (!success) {
+                        player.sendMessage("Не удалось начать игру!");
+                        return;
+                    }
+                    level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(player);
+
                     player.setGameMode(GameMode.ADVENTURE);
                     player.getInventory().clear();
 
