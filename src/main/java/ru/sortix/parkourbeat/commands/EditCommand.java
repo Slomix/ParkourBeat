@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat.commands;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import lombok.NonNull;
@@ -11,6 +12,7 @@ import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.editor.LevelEditorsManager;
 import ru.sortix.parkourbeat.game.GameManager;
 import ru.sortix.parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.levels.settings.GameSettings;
 
 public class EditCommand implements CommandExecutor, TabCompleter {
 
@@ -46,7 +48,8 @@ public class EditCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         levelsManager.loadLevel(levelId).thenAccept(level -> {
-            if (!level.getLevelSettings().getGameSettings().isOwner(sender)) {
+            GameSettings gameSettings = level.getLevelSettings().getGameSettings();
+            if (!gameSettings.isOwner(sender)) {
                 player.sendMessage("Вы не являетесь владельцем этого уровня!");
                 if (level.getWorld().getPlayers().isEmpty()) {
                     levelsManager.unloadLevel(levelId);
@@ -57,7 +60,9 @@ public class EditCommand implements CommandExecutor, TabCompleter {
                 player.sendMessage("Вы и так уже редактируете данный уровень!");
                 return;
             }
-            if (!this.gameManager.getPlayersOnLevel(level).isEmpty()) {
+            Collection<Player> playersOnLevel = this.gameManager.getPlayersOnLevel(level);
+            playersOnLevel.removeIf(gameSettings::isOwner);
+            if (!playersOnLevel.isEmpty()) {
                 player.sendMessage("Нельзя редактировать уровень, на котором находятся игроки");
                 return;
             }
