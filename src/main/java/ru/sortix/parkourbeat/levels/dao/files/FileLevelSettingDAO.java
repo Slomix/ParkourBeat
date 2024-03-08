@@ -24,18 +24,24 @@ import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 public class FileLevelSettingDAO implements LevelSettingDAO {
     private final Logger logger;
     private final Server server;
+
     private final Path worldsContainerPath;
-    private final File levelsDir;
+    private final File levelsDirRelativeDir;
+    private final File levelsDirAbsoluteFile;
+
     private final GameSettingsDAO gameSettingsDAO;
     private final WorldSettingsDAO worldSettingsDAO;
 
     public FileLevelSettingDAO(@NonNull Plugin plugin) {
         this.logger = plugin.getLogger();
         this.server = plugin.getServer();
+
         this.worldsContainerPath = this.server.getWorldContainer().toPath();
-        this.levelsDir = new File(plugin.getDataFolder(), "levels");
+        this.levelsDirRelativeDir = new File(plugin.getDataFolder(), "levels");
+        this.levelsDirAbsoluteFile = this.levelsDirRelativeDir.getAbsoluteFile();
         //noinspection ResultOfMethodCallIgnored
-        this.levelsDir.mkdirs();
+        this.levelsDirAbsoluteFile.mkdirs();
+
         this.gameSettingsDAO = new GameSettingsDAO();
         this.worldSettingsDAO = new WorldSettingsDAO();
     }
@@ -158,7 +164,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     }
 
     @NonNull public File getBukkitWorldDirectory(@NonNull UUID levelId) {
-        return new File(this.levelsDir, levelId.toString());
+        return new File(this.levelsDirRelativeDir, levelId.toString());
     }
 
     @Override
@@ -168,13 +174,11 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
 
     @Override
     public boolean isLevelWorld(@NonNull World world) {
-        // TODO test it
-        boolean equals = world.getWorldFolder().getParentFile().equals(this.levelsDir);
-        System.out.println("#1 " + world.getWorldFolder().getParentFile());
-        System.out.println("#2 " + this.levelsDir);
-        System.out.println("#3 " + this.levelsDir.getAbsolutePath());
-        System.out.println("equals=" + equals);
-        return equals;
+        try {
+            return world.getWorldFolder().getParentFile().getCanonicalFile().equals(this.levelsDirAbsoluteFile);
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     @NonNull private String getBukkitWorldName(@NonNull UUID levelId) {
@@ -187,14 +191,15 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     @NonNull public Map<String, UUID> loadAllAvailableLevelNamesSync() {
         Map<String, UUID> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-        if (!this.levelsDir.isDirectory()) {
-            this.logger.warning("Levels directory not found: " + this.levelsDir.getAbsolutePath());
+        if (!this.levelsDirRelativeDir.isDirectory()) {
+            this.logger.warning("Levels directory not found: " + this.levelsDirRelativeDir.getAbsolutePath());
             return result;
         }
 
-        File[] files = this.levelsDir.listFiles();
+        File[] files = this.levelsDirRelativeDir.listFiles();
         if (files == null) {
-            this.logger.warning("Unable to get levels directory content: " + this.levelsDir.getAbsolutePath());
+            this.logger.warning(
+                    "Unable to get levels directory content: " + this.levelsDirRelativeDir.getAbsolutePath());
             return result;
         }
 

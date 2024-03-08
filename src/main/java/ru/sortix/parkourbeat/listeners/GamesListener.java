@@ -223,15 +223,25 @@ public final class GamesListener implements Listener {
     }
 
     @NonNull private WorldType getWorldType(@NonNull Player player) {
+        Level level = this.getCurrentPlayerLevel(player);
+        if (level != null && level.getWorld() == player.getWorld()) return WorldType.PB_LEVEL;
         return this.getWorldType(player.getWorld());
     }
 
+    @Nullable private Level getCurrentPlayerLevel(@NonNull Player player) {
+        Game game = this.gameManager.getCurrentGame(player);
+        if (game != null) return game.getLevel();
+        EditorSession editorSession = this.levelEditorsManager.getEditorSession(player);
+        if (editorSession != null) return editorSession.getLevel();
+        return null;
+    }
+
     @NonNull private WorldType getWorldType(@NonNull World world) {
-        if (this.levelSettingDAO.isLevelWorld(world)) {
-            return WorldType.PB_LEVEL;
-        }
         if (Settings.getLobbySpawn().getWorld() == world) {
             return WorldType.PB_LOBBY;
+        }
+        if (this.levelSettingDAO.isLevelWorld(world)) {
+            return WorldType.PB_LEVEL;
         }
         return WorldType.NON_PB;
     }
