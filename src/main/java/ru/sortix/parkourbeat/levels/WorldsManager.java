@@ -80,6 +80,7 @@ public class WorldsManager {
                         Files.walkFileTree(source.toPath(), visitor);
                         return !visitor.isFailed();
                     } catch (IOException e) {
+                        this.logger.log(Level.SEVERE, "Unable to copy world data from " + source + " to " + target, e);
                         return false;
                     }
                 },
