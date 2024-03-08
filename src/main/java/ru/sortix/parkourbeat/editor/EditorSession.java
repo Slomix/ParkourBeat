@@ -6,6 +6,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.RayTraceResult;
@@ -97,9 +98,9 @@ public class EditorSession {
     public static final int INTERACT_BLOCK_DISTANCE = 5;
 
     public void onPlayerInteract(PlayerInteractEvent e) {
-        if (e.getItem() == null) {
-            return;
-        }
+        if (e.getItem() == null) return;
+        if (e.getHand() != EquipmentSlot.HAND) return;
+
         EditorItem editorItem = editorItems.getEditorItems().get(e.getItem());
         if (editorItem != null) {
             Location interactionPoint = e.getInteractionPoint();
