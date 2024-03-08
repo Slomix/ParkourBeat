@@ -176,11 +176,16 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     @NonNull public Map<String, UUID> loadAllAvailableLevelNamesSync() {
         Map<String, UUID> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-        File worldsDirectory = this.levelsDir;
-        if (!worldsDirectory.isDirectory()) return result;
+        if (!this.levelsDir.isDirectory()) {
+            this.logger.warning("Levels directory not found: " + this.levelsDir.getAbsolutePath());
+            return result;
+        }
 
-        File[] files = worldsDirectory.listFiles();
-        if (files == null) return result;
+        File[] files = this.levelsDir.listFiles();
+        if (files == null) {
+            this.logger.warning("Unable to get levels directory content: " + this.levelsDir.getAbsolutePath());
+            return result;
+        }
 
         for (File file : files) {
             if (!file.isDirectory()) {

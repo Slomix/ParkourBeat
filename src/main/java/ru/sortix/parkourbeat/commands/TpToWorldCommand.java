@@ -42,6 +42,10 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
                 }
 
                 this.levelsManager.loadLevel(levelId).thenAccept(level -> {
+                    if (level == null) {
+                        sender.sendMessage("Не удалось загрузить данные уровня");
+                        return;
+                    }
                     if (level.getWorld() == player.getWorld()) {
                         sender.sendMessage("You are already in this world!");
                         return;

@@ -49,6 +49,10 @@ public class Game {
         this.player = player;
 
         this.levelsManager.loadLevel(levelId).thenAccept(level -> {
+            if (level == null) {
+                result.complete(false);
+                return;
+            }
             try {
                 this.level = level;
 

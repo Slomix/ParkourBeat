@@ -41,6 +41,10 @@ public class DeleteCommand implements CommandExecutor, TabCompleter {
         }
 
         levelsManager.loadLevel(levelId).thenAccept(level -> {
+            if (level == null) {
+                sender.sendMessage("Не удалось загрузить данные уровня");
+                return;
+            }
             if (!level.getLevelSettings().getGameSettings().isOwner(sender)) {
                 sender.sendMessage("Вы не являетесь владельцем этого уровня");
                 if (level.getWorld().getPlayers().isEmpty()) {

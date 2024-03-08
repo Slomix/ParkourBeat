@@ -69,6 +69,10 @@ public class LevelsManager {
         this.worldsManager
                 .createWorldFromCustomDirectory(worldCreator, worldDir)
                 .thenAccept(world -> {
+                    if (world == null) {
+                        result.complete(null);
+                        return;
+                    }
                     prepareLevelWorld(world, true);
 
                     LevelSettings levelSettings = LevelSettings.create(levelId, levelName, world, ownerId, ownerName);
@@ -96,6 +100,10 @@ public class LevelsManager {
         this.worldsManager
                 .createWorldFromDefaultContainer(worldCreator, this.worldsManager.getSyncExecutor())
                 .thenAccept(world -> {
+                    if (world == null) {
+                        result.complete(null);
+                        return;
+                    }
                     try {
                         this.prepareLevelWorld(world, false);
 

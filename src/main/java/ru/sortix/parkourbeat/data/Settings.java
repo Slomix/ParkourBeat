@@ -91,8 +91,11 @@ public class Settings {
                 world = worldsManager
                         .createWorldFromDefaultContainer(worldCreator, worldsManager.getCurrentThreadExecutor())
                         .join();
+                if (world == null) {
+                    throw new IllegalArgumentException("Unable to create bukkit world from default container");
+                }
             } catch (Exception e) {
-                throw new RuntimeException("Unable to load lobby world", e);
+                throw new RuntimeException("Unable to load world from config", e);
             }
         }
 

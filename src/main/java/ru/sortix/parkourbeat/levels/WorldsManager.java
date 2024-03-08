@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
 import lombok.NonNull;
@@ -62,16 +63,10 @@ public class WorldsManager {
 
         this.copyWorldData(worldDir, realWorldDir).thenAccept(dataPrepared -> {
             if (!dataPrepared) {
-                result.completeExceptionally(new IllegalArgumentException("Unable to prepare world data"));
+                result.complete(null);
                 return;
             }
-            this.createBukkitWorld(worldCreator, this.syncExecutor).thenAccept(world -> {
-                if (world == null) {
-                    result.completeExceptionally(new IllegalArgumentException("Unable to create Bukkit world"));
-                    return;
-                }
-                result.complete(world);
-            });
+            this.createBukkitWorld(worldCreator, this.syncExecutor).thenAccept(result::complete);
         });
         return result;
     }
@@ -97,14 +92,21 @@ public class WorldsManager {
                     World world = this.server.getWorld(worldCreator.name());
                     if (world != null) return world;
 
-                    world = this.server.createWorld(worldCreator);
-                    if (world != null) return world;
-
-                    throw new UnsupportedOperationException("Unable to create world \""
-                            + worldCreator.name()
-                            + "\""
-                            + " from directory "
-                            + this.getWorldDir(worldCreator).getAbsolutePath());
+                    try {
+                        world = this.server.createWorld(worldCreator);
+                        if (world != null) return world;
+                        throw new IllegalArgumentException("Bukkit API result is null");
+                    } catch (Exception e) {
+                        this.logger.log(
+                                Level.SEVERE,
+                                "Unable to create world \""
+                                        + worldCreator.name()
+                                        + "\""
+                                        + " from directory "
+                                        + this.getWorldDir(worldCreator).getAbsolutePath(),
+                                e);
+                    }
+                    return null;
                 },
                 executor);
     }

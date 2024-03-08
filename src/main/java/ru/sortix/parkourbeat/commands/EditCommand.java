@@ -48,6 +48,10 @@ public class EditCommand implements CommandExecutor, TabCompleter {
             return true;
         }
         levelsManager.loadLevel(levelId).thenAccept(level -> {
+            if (level == null) {
+                sender.sendMessage("Не удалось загрузить данные уровня");
+                return;
+            }
             GameSettings gameSettings = level.getLevelSettings().getGameSettings();
             if (!gameSettings.isOwner(sender)) {
                 player.sendMessage("Вы не являетесь владельцем этого уровня!");
