@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.levels.dao.files;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -23,6 +24,7 @@ import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 public class FileLevelSettingDAO implements LevelSettingDAO {
     private final Logger logger;
     private final Server server;
+    private final Path worldsContinerPath;
     private final File levelsDir;
     private final GameSettingsDAO gameSettingsDAO;
     private final WorldSettingsDAO worldSettingsDAO;
@@ -30,7 +32,8 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     public FileLevelSettingDAO(@NonNull Plugin plugin) {
         this.logger = plugin.getLogger();
         this.server = plugin.getServer();
-        this.levelsDir = new File(plugin.getDataFolder(), "levels").getAbsoluteFile();
+        this.worldsContinerPath = this.server.getWorldContainer().toPath();
+        this.levelsDir = new File(plugin.getDataFolder(), "levels");
         //noinspection ResultOfMethodCallIgnored
         this.levelsDir.mkdirs();
         this.gameSettingsDAO = new GameSettingsDAO();
@@ -78,7 +81,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
 
     @Override
     public void deleteLevelWorldAndSettings(@NonNull UUID levelId) {
-        File worldFolder = this.getBukkitWorldDirectory(levelId);
+        File worldFolder = this.getBukkitWorldDirectory(levelId).getAbsoluteFile();
         if (!worldFolder.isDirectory()) return;
         deleteDirectory(worldFolder);
     }
@@ -151,7 +154,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     }
 
     @NonNull private File getSettingsDirectory(@NonNull UUID levelId) {
-        return new File(getBukkitWorldDirectory(levelId), "parkourbeat");
+        return new File(getBukkitWorldDirectory(levelId).getAbsoluteFile(), "parkourbeat");
     }
 
     @NonNull public File getBukkitWorldDirectory(@NonNull UUID levelId) {
@@ -165,12 +168,20 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
 
     @Override
     public boolean isLevelWorld(@NonNull World world) {
-        // TODO Optimize it
-        return world.getWorldFolder().getParentFile().equals(this.levelsDir);
+        // TODO test it
+        boolean equals = world.getWorldFolder().getParentFile().equals(this.levelsDir);
+        System.out.println("#1 " + world.getWorldFolder().getParentFile());
+        System.out.println("#2 " + this.levelsDir);
+        System.out.println("#3 " + this.levelsDir.getAbsolutePath());
+        System.out.println("equals=" + equals);
+        return equals;
     }
 
     @NonNull private String getBukkitWorldName(@NonNull UUID levelId) {
-        return this.getBukkitWorldDirectory(levelId).getAbsolutePath();
+        return this.worldsContinerPath
+                .relativize(this.getBukkitWorldDirectory(levelId).toPath())
+                .toFile()
+                .getPath();
     }
 
     @NonNull public Map<String, UUID> loadAllAvailableLevelNamesSync() {
