@@ -1,5 +1,7 @@
 package ru.sortix.parkourbeat.editor.menu;
 
+import lombok.NonNull;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 import ru.sortix.parkourbeat.utils.Heads;
@@ -40,7 +42,7 @@ public class ArrowItem extends SongMenuItem {
     }
 
     @Override
-    public void onClick() {
+    public void onClick(@NonNull Player player) {
         if (right) {
             menu.next();
         } else {

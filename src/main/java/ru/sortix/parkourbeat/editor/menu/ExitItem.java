@@ -1,17 +1,14 @@
 package ru.sortix.parkourbeat.editor.menu;
 
+import lombok.NonNull;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 public class ExitItem extends SongMenuItem {
-
-    private final Player player;
-
-    public ExitItem(int slot, Player player) {
+    public ExitItem(int slot) {
         super(slot);
-        this.player = player;
     }
 
     @Override
@@ -24,7 +21,7 @@ public class ExitItem extends SongMenuItem {
     }
 
     @Override
-    public void onClick() {
+    public void onClick(@NonNull Player player) {
         player.closeInventory();
     }
 }

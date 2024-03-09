@@ -47,9 +47,8 @@ public class EditorSession {
         this.levelsManager = levelsManager;
         this.gameManager = gameManager;
         this.editorItems = new ItemsContainer(owner, level, gameManager, levelEditorsManager);
-        this.songMenu = new SongMenu(
-                        ParkourBeat.getSongs(), owner, level.getLevelSettings().getGameSettings())
-                .getInventory();
+        this.songMenu =
+                new SongMenu(ParkourBeat.getSongs(), level.getLevelSettings().getGameSettings()).getInventory();
     }
 
     public void openSongMenu() {

@@ -1,5 +1,7 @@
 package ru.sortix.parkourbeat.editor.menu;
 
+import lombok.NonNull;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 public abstract class SongMenuItem {
@@ -16,5 +18,5 @@ public abstract class SongMenuItem {
 
     public abstract ItemStack getItemStack();
 
-    public abstract void onClick();
+    public abstract void onClick(@NonNull Player player);
 }

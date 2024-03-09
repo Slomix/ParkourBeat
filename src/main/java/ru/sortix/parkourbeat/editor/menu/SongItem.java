@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat.editor.menu;
 
+import lombok.NonNull;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -14,15 +15,13 @@ public class SongItem extends SongMenuItem {
     private final String name;
     private final String playlist;
     private final GameSettings gameSettings;
-    private final Player player;
     private final ItemStack item;
 
-    public SongItem(int slot, String playlist, String name, Player player, GameSettings gameSettings) {
+    public SongItem(int slot, String playlist, String name, GameSettings gameSettings) {
         super(slot);
         this.name = name;
         this.playlist = playlist;
         this.gameSettings = gameSettings;
-        this.player = player;
         this.item = createSongItem(name);
     }
 
@@ -40,7 +39,7 @@ public class SongItem extends SongMenuItem {
     }
 
     @Override
-    public void onClick() {
+    public void onClick(@NonNull Player player) {
         gameSettings.setSong(playlist, name);
         player.sendMessage("Вы успешно установили песню: " + name);
     }

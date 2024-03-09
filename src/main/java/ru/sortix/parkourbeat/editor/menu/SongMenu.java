@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import lombok.NonNull;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -16,17 +17,15 @@ public class SongMenu implements InventoryHolder {
     private final int maxPage;
     private final Songs songs;
     private final Map<Integer, SongMenuItem> items;
-    private final Player player;
     private final GameSettings gameSettings;
     private final Inventory inventory;
     private int page = 0;
 
-    public SongMenu(Songs songs, Player player, GameSettings gameSettings) {
+    public SongMenu(Songs songs, GameSettings gameSettings) {
         this.inventory = Bukkit.createInventory(this, 54, "Список песен");
         this.songs = songs;
         this.maxPage = (songs.getAllSongs().size() + 1) / 45;
         this.items = new HashMap<>();
-        this.player = player;
         this.gameSettings = gameSettings;
         initPage(0);
     }
@@ -37,8 +36,7 @@ public class SongMenu implements InventoryHolder {
             int songID = slot + 45 * page;
             if (songID < songs.size()) {
                 String songName = songs.get(songID);
-                SongMenuItem item =
-                        new SongItem(slot, this.songs.getSongPlaylist(songName), songName, player, gameSettings);
+                SongMenuItem item = new SongItem(slot, this.songs.getSongPlaylist(songName), songName, gameSettings);
                 inventory.setItem(slot, item.getItemStack());
                 items.put(slot, item);
             }
@@ -54,15 +52,15 @@ public class SongMenu implements InventoryHolder {
             inventory.setItem(53, item.getItemStack());
             items.put(53, item);
         }
-        SongMenuItem exitItem = new ExitItem(49, player);
+        SongMenuItem exitItem = new ExitItem(49);
         inventory.setItem(49, exitItem.getItemStack());
         items.put(49, exitItem);
     }
 
-    public void onClick(int slot) {
+    public void onClick(int slot, @NonNull Player player) {
         SongMenuItem item = items.get(slot);
         if (item != null) {
-            item.onClick();
+            item.onClick(player);
         }
     }
 
