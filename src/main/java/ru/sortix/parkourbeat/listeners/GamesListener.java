@@ -1,7 +1,12 @@
 package ru.sortix.parkourbeat.listeners;
 
+import io.papermc.paper.chat.ChatRenderer;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import javax.annotation.Nullable;
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -15,6 +20,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
+import org.jetbrains.annotations.NotNull;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.Settings;
@@ -210,6 +216,25 @@ public final class GamesListener implements Listener {
                 && block.getWorld() == editorSession.getLevel().getWorld()) return;
         if (event.getPlayer().hasPermission("parkourbeat.level.edit.anytime")) return;
         event.setUseInteractedBlock(Event.Result.DENY);
+    }
+
+    private final ChatRenderer.ViewerUnaware viewerUnaware = new ChatRenderer.ViewerUnaware() {
+        @Override
+        public @NotNull Component render(
+                @NotNull Player source, @NotNull Component sourceDisplayName, @NotNull Component message) {
+            int lvl = 0;
+            TextColor nameColor =
+                    source.hasPermission("parkourbeat.chat.admin") ? NamedTextColor.RED : NamedTextColor.WHITE;
+            return Component.text("#" + lvl + " ", NamedTextColor.GRAY)
+                    .append(sourceDisplayName.color(nameColor))
+                    .append(Component.text(" -> ", NamedTextColor.WHITE))
+                    .append(message.color(NamedTextColor.WHITE));
+        }
+    };
+
+    @EventHandler
+    private void on(AsyncChatEvent event) {
+        event.renderer(ChatRenderer.viewerUnaware(this.viewerUnaware));
     }
 
     @Nullable private Level getEditOrGameLevel(@NonNull Player player) {
