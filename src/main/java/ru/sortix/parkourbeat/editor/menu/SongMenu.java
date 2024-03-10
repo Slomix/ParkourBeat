@@ -11,6 +11,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import ru.sortix.parkourbeat.data.Songs;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
+import ru.sortix.parkourbeat.levels.settings.Song;
 
 public class SongMenu implements InventoryHolder {
 
@@ -35,8 +36,12 @@ public class SongMenu implements InventoryHolder {
         for (int slot = 0; slot < 45; slot++) {
             int songID = slot + 45 * page;
             if (songID < songs.size()) {
+
                 String songName = songs.get(songID);
-                SongMenuItem item = new SongItem(slot, this.songs.getSongPlaylist(songName), songName, gameSettings);
+                String songPlaylist = this.songs.getSongPlaylist(songName);
+                Song song = new Song(songPlaylist, songName);
+
+                SongMenuItem item = new SongItem(slot, song, this.gameSettings);
                 inventory.setItem(slot, item.getItemStack());
                 items.put(slot, item);
             }

@@ -19,6 +19,7 @@ import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
+import ru.sortix.parkourbeat.levels.settings.Song;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.utils.TeleportUtils;
 
@@ -95,44 +96,51 @@ public class Game {
 
         this.gameMoveHandler = new GameMoveHandler(this);
 
-        String songPlayListName = gameSettings.getSongPlayListName();
-        if (gameSettings.getSongName() != null && !songPlayListName.equals(AMusic.getPackName(player))) {
-            this.getPlugin()
-                    .getServer()
-                    .getScheduler()
-                    .scheduleSyncDelayedTask(
-                            this.getPlugin(),
-                            () -> {
-                                try {
-                                    AMusic.loadPack(player, songPlayListName, false);
-                                } catch (Throwable t) {
-                                    this.levelsManager
-                                            .getPlugin()
-                                            .getLogger()
-                                            .log(
-                                                    java.util.logging.Level.SEVERE,
-                                                    "Не удалось загрузить пак "
-                                                            + songPlayListName
-                                                            + " игроку "
-                                                            + player.getName(),
-                                                    t);
-                                }
-                            },
-                            20L);
-        } else {
-            currentState = State.READY;
+        boolean ready = true;
+        Song song = gameSettings.getSong();
+        if (song != null) {
+            String currentPlayList = AMusic.getPackName(this.player); // nullable
+            String requiredPlaylist = song.getSongPlaylist();
+            if (!requiredPlaylist.equals(currentPlayList)) {
+                ready = false;
+                Plugin plugin = this.getPlugin();
+                plugin.getServer()
+                        .getScheduler()
+                        .runTaskLater(
+                                plugin,
+                                () -> {
+                                    try {
+                                        AMusic.loadPack(this.player, requiredPlaylist, false);
+                                    } catch (Throwable t) {
+                                        this.levelsManager
+                                                .getPlugin()
+                                                .getLogger()
+                                                .log(
+                                                        java.util.logging.Level.SEVERE,
+                                                        "Не удалось загрузить плейлист " + requiredPlaylist + " игроку "
+                                                                + this.player.getName(),
+                                                        t);
+                                        this.player.sendMessage("Не удалось создать ресурспак с указанной песней");
+                                        this.currentState = State.READY;
+                                    }
+                                },
+                                20L);
+            }
+        }
+        if (ready) {
+            this.currentState = State.READY;
         }
     }
 
     public void start() {
-        if (currentState != State.READY) {
+        if (this.currentState != State.READY) {
             return;
         }
         LevelSettings settings = this.level.getLevelSettings();
         settings.getParticleController().startSpawnParticles(player);
-        if (settings.getGameSettings().getSongName() != null) {
+        if (settings.getGameSettings().getSong() != null) {
             AMusic.setRepeatMode(player, null);
-            AMusic.playSound(player, settings.getGameSettings().getSongName());
+            AMusic.playSound(player, settings.getGameSettings().getSong().getSongName());
         }
         Plugin plugin = this.levelsManager.getPlugin();
         for (Player onlinePlayer : player.getWorld().getPlayers()) {

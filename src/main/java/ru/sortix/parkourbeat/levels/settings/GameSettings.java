@@ -18,12 +18,10 @@ public class GameSettings {
     private final @NonNull String levelName;
     private final @NonNull UUID ownerId;
     private final @NonNull String ownerName;
-    private @Nullable String songPlayListName;
-    private @Nullable String songName;
+    private @Nullable Song song;
 
-    public void setSong(String playlist, String name) {
-        this.songPlayListName = playlist;
-        this.songName = name;
+    public void setSong(@NonNull Song song) {
+        this.song = song;
     }
 
     public boolean isOwner(@NonNull CommandSender sender) {
