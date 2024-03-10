@@ -126,45 +126,79 @@ public class LevelsManager {
 
                         result.complete(loadedLevel);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        this.plugin
+                                .getLogger()
+                                .log(java.util.logging.Level.SEVERE, "Не удалось загрузить уровень " + levelId, e);
                         result.complete(null);
                     }
                 });
         return result;
     }
 
-    public boolean deleteLevel(@NonNull Level level) {
+    @NonNull public CompletableFuture<Boolean> deleteLevelAsync(@NonNull Level level) {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
         UUID levelId = level.getLevelId();
-        if (!this.unloadLevel(levelId)) return false;
+        this.unloadLevelAsync(levelId).thenAccept(success -> {
+            if (!success) {
+                result.complete(false);
+                return;
+            }
 
-        this.availableLevelIdsByName.remove(level.getLevelName());
-        this.levelsSettings.getLevelSettingDAO().deleteLevelWorldAndSettings(levelId);
-        return true;
+            this.availableLevelIdsByName.remove(level.getLevelName());
+            this.levelsSettings.getLevelSettingDAO().deleteLevelWorldAndSettings(levelId);
+            result.complete(true);
+        });
+        return result;
     }
 
-    public boolean unloadLevel(@NonNull UUID levelId) {
+    @NonNull public CompletableFuture<Boolean> unloadLevelAsync(@NonNull UUID levelId) {
+        if (!this.loadedLevels.containsKey(levelId)) return CompletableFuture.completedFuture(true);
+
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
         LevelSettingDAO dao = this.levelsSettings.getLevelSettingDAO();
 
-        if (!this.loadedLevels.containsKey(levelId)) return true;
-
+        CompletableFuture<Boolean> worldUnloading;
         World world = dao.getBukkitWorld(levelId);
-        boolean success = true;
-        if (world != null) {
+        if (world == null) {
+            worldUnloading = CompletableFuture.completedFuture(true);
+        } else {
+            worldUnloading = new CompletableFuture<>();
+            List<CompletableFuture<Boolean>> futures = new ArrayList<>();
             for (Player player : world.getPlayers()) {
                 player.sendMessage("Уровень, на которым вы находились, был удалён");
-                TeleportUtils.teleport(player, Settings.getLobbySpawn());
+                futures.add(TeleportUtils.teleportAsync(player, Settings.getLobbySpawn()));
             }
-            success = this.plugin.getServer().unloadWorld(world, false);
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                    .thenAcceptAsync(
+                            unused -> {
+                                if (!world.getPlayers().isEmpty()) {
+                                    this.plugin
+                                            .getLogger()
+                                            .severe("Unable to unload world: " + world + " (players not teleported)");
+                                    worldUnloading.complete(false);
+                                    return;
+                                }
+                                if (!this.plugin.getServer().unloadWorld(world, false)) {
+                                    this.plugin.getLogger().severe("Unable to unload world: " + world);
+                                    worldUnloading.complete(false);
+                                    return;
+                                }
+                                worldUnloading.complete(true);
+                            },
+                            this.worldsManager.getSyncExecutor());
         }
 
-        if (!success) {
-            this.plugin.getLogger().severe("Unable to unload world: " + world);
-            return false;
-        }
+        worldUnloading.thenAccept(success -> {
+            if (!success) {
+                result.complete(false);
+                return;
+            }
+            this.levelsSettings.unloadLevelSettings(levelId);
+            this.loadedLevels.remove(levelId);
+            result.complete(true);
+        });
 
-        this.levelsSettings.unloadLevelSettings(levelId);
-        this.loadedLevels.remove(levelId);
-        return true;
+        return result;
     }
 
     public void saveLevel(Level level) {

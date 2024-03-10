@@ -65,7 +65,7 @@ public class Game {
                     result.complete(false);
 
                     if (level.getWorld().getPlayers().isEmpty()) {
-                        levelsManager.unloadLevel(levelId);
+                        this.levelsManager.unloadLevelAsync(levelId);
                     }
                     return;
                 }
@@ -73,7 +73,7 @@ public class Game {
                 this.prepareGame();
                 result.complete(true);
             } catch (Exception e) {
-                e.printStackTrace();
+                this.getPlugin().getLogger().log(java.util.logging.Level.SEVERE, "Unable to prepare game", e);
                 result.complete(false);
             }
         });
@@ -84,50 +84,51 @@ public class Game {
         LevelSettings settings = this.level.getLevelSettings();
         WorldSettings worldSettings = settings.getWorldSettings();
         GameSettings gameSettings = settings.getGameSettings();
-        ParticleController particleController = settings.getParticleController();
 
-        if (!particleController.isLoaded()) {
-            particleController.loadParticleLocations(worldSettings.getWaypoints());
-        }
+        TeleportUtils.teleportAsync(this.player, worldSettings.getSpawn()).thenAccept(success -> {
+            if (!success) return;
 
-        this.player.setGameMode(GameMode.ADVENTURE);
+            ParticleController particleController = settings.getParticleController();
 
-        TeleportUtils.teleport(this.player, worldSettings.getSpawn());
-
-        this.gameMoveHandler = new GameMoveHandler(this);
-
-        boolean ready = true;
-        Song song = gameSettings.getSong();
-        if (song != null) {
-            String currentPlayList = AMusic.getPackName(this.player); // nullable
-            String requiredPlaylist = song.getSongPlaylist();
-            if (!requiredPlaylist.equals(currentPlayList)) {
-                ready = false;
-                Plugin plugin = this.getPlugin();
-                plugin.getServer()
-                        .getScheduler()
-                        .runTaskLater(
-                                plugin,
-                                () -> {
-                                    try {
-                                        AMusic.loadPack(this.player, requiredPlaylist, false);
-                                    } catch (Throwable t) {
-                                        this.levelsManager
-                                                .getPlugin()
-                                                .getLogger()
-                                                .log(
-                                                        java.util.logging.Level.SEVERE,
-                                                        "Не удалось загрузить плейлист " + requiredPlaylist + " игроку "
-                                                                + this.player.getName(),
-                                                        t);
-                                        this.player.sendMessage("Не удалось создать ресурспак с указанной песней");
-                                        this.currentState = State.READY;
-                                    }
-                                },
-                                20L);
+            if (!particleController.isLoaded()) {
+                particleController.loadParticleLocations(worldSettings.getWaypoints());
             }
-        }
-        if (ready) {
+
+            this.player.setGameMode(GameMode.ADVENTURE);
+
+            this.gameMoveHandler = new GameMoveHandler(this);
+
+            boolean ready = true;
+            Song song = gameSettings.getSong();
+            if (song != null) {
+                String currentPlayList = AMusic.getPackName(this.player); // nullable
+                String requiredPlaylist = song.getSongPlaylist();
+                if (!requiredPlaylist.equals(currentPlayList)) {
+                    ready = false;
+                    Plugin plugin = this.getPlugin();
+                    plugin.getServer()
+                            .getScheduler()
+                            .runTaskLater(plugin, () -> this.setPlaylist(requiredPlaylist), 20L);
+                }
+            }
+            if (ready) {
+                this.currentState = State.READY;
+            }
+        });
+    }
+
+    private void setPlaylist(@NonNull String requiredPlaylist) {
+        try {
+            AMusic.loadPack(this.player, requiredPlaylist, false);
+        } catch (Throwable t) {
+            this.levelsManager
+                    .getPlugin()
+                    .getLogger()
+                    .log(
+                            java.util.logging.Level.SEVERE,
+                            "Не удалось загрузить плейлист " + requiredPlaylist + " игроку " + this.player.getName(),
+                            t);
+            this.player.sendMessage("Не удалось создать ресурспак с указанной песней");
             this.currentState = State.READY;
         }
     }
@@ -169,23 +170,27 @@ public class Game {
     public void stopGame(StopReason reason) {
         LevelSettings settings = this.level.getLevelSettings();
         player.setFallDistance(0f);
-        TeleportUtils.teleport(player, settings.getWorldSettings().getSpawn());
-        player.setHealth(20);
-        player.setGameMode(GameMode.ADVENTURE);
+        TeleportUtils.teleportAsync(this.player, settings.getWorldSettings().getSpawn())
+                .thenAccept(success -> {
+                    if (!success) return;
 
-        player.sendTitle(reason.title, null, 10, 10, 10);
+                    player.setHealth(20);
+                    player.setGameMode(GameMode.ADVENTURE);
 
-        AMusic.stopSound(player);
-        player.playSound(player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
-        settings.getParticleController().stopSpawnParticlesForPlayer(player);
-        gameMoveHandler.getAccuracyChecker().reset();
+                    player.sendTitle(reason.title, null, 10, 10, 10);
 
-        Plugin plugin = this.getPlugin();
-        for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
-            player.showPlayer(plugin, onlinePlayer);
-        }
+                    AMusic.stopSound(player);
+                    player.playSound(player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
+                    settings.getParticleController().stopSpawnParticlesForPlayer(player);
+                    gameMoveHandler.getAccuracyChecker().reset();
 
-        currentState = State.READY;
+                    Plugin plugin = this.getPlugin();
+                    for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+                        player.showPlayer(plugin, onlinePlayer);
+                    }
+
+                    currentState = State.READY;
+                });
     }
 
     @NonNull public Plugin getPlugin() {
@@ -203,7 +208,7 @@ public class Game {
 
         if (unloadLevel) {
             if (settings.getWorldSettings().isWorldEmpty()) {
-                this.levelsManager.unloadLevel(settings.getGameSettings().getLevelId());
+                this.levelsManager.unloadLevelAsync(settings.getGameSettings().getLevelId());
             }
         }
 

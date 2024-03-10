@@ -43,13 +43,17 @@ public class TestItem extends EditorItem {
     public void onClick(Action action, Block block, @Nullable Location interactionPoint) {
         if (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK) {
             if (gameManager.isInGame(player)) {
-                gameManager.removeGame(player, false);
-                TeleportUtils.teleport(
-                        player, level.getLevelSettings().getWorldSettings().getSpawn());
-                player.setGameMode(GameMode.CREATIVE);
-                itemsContainer.giveToPlayer();
-                level.getLevelSettings().getParticleController().startSpawnParticles(player);
-                player.sendMessage("Вы вышли из режима тестирования");
+                TeleportUtils.teleportAsync(
+                                player,
+                                level.getLevelSettings().getWorldSettings().getSpawn())
+                        .thenAccept(success -> {
+                            if (!success) return;
+                            gameManager.removeGame(player, false);
+                            player.setGameMode(GameMode.CREATIVE);
+                            itemsContainer.giveToPlayer();
+                            level.getLevelSettings().getParticleController().startSpawnParticles(player);
+                            player.sendMessage("Вы вышли из режима тестирования");
+                        });
             } else {
                 player.sendMessage("Загрузка уровня...");
                 gameManager.createNewGame(player, level.getLevelId()).thenAccept(success -> {

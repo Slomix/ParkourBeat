@@ -1,23 +1,26 @@
 package ru.sortix.parkourbeat.data;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Stream;
+import lombok.NonNull;
 import me.bomb.amusic.AMusic;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class Songs {
-
+    private final Logger logger;
     private final Map<String, String> allSongs;
     private final Path path;
 
-    public Songs() {
-        allSongs = new TreeMap<>();
+    public Songs(@NonNull Logger logger) {
+        this.logger = logger;
+        this.allSongs = new TreeMap<>();
         this.path = new File(JavaPlugin.getPlugin(AMusic.class).getDataFolder(), "Music").toPath();
         reload();
     }
@@ -31,18 +34,18 @@ public class Songs {
                 if (dotIndex > 0) {
                     filename = filename.substring(0, dotIndex);
                 }
-                allSongs.put(filename, parent);
+                this.allSongs.put(filename, parent);
             });
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            this.logger.log(Level.SEVERE, "Unable to reload songs", e);
         }
     }
 
     public Set<String> getAllSongs() {
-        return allSongs.keySet();
+        return this.allSongs.keySet();
     }
 
     public String getSongPlaylist(String name) {
-        return allSongs.get(name);
+        return this.allSongs.get(name);
     }
 }

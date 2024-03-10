@@ -51,14 +51,20 @@ public class TpToWorldCommand implements CommandExecutor, TabCompleter {
                         return;
                     }
 
-                    TeleportUtils.teleport(
-                            player, level.getLevelSettings().getWorldSettings().getSpawn());
-                    player.setGameMode(GameMode.SPECTATOR);
-                    player.sendMessage("Вы телепортированы на уровень \"" + level.getLevelName() + "\"");
+                    TeleportUtils.teleportAsync(
+                                    player,
+                                    level.getLevelSettings().getWorldSettings().getSpawn())
+                            .thenAccept(success -> {
+                                if (!success) return;
+                                player.setGameMode(GameMode.SPECTATOR);
+                                player.sendMessage("Вы телепортированы на уровень \"" + level.getLevelName() + "\"");
+                            });
                 });
             } else {
-                TeleportUtils.teleport(player, Settings.getLobbySpawn());
-                player.setGameMode(GameMode.ADVENTURE);
+                TeleportUtils.teleportAsync(player, Settings.getLobbySpawn()).thenAccept(success -> {
+                    if (!success) return;
+                    player.setGameMode(GameMode.ADVENTURE);
+                });
             }
             if (!levelEditorsManager.removeEditorSession(player)) {
                 gameManager.removeGame(player);

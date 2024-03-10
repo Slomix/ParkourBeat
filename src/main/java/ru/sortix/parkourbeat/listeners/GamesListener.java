@@ -49,10 +49,13 @@ public final class GamesListener implements Listener {
 
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             if (this.getWorldType(player) != WorldType.PB_LEVEL) continue;
-            TeleportUtils.teleport(player, Settings.getLobbySpawn());
-            player.setGameMode(GameMode.ADVENTURE);
-            player.getInventory().clear();
-            player.sendMessage("Перезагрузка плагина привела к телепортации в лобби");
+            TeleportUtils.teleportAsync(player, Settings.getLobbySpawn()).thenAccept(success -> {
+                if (!success) return;
+
+                player.setGameMode(GameMode.ADVENTURE);
+                player.getInventory().clear();
+                player.sendMessage("Перезагрузка плагина привела к телепортации в лобби");
+            });
         }
     }
 
@@ -71,14 +74,17 @@ public final class GamesListener implements Listener {
     private void on(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         if (this.getWorldType(player) == WorldType.NON_PB) return;
-        TeleportUtils.teleport(player, Settings.getLobbySpawn());
-        player.setHealth(20);
-        player.setFoodLevel(20);
-        player.setSaturation(5.0F);
-        player.setExhaustion(0.0F);
-        player.setFireTicks(-40);
-        player.setGameMode(GameMode.ADVENTURE);
-        player.getInventory().clear();
+        TeleportUtils.teleportAsync(player, Settings.getLobbySpawn()).thenAccept(success -> {
+            if (!success) return;
+
+            player.setHealth(20);
+            player.setFoodLevel(20);
+            player.setSaturation(5.0F);
+            player.setExhaustion(0.0F);
+            player.setFireTicks(-40);
+            player.setGameMode(GameMode.ADVENTURE);
+            player.getInventory().clear();
+        });
     }
 
     @EventHandler
@@ -133,7 +139,7 @@ public final class GamesListener implements Listener {
 
         Game game = this.gameManager.getCurrentGame(player);
         if (game != null) game.stopGame(Game.StopReason.FALL);
-        else TeleportUtils.teleport(player, player.getWorld().getSpawnLocation());
+        else TeleportUtils.teleportAsync(player, player.getWorld().getSpawnLocation());
     }
 
     private int getFallHeight(@Nullable Level level, boolean play) {

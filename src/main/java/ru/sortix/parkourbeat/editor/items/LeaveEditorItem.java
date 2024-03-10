@@ -43,10 +43,13 @@ public class LeaveEditorItem extends EditorItem {
 
     @Override
     public void onClick(Action action, Block block, @Nullable Location interactionPoint) {
-        TeleportUtils.teleport(this.player, Settings.getLobbySpawn());
-        this.player.setGameMode(GameMode.ADVENTURE);
-        if (!this.levelEditorsManager.removeEditorSession(this.player)) {
-            this.gameManager.removeGame(this.player);
-        }
+        TeleportUtils.teleportAsync(this.player, Settings.getLobbySpawn()).thenAccept(success -> {
+            if (!success) return;
+
+            this.player.setGameMode(GameMode.ADVENTURE);
+            if (!this.levelEditorsManager.removeEditorSession(this.player)) {
+                this.gameManager.removeGame(this.player);
+            }
+        });
     }
 }

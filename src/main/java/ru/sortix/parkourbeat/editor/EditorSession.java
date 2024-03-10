@@ -60,38 +60,44 @@ public class EditorSession {
     }
 
     public void start() {
-        PlayerInventory inventory = owner.getInventory();
-        inventory.clear();
-        editorItems.giveToPlayer();
-
         LevelSettings levelSettings = level.getLevelSettings();
         WorldSettings worldSettings = levelSettings.getWorldSettings();
-        ParticleController particleController = levelSettings.getParticleController();
+        TeleportUtils.teleportAsync(this.owner, worldSettings.getSpawn()).thenAccept(success -> {
+            if (!success) return;
+            PlayerInventory inventory = owner.getInventory();
+            inventory.clear();
+            editorItems.giveToPlayer();
 
-        owner.setGameMode(GameMode.CREATIVE);
-        owner.setFlying(true);
-        TeleportUtils.teleport(this.owner, worldSettings.getSpawn());
-        owner.sendMessage("Редактор уровня \"" + level.getLevelName() + "\" успешно запущен");
+            ParticleController particleController = levelSettings.getParticleController();
 
-        particleController.loadParticleLocations(worldSettings.getWaypoints());
-        particleController.startSpawnParticles(owner);
+            owner.setGameMode(GameMode.CREATIVE);
+            owner.setFlying(true);
+            owner.sendMessage("Редактор уровня \"" + level.getLevelName() + "\" успешно запущен");
 
-        level.setEditing(true);
+            particleController.loadParticleLocations(worldSettings.getWaypoints());
+            particleController.startSpawnParticles(owner);
+
+            level.setEditing(true);
+        });
     }
 
     public void stop() {
-        level.getLevelSettings().getParticleController().stopSpawnParticles();
-        level.setEditing(false);
+        TeleportUtils.teleportAsync(owner, Settings.getLobbySpawn()).thenAccept(success -> {
+            if (!success) return;
 
-        gameManager.removeGame(owner, false);
+            level.getLevelSettings().getParticleController().stopSpawnParticles();
+            level.setEditing(false);
 
-        owner.setGameMode(GameMode.ADVENTURE);
-        owner.getInventory().clear();
-        TeleportUtils.teleport(owner, Settings.getLobbySpawn());
-        owner.sendMessage("Редактор уровня \"" + level.getLevelName() + "\" успешно остановлен");
+            gameManager.removeGame(owner, false);
 
-        levelsManager.saveLevel(level);
-        levelsManager.unloadLevel(level.getLevelId());
+            owner.setGameMode(GameMode.ADVENTURE);
+            owner.getInventory().clear();
+
+            owner.sendMessage("Редактор уровня \"" + level.getLevelName() + "\" успешно остановлен");
+
+            levelsManager.saveLevel(level);
+            levelsManager.unloadLevelAsync(level.getLevelId());
+        });
     }
 
     public static final int INTERACT_BLOCK_DISTANCE = 5;

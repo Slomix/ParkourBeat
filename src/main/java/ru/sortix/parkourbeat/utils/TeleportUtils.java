@@ -1,27 +1,66 @@
 package ru.sortix.parkourbeat.utils;
 
-import java.util.logging.Logger;
+import java.util.concurrent.CompletableFuture;
+import java.util.logging.Level;
 import lombok.NonNull;
 import org.bukkit.Location;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import ru.sortix.parkourbeat.listeners.WorldsListener;
 
-// TODO Temporary class. See: https://github.com/Slomix/ParkourBeat/issues/42
 public class TeleportUtils {
-    public static Logger logger;
+    public static final boolean ASYNC_TELEPORT_SUPPORTED;
 
-    public static boolean teleport(@NonNull Player player, @NonNull Location location) {
+    static {
+        boolean asyncTeleportSupported;
+        try {
+            Entity.class.getDeclaredMethod("teleportAsync", Location.class);
+            asyncTeleportSupported = true;
+        } catch (NoSuchMethodException e) {
+            asyncTeleportSupported = false;
+        }
+        ASYNC_TELEPORT_SUPPORTED = asyncTeleportSupported;
+    }
+
+    public static Plugin plugin;
+
+    private static boolean teleportSync(@NonNull Player player, @NonNull Location location) {
         Location sourceLoc = player.getLocation();
         WorldsListener.CHUNKS_LOADED = 0;
         long startedAtMills = System.currentTimeMillis();
-        boolean result = player.teleport(location);
+        boolean success = player.teleport(location);
         long durationMills = System.currentTimeMillis() - startedAtMills;
-        if (WorldsListener.CHUNKS_LOADED > 0) {
-            logger.warning("Телепортация игрока " + player.getName()
-                    + " из " + toString(sourceLoc)
-                    + " в " + toString(location)
-                    + " заняла " + durationMills + " мс"
-                    + " (загружено " + WorldsListener.CHUNKS_LOADED + " чанков)");
+        if (WorldsListener.CHUNKS_LOADED > 0 && ASYNC_TELEPORT_SUPPORTED) {
+            plugin.getLogger()
+                    .log(
+                            Level.WARNING,
+                            "Обнаружена телепортация игрока " + player.getName()
+                                    + " из " + toString(sourceLoc)
+                                    + " в " + toString(location)
+                                    + " в основном потоке. Телепорт занял " + durationMills + " мс"
+                                    + " (загружено " + WorldsListener.CHUNKS_LOADED + " чанков)",
+                            new RuntimeException("Стек вызовов:"));
+        }
+        if (!success) {
+            player.sendMessage("Телепортация отменена");
+        }
+        return success;
+    }
+
+    @NonNull public static CompletableFuture<Boolean> teleportAsync(@NonNull Player player, @NonNull Location location) {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        if (ASYNC_TELEPORT_SUPPORTED) {
+            player.teleportAsync(location).thenAccept(success -> {
+                if (!success) {
+                    player.sendMessage("Телепортация отменена");
+                }
+                result.complete(success);
+            });
+        } else {
+            plugin.getServer()
+                    .getScheduler()
+                    .runTaskLater(plugin, () -> result.complete(teleportSync(player, location)), 1L);
         }
         return result;
     }

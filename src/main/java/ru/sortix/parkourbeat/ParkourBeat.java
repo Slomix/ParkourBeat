@@ -39,11 +39,11 @@ public class ParkourBeat extends JavaPlugin {
         ConfigurationSerialization.registerClass(NonWorldAndYawPitchLocation.class);
         ConfigurationSerialization.registerClass(NonWorldLocation.class);
 
-        TeleportUtils.logger = this.getLogger();
+        TeleportUtils.plugin = this;
 
         WorldsManager worldsManager = new WorldsManager(this);
         Settings.load(this, worldsManager);
-        songs = new Songs();
+        songs = new Songs(this.getLogger());
 
         ConfigurationSerialization.registerClass(Waypoint.class);
         LevelSettingDAO levelSettingDAO = new FileLevelSettingDAO(this);
