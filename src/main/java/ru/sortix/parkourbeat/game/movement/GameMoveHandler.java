@@ -67,11 +67,7 @@ public class GameMoveHandler {
             return;
         }
         accuracyChecker.onPlayerLocationChange(event.getTo());
-        player.spigot()
-                .sendMessage(
-                        ChatMessageType.ACTION_BAR,
-                        TextComponent.fromLegacyText(
-                                "§aТочность: " + String.format("%.2f", accuracyChecker.getAccuracy() * 100f) + "%"));
+        player.sendActionBar("§aТочность: " + String.format("%.2f", accuracyChecker.getAccuracy() * 100f) + "%");
     }
 
     public void onRunningState(PlayerToggleSprintEvent event) {
