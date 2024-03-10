@@ -2,8 +2,6 @@ package ru.sortix.parkourbeat.game.movement;
 
 import lombok.Getter;
 import lombok.NonNull;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -62,7 +60,9 @@ public class GameMoveHandler {
             game.stopGame(Game.StopReason.FINISH);
             return;
         }
-        if (!isLookingAtFinish(player)) {
+        if (!settings.getDirectionChecker().isCorrectDirection(event.getFrom(), event.getTo())
+            || !isLookingAtFinish(player)
+        ) {
             game.stopGame(Game.StopReason.WRONG_DIRECTION);
             return;
         }
