@@ -17,15 +17,11 @@ public class TeleportUtils {
         boolean result = player.teleport(location);
         long durationMills = System.currentTimeMillis() - startedAtMills;
         if (WorldsListener.CHUNKS_LOADED > 0) {
-            logger.warning("Телепортация игрока из "
-                    + toString(sourceLoc)
-                    + " в "
-                    + toString(location)
-                    + " заняла "
-                    + durationMills
-                    + " мс (загружено "
-                    + WorldsListener.CHUNKS_LOADED
-                    + " чанков)");
+            logger.warning("Телепортация игрока " + player.getName()
+                    + " из " + toString(sourceLoc)
+                    + " в " + toString(location)
+                    + " заняла " + durationMills + " мс"
+                    + " (загружено " + WorldsListener.CHUNKS_LOADED + " чанков)");
         }
         return result;
     }
