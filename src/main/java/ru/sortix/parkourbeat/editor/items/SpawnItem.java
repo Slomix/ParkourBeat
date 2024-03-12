@@ -37,12 +37,13 @@ public class SpawnItem extends EditorItem {
     public void onClick(Action action, Block block, @Nullable Location interactionPoint) {
         LevelSettings levelSettings = this.level.getLevelSettings();
         Location playerLocation = player.getLocation();
-        levelSettings.getWorldSettings().setSpawn(playerLocation);
 
         if (!isValidSpawnPoint(playerLocation, levelSettings)) {
             this.player.sendMessage("Точка спауна не может быть установлена здесь.");
             return;
         }
+
+        levelSettings.getWorldSettings().setSpawn(playerLocation);
 
         this.player.sendMessage("Точка спауна установлена на уровне ваших ног. "
                 + "Убедитесь, что направление взгляда выбрано корректно! "

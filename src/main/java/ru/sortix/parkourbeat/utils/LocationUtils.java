@@ -9,7 +9,7 @@ import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 public class LocationUtils {
 
-    public static boolean isValidSpawnPoint(@NonNull Location spawnLocation, LevelSettings levelSettings) {
+    public static boolean isValidSpawnPoint(@NonNull Location spawnLocation, @NonNull LevelSettings levelSettings) {
         DirectionChecker directionChecker = levelSettings.getDirectionChecker();
         Location startLocation = levelSettings.getWorldSettings().getStartBorderLoc();
         Block block = spawnLocation.getBlock();
