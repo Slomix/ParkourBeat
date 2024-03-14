@@ -5,6 +5,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.sortix.parkourbeat.commands.*;
@@ -29,6 +30,9 @@ public class ParkourBeat extends JavaPlugin {
 
     @Getter
     private static Songs songs;
+    private static GameManager gameManager;
+    private static LevelEditorsManager levelEditorsManager;
+    private static LevelsManager levelsManager;
 
     public static JavaPlugin getPlugin() {
         return JavaPlugin.getPlugin(ParkourBeat.class);
@@ -47,9 +51,9 @@ public class ParkourBeat extends JavaPlugin {
 
         ConfigurationSerialization.registerClass(Waypoint.class);
         LevelSettingDAO levelSettingDAO = new FileLevelSettingDAO(this);
-        LevelsManager levelsManager = new LevelsManager(this, worldsManager, levelSettingDAO);
-        GameManager gameManager = new GameManager(levelsManager);
-        LevelEditorsManager levelEditorsManager = new LevelEditorsManager(gameManager, levelsManager);
+        levelsManager = new LevelsManager(this, worldsManager, levelSettingDAO);
+        gameManager = new GameManager(levelsManager);
+        levelEditorsManager = new LevelEditorsManager(gameManager, levelsManager);
 
         registerCommand("tptoworld", new TpToWorldCommand(levelEditorsManager, gameManager, levelsManager));
         registerCommand("play", new PlayCommand(gameManager, levelsManager, levelEditorsManager));
@@ -83,5 +87,6 @@ public class ParkourBeat extends JavaPlugin {
     public void onDisable() {
         ConfigurationSerialization.unregisterClass(NonWorldAndYawPitchLocation.class);
         ConfigurationSerialization.unregisterClass(NonWorldLocation.class);
+        levelsManager.getLoadedLevels().forEach(level -> levelsManager.saveLevel(level));
     }
 }

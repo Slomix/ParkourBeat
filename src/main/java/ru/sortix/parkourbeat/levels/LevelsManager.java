@@ -223,6 +223,10 @@ public class LevelsManager {
         return this.loadedLevels.get(levelId);
     }
 
+    @NonNull public Collection<Level> getLoadedLevels() {
+        return this.loadedLevels.values();
+    }
+
     @NonNull public List<String> getValidLevelNames(@NonNull String levelNamePrefix) {
         return this.availableLevelIdsByName.keySet().stream()
                 .filter(level -> level.toLowerCase().startsWith(levelNamePrefix))
