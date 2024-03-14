@@ -217,6 +217,7 @@ public class Game {
             player.showPlayer(plugin, onlinePlayer);
         }
 
+        currentState = State.READY;
         settings.getParticleController().stopSpawnParticlesForPlayer(player);
     }
 
