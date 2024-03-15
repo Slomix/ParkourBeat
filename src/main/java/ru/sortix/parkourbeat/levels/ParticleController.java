@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
-import ru.sortix.parkourbeat.editor.items.ParticleItem;
+import ru.sortix.parkourbeat.item.editor.type.EditTrackParticleItem;
 import ru.sortix.parkourbeat.location.Waypoint;
 import ru.sortix.parkourbeat.utils.java.ParticleUtils;
 
@@ -32,7 +32,8 @@ public class ParticleController {
     private BukkitTask particleTask = null;
     private boolean isLoaded = false;
 
-    public ParticleController(Plugin plugin, World world, DirectionChecker directionChecker) {
+    public ParticleController(
+            @NonNull Plugin plugin, @NonNull World world, @NonNull DirectionChecker directionChecker) {
         this.plugin = plugin;
         this.world = world;
         this.directionChecker = directionChecker;
@@ -93,6 +94,7 @@ public class ParticleController {
         if (directionChecker == null || waypoints == null) {
             return;
         }
+
         if (isLoaded) {
             particleLocations.clear();
             colorsChangeLocations.clear();
@@ -119,22 +121,18 @@ public class ParticleController {
                 particleLocations.addAll(curvedPath);
             }
         }
-        particleTask = this.plugin
+        this.particleTask = this.plugin
                 .getServer()
                 .getScheduler()
                 .runTaskTimerAsynchronously(
                         this.plugin,
                         () -> {
-                            if (world == null) {
-                                particleTask.cancel();
-                                return;
-                            }
-                            particleViewers.forEach((player) -> {
+                            this.particleViewers.forEach((player) -> {
                                 if (player == null || !player.isOnline()) {
-                                    throw new NullPointerException("Player is not online!");
-                                } else if (player.getWorld() != world) {
+                                    throw new IllegalStateException("Player is not online!");
+                                } else if (player.getWorld() != this.world) {
                                     throw new IllegalStateException("Player is not in world "
-                                            + world.getName()
+                                            + this.world.getName()
                                             + "!\nPlayer world: "
                                             + player.getWorld());
                                 } else {
@@ -144,19 +142,23 @@ public class ParticleController {
                         },
                         0,
                         5);
-        isLoaded = true;
+        this.isLoaded = true;
     }
 
-    public void startSpawnParticles(Player player) {
-        if (player.getWorld() != world) {
+    public void startSpawnParticles(@NonNull Player player) {
+        if (player.getWorld() != this.world) {
             throw new IllegalStateException(
-                    "Player is not in world " + world.getName() + "!\nPlayer world: " + player.getWorld());
+                    "Player is not in world " + this.world.getName() + "!\nPlayer world: " + player.getWorld());
         }
-        if (particleTask == null || particleTask.isCancelled()) {
+        if (this.particleTask == null || this.particleTask.isCancelled()) {
             throw new IllegalStateException("Particle task is not running!");
         }
 
-        particleViewers.add(player);
+        this.particleViewers.add(player);
+    }
+
+    public void stopSpawnParticlesForPlayer(Player player) {
+        this.particleViewers.remove(player);
     }
 
     private void updatePlayerParticles(Player player) {
@@ -166,10 +168,6 @@ public class ParticleController {
         //  https://github.com/Slomix/ParkourBeat/issues/17
         Iterable<Location> locations = this.particleLocations;
         ParticleUtils.displayRedstoneParticles(player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
-    }
-
-    public void stopSpawnParticlesForPlayer(Player player) {
-        particleViewers.remove(player);
     }
 
     public void stopSpawnParticles() {
@@ -189,7 +187,7 @@ public class ParticleController {
             }
             break;
         }
-        return lastColor == null ? ParticleItem.DEFAULT_PARTICLES_COLOR : lastColor;
+        return lastColor == null ? EditTrackParticleItem.DEFAULT_PARTICLES_COLOR : lastColor;
     }
 
     private List<Location> createStraightPath(Location start, Location end) {

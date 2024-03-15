@@ -15,12 +15,13 @@ import org.bukkit.WorldCreator;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.Plugin;
 import ru.sortix.parkourbeat.levels.gen.EmptyChunkGenerator;
+import ru.sortix.parkourbeat.lifecycle.PluginManager;
 import ru.sortix.parkourbeat.utils.java.CopyDirVisitor;
 import ru.sortix.parkourbeat.utils.shedule.BukkitAsyncExecutor;
 import ru.sortix.parkourbeat.utils.shedule.BukkitSyncExecutor;
 import ru.sortix.parkourbeat.utils.shedule.CurrentThreadExecutor;
 
-public class WorldsManager {
+public class WorldsManager implements PluginManager {
     private final Logger logger;
     private final Server server;
 
@@ -124,4 +125,7 @@ public class WorldsManager {
                 .resolve(worldCreator.name())
                 .toFile();
     }
+
+    @Override
+    public void disable() {}
 }

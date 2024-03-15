@@ -24,13 +24,13 @@ public class GameSettings {
         this.song = song;
     }
 
-    public boolean isOwner(@NonNull CommandSender sender) {
+    public boolean isOwner(@NonNull CommandSender sender, boolean bypassAdmins, boolean bypassMsg) {
         if (sender instanceof Player) {
             if (this.ownerId.equals(((Player) sender).getUniqueId())) {
                 return true;
             }
-            if (sender.isOp()) {
-                sender.sendMessage("Использован обход прав, поскольку вы являетесь оператором сервера");
+            if (bypassAdmins && sender.hasPermission("parkourbeat.restrictions.bypass")) {
+                if (bypassMsg) sender.sendMessage("Использован обход прав, поскольку вы являетесь оператором сервера");
                 return true;
             }
             return false;

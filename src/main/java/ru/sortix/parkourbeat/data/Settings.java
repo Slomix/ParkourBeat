@@ -34,11 +34,12 @@ public class Settings {
 
     private boolean isLoaded = false;
 
-    public void load(@NonNull ParkourBeat plugin, @NonNull WorldsManager worldsManager) {
+    public void load(@NonNull ParkourBeat plugin) {
         if (isLoaded) {
             plugin.getLogger().warning("Settings already loaded!");
             return;
         }
+        WorldsManager worldsManager = plugin.get(WorldsManager.class);
 
         plugin.saveDefaultConfig();
 

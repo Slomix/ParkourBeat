@@ -3,14 +3,16 @@ package ru.sortix.parkourbeat.utils;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 import lombok.NonNull;
+import lombok.experimental.UtilityClass;
 import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import ru.sortix.parkourbeat.listeners.WorldsListener;
 
+@UtilityClass
 public class TeleportUtils {
-    public static final boolean ASYNC_TELEPORT_SUPPORTED;
+    private final boolean ASYNC_TELEPORT_SUPPORTED;
 
     static {
         boolean asyncTeleportSupported;
@@ -23,9 +25,7 @@ public class TeleportUtils {
         ASYNC_TELEPORT_SUPPORTED = asyncTeleportSupported;
     }
 
-    public static Plugin plugin;
-
-    private static boolean teleportSync(@NonNull Player player, @NonNull Location location) {
+    private boolean teleportSync(@NonNull Plugin plugin, @NonNull Player player, @NonNull Location location) {
         Location sourceLoc = player.getLocation();
         WorldsListener.CHUNKS_LOADED = 0;
         long startedAtMills = System.currentTimeMillis();
@@ -48,7 +48,9 @@ public class TeleportUtils {
         return success;
     }
 
-    @NonNull public static CompletableFuture<Boolean> teleportAsync(@NonNull Player player, @NonNull Location location) {
+    @NonNull public CompletableFuture<Boolean> teleportAsync(
+            @NonNull Plugin plugin, @NonNull Player player, @NonNull Location location) {
+        player.setFallDistance(0f);
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         if (ASYNC_TELEPORT_SUPPORTED) {
             player.teleportAsync(location).thenAccept(success -> {
@@ -60,12 +62,12 @@ public class TeleportUtils {
         } else {
             plugin.getServer()
                     .getScheduler()
-                    .runTaskLater(plugin, () -> result.complete(teleportSync(player, location)), 1L);
+                    .runTaskLater(plugin, () -> result.complete(teleportSync(plugin, player, location)), 1L);
         }
         return result;
     }
 
-    @NonNull private static String toString(@NonNull Location loc) {
+    @NonNull private String toString(@NonNull Location loc) {
         return "|"
                 + (loc.getWorld() == null ? "null" : loc.getWorld().getName())
                 + " "

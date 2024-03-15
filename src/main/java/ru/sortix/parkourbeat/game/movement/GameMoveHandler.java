@@ -61,8 +61,7 @@ public class GameMoveHandler {
             return;
         }
         if (!settings.getDirectionChecker().isCorrectDirection(event.getFrom(), event.getTo())
-            || !isLookingAtFinish(player)
-        ) {
+                || !isLookingAtFinish(player)) {
             game.stopGame(Game.StopReason.WRONG_DIRECTION);
             return;
         }

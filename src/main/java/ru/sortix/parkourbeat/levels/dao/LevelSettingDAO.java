@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import lombok.NonNull;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 public interface LevelSettingDAO {
@@ -21,5 +22,5 @@ public interface LevelSettingDAO {
 
     boolean isLevelWorld(@NonNull World world);
 
-    @NonNull Map<String, UUID> loadAllAvailableLevelNamesSync();
+    @NonNull Map<String, GameSettings> loadAllAvailableLevelGameSettingsSync();
 }

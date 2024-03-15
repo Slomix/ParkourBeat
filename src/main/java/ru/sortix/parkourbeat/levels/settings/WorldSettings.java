@@ -16,7 +16,7 @@ import ru.sortix.parkourbeat.location.Waypoint;
 @Getter
 public class WorldSettings {
 
-    private final World world;
+    private final @NonNull World world;
     private final List<Waypoint> waypoints;
     private final int minWorldHeight;
     private final DirectionChecker.Direction direction;

@@ -1,18 +1,22 @@
 package ru.sortix.parkourbeat.listeners;
 
-import lombok.RequiredArgsConstructor;
+import lombok.NonNull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.WorldInitEvent;
+import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 
-@RequiredArgsConstructor
 public class WorldsListener implements Listener {
     public static int CHUNKS_LOADED = 0;
 
     private final LevelsManager levelsManager;
+
+    public WorldsListener(@NonNull ParkourBeat plugin) {
+        this.levelsManager = plugin.get(LevelsManager.class);
+    }
 
     @EventHandler
     private void on(WorldInitEvent event) {

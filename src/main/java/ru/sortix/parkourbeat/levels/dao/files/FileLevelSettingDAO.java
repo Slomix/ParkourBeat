@@ -189,8 +189,8 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
                 .replace("\\", "/"); // fix Windows issues
     }
 
-    @NonNull public Map<String, UUID> loadAllAvailableLevelNamesSync() {
-        Map<String, UUID> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    @NonNull public Map<String, GameSettings> loadAllAvailableLevelGameSettingsSync() {
+        Map<String, GameSettings> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
         if (!this.levelsDirRelativeDir.isDirectory()) {
             this.logger.warning("Levels directory not found: " + this.levelsDirRelativeDir.getAbsolutePath());
@@ -222,7 +222,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
                 continue;
             }
             String levelName = gameSettings.getLevelName();
-            if (result.put(levelName, levelId) != null) {
+            if (result.put(levelName, gameSettings) != null) {
                 this.logger.warning("Duplicate level name: " + levelName);
             }
         }

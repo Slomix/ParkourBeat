@@ -2,7 +2,7 @@ package ru.sortix.parkourbeat.listeners;
 
 import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import javax.annotation.Nullable;
+import java.util.function.Consumer;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -10,7 +10,6 @@ import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -23,77 +22,122 @@ import org.bukkit.event.player.*;
 import org.jetbrains.annotations.NotNull;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.activity.ActivityManager;
+import ru.sortix.parkourbeat.activity.UserActivity;
 import ru.sortix.parkourbeat.data.Settings;
-import ru.sortix.parkourbeat.editor.EditorSession;
-import ru.sortix.parkourbeat.editor.LevelEditorsManager;
-import ru.sortix.parkourbeat.game.Game;
-import ru.sortix.parkourbeat.game.GameManager;
-import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
-import ru.sortix.parkourbeat.levels.Level;
+import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public final class GamesListener implements Listener {
-    private final GameManager gameManager;
-    private final LevelEditorsManager levelEditorsManager;
+    private final ParkourBeat plugin;
+    private final ActivityManager activityManager;
     private final LevelSettingDAO levelSettingDAO;
 
-    public GamesListener(
-            @NonNull ParkourBeat plugin,
-            @NonNull GameManager gameManager,
-            @NonNull LevelEditorsManager levelEditorsManager) {
-        this.gameManager = gameManager;
-        this.levelEditorsManager = levelEditorsManager;
+    public GamesListener(@NonNull ParkourBeat plugin) {
+        this.plugin = plugin;
+        this.activityManager = plugin.get(ActivityManager.class);
         this.levelSettingDAO =
-                this.levelEditorsManager.getLevelsManager().getLevelsSettings().getLevelSettingDAO();
+                plugin.get(LevelsManager.class).getLevelsSettings().getLevelSettingDAO();
 
         for (Player player : plugin.getServer().getOnlinePlayers()) {
-            if (this.getWorldType(player) != WorldType.PB_LEVEL) continue;
-            TeleportUtils.teleportAsync(player, Settings.getLobbySpawn()).thenAccept(success -> {
-                if (!success) return;
-
-                player.setGameMode(GameMode.ADVENTURE);
-                player.getInventory().clear();
+            if (this.teleportToSpawnIfInLevelWorld(player)) {
                 player.sendMessage("Перезагрузка плагина привела к телепортации в лобби");
-            });
+            }
         }
     }
 
     @EventHandler
-    private void on(PlayerSpawnLocationEvent event) {
-        event.setSpawnLocation(Settings.getLobbySpawn());
-    }
+    private void on(PlayerTeleportEvent event) {
+        World from = event.getFrom().getWorld();
+        World to = event.getTo().getWorld();
+        if (from == to) return;
 
-    @EventHandler
-    private void on(PlayerQuitEvent event) {
-        Player player = event.getPlayer();
-        if (!levelEditorsManager.removeEditorSession(player)) gameManager.removeGame(player);
+        if (true) return; // TODO Implement auto spectating
+
+        UserActivity oldActivity = this.activityManager.getActivity(event.getPlayer());
+        if (oldActivity == null) {
+            event.getPlayer().sendMessage("Текущая активность не найдена");
+        } else if (oldActivity.getLevel().getWorld() == from) {
+            event.getPlayer().sendMessage("Завершаем старую активность (" + from.getName() + ")");
+            if (false) oldActivity.endActivity();
+        } else if (oldActivity.getLevel().getWorld() == to) {
+            event.getPlayer().sendMessage("Запускаем новую активность (" + to.getName() + ")");
+        } else {
+            event.getPlayer()
+                    .sendMessage("Миры " + from.getName() + " и " + to.getName() + " не относятся к активностям");
+        }
     }
 
     @EventHandler
     private void on(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if (this.getWorldType(player) == WorldType.NON_PB) return;
-        TeleportUtils.teleportAsync(player, Settings.getLobbySpawn()).thenAccept(success -> {
-            if (!success) return;
+        if (this.isLobby(player.getWorld())) {
+            this.onPlayerTeleportToLobby.accept(player);
+        } else {
+            this.teleportToSpawnIfInLevelWorld(player);
+        }
+    }
 
-            player.setHealth(20);
-            player.setFoodLevel(20);
-            player.setSaturation(5.0F);
-            player.setExhaustion(0.0F);
-            player.setFireTicks(-40);
-            player.setGameMode(GameMode.ADVENTURE);
-            player.getInventory().clear();
-        });
+    @EventHandler
+    private void on(PlayerSpawnLocationEvent event) {
+        Player player = event.getPlayer();
+
+        if (true) {
+            event.setSpawnLocation(Settings.getLobbySpawn());
+            return;
+        }
+
+        if (this.isLobby(player.getWorld())) {
+            event.setSpawnLocation(Settings.getLobbySpawn());
+        } else {
+            this.teleportToSpawnIfInLevelWorld(player);
+        }
+    }
+
+    @EventHandler
+    private void on(PlayerRespawnEvent event) {
+        Player player = event.getPlayer();
+        if (this.isLobby(player.getWorld())) {
+            event.setRespawnLocation(Settings.getLobbySpawn());
+        } else {
+            this.doActivityAction(player, activity -> {
+                event.setRespawnLocation(activity.getRespawnLocation());
+                activity.startActivity();
+            });
+        }
+    }
+
+    private final Consumer<Player> onPlayerTeleportToLobby = player -> {
+        player.setHealth(20);
+        player.setFoodLevel(20);
+        player.setSaturation(5.0F);
+        player.setExhaustion(0.0F);
+        player.setFireTicks(-40);
+        player.setGameMode(GameMode.ADVENTURE);
+        player.getInventory().clear();
+    };
+
+    private boolean teleportToSpawnIfInLevelWorld(@NonNull Player player) {
+        if (!this.levelSettingDAO.isLevelWorld(player.getWorld())) return false;
+        TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn())
+                .thenAccept(success -> {
+                    if (!success) return;
+                    this.onPlayerTeleportToLobby.accept(player);
+                });
+        return true;
+    }
+
+    @EventHandler
+    private void on(PlayerQuitEvent event) {
+        this.doActivityAction(event.getPlayer(), UserActivity::endActivity);
     }
 
     @EventHandler
     private void on(EntityDamageEvent event) {
-        if (event.getEntity().getType() != EntityType.PLAYER) {
-            return;
-        }
+        if (!(event.getEntity() instanceof Player)) return;
         Player player = (Player) event.getEntity();
-        if (this.getWorldType(player) == WorldType.NON_PB) return;
+        if (this.isNotInLobbyOrLevel(player)) return;
         event.setCancelled(true);
     }
 
@@ -101,127 +145,96 @@ public final class GamesListener implements Listener {
     private void on(EntityRegainHealthEvent event) {
         if (!(event.getEntity() instanceof Player)) return;
         Player player = ((Player) event.getEntity());
-        if (this.getWorldType(player) == WorldType.NON_PB) return;
+        if (this.isNotInLobbyOrLevel(player)) return;
         event.setCancelled(true);
     }
 
     @EventHandler
     private void on(PlayerDeathEvent event) {
         Player player = event.getEntity();
-        if (this.getWorldType(player) == WorldType.NON_PB) return;
+        if (this.isNotInLobbyOrLevel(player)) return;
 
         event.setKeepInventory(true);
         event.getDrops().clear();
         player.spigot().respawn();
 
-        Game game = this.gameManager.getCurrentGame(player);
-        if (game != null) game.stopGame(Game.StopReason.DEATH);
+        this.doActivityAction(player, UserActivity::startActivity);
     }
 
     @EventHandler
     private void on(FoodLevelChangeEvent event) {
-        if (this.getWorldType((Player) event.getEntity()) == WorldType.NON_PB) return;
+        if (this.isNotInLobbyOrLevel((Player) event.getEntity())) return;
         if (event.getFoodLevel() != 20) {
             event.setFoodLevel(20);
         }
     }
 
     @EventHandler
-    private void on1(PlayerMoveEvent event) {
-        if (event.getFrom().getY() <= event.getTo().getY()) return;
-
-        Player player = event.getPlayer();
-        if (this.getWorldType(player) == WorldType.NON_PB) return;
-
-        Level level = this.getEditOrGameLevel(player);
-        int minWorldHeight = this.getFallHeight(level, this.gameManager.getCurrentGame(player) != null);
-        if (event.getTo().getY() > minWorldHeight) return;
-
-        Game game = this.gameManager.getCurrentGame(player);
-        if (game != null) game.stopGame(Game.StopReason.FALL);
-        else TeleportUtils.teleportAsync(player, player.getWorld().getSpawnLocation());
-    }
-
-    private int getFallHeight(@Nullable Level level, boolean play) {
-        if (!play) return -5;
-        return (level == null ? 0 : level.getLevelSettings().getWorldSettings().getMinWorldHeight()) - 1;
-    }
-
-    @EventHandler
-    private void on2(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
-
-        Game game = this.gameManager.getCurrentGame(player);
-        if (game == null) return;
-
-        Game.State state = game.getCurrentState();
-        GameMoveHandler gameMoveHandler = game.getGameMoveHandler();
-        if (state == Game.State.PREPARING) {
-            gameMoveHandler.onPreparingState(event);
-        } else if (state == Game.State.READY) {
-            gameMoveHandler.onReadyState(event);
-        } else if (state == Game.State.RUNNING) {
-            gameMoveHandler.onRunningState(event);
-        }
-    }
-
-    @EventHandler
     private void on(PlayerDropItemEvent event) {
-        if (this.getWorldType(event.getPlayer()) == WorldType.NON_PB) return;
+        if (this.isNotInLobbyOrLevel(event.getPlayer())) return;
         event.setCancelled(true);
     }
 
     @EventHandler
-    private void on(PlayerResourcePackStatusEvent event) {
-        Player player = event.getPlayer();
-        Game game = this.gameManager.getCurrentGame(player);
-        if (game == null) return;
-
-        switch (event.getStatus()) {
-            case ACCEPTED: {
-                player.sendMessage("Началась загрузка мелодии. " + " После окончания загрузки вы сможете начать игру");
-                return;
-            }
-            case FAILED_DOWNLOAD: {
-                player.sendMessage("Ошибка загрузки мелодии."
-                        + " Вам доступна игра без ресурс-пака, "
-                        + "однако мы рекомендуем всё же установить пакет ресурсов для более комфортной игры");
-                return;
-            }
-            case DECLINED: {
-                player.sendMessage("Вы отказались от загрузки мелодии. "
-                        + "Если вы захотите вновь загрузить ресурс-пак - убедитесь, "
-                        + "что в настройках сервера у вас разрешено принятие пакетов ресурсов");
-                break;
-            }
-            case SUCCESSFULLY_LOADED: {
-                player.sendMessage("Мелодия успешно загружена, приятной игры!");
-                break;
-            }
-        }
-        game.setCurrentState(Game.State.READY);
+    private void onActivityEvent(PlayerResourcePackStatusEvent event) {
+        this.doActivityAction(event.getPlayer(), activity -> activity.on(event));
     }
 
     @EventHandler
-    private void on(PlayerToggleSprintEvent event) {
-        Game game = gameManager.getCurrentGame(event.getPlayer());
-        if (game == null) return;
-
-        if (game.getCurrentState() == Game.State.RUNNING) {
-            game.getGameMoveHandler().onRunningState(event);
-        }
+    private void onActivityEvent(PlayerMoveEvent event) {
+        this.doActivityAction(event.getPlayer(), activity -> activity.on(event));
     }
 
     @EventHandler
-    private void on(PlayerInteractEvent event) {
-        if (this.getWorldType(event.getPlayer()) == WorldType.NON_PB) return;
+    private void onActivityEvent(PlayerToggleSprintEvent event) {
+        this.doActivityAction(event.getPlayer(), activity -> activity.on(event));
+    }
+
+    @EventHandler
+    private void onActivityEvent(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
         if (block == null) return;
-        EditorSession editorSession = this.levelEditorsManager.getEditorSession(event.getPlayer());
-        if (editorSession != null
-                && block.getWorld() == editorSession.getLevel().getWorld()) return;
-        if (event.getPlayer().hasPermission("parkourbeat.level.edit.anytime")) return;
-        event.setUseInteractedBlock(Event.Result.DENY);
+
+        UserActivity activity = this.activityManager.getActivity(event.getPlayer());
+        if (activity != null) {
+            if (block.getWorld() != activity.getLevel().getWorld()) {
+                return;
+            }
+            activity.on(event);
+        } else if (this.isLobby(block.getWorld())) {
+            if (!event.getPlayer().hasPermission("parkourbeat.level.edit.lobby")) {
+                event.setUseInteractedBlock(Event.Result.DENY);
+            }
+        }
+    }
+
+    @EventHandler
+    private void on1(PlayerMoveEvent event) {
+        double yPos = event.getTo().getY();
+        if (event.getFrom().getY() <= yPos) return;
+
+        Player player = event.getPlayer();
+        UserActivity activity = this.activityManager.getActivity(player);
+        if (activity != null) {
+            if (yPos > activity.getFallHeight()) return;
+            activity.onPlayerFall();
+        } else if (this.isLobby(player.getWorld())) {
+            if (yPos > 0) return;
+            TeleportUtils.teleportAsync(this.plugin, player, player.getWorld().getSpawnLocation());
+        }
+    }
+
+    private void doActivityAction(@NonNull Player player, @NonNull Consumer<UserActivity> activityConsumer) {
+        UserActivity activity = this.activityManager.getActivity(player);
+        if (activity != null) activityConsumer.accept(activity);
+    }
+
+    private boolean isLobby(@NonNull World world) {
+        return world == Settings.getLobbySpawn().getWorld();
+    }
+
+    private boolean isNotInLobbyOrLevel(@NonNull Player player) {
+        return this.activityManager.getActivity(player) == null && !this.isLobby(player.getWorld());
     }
 
     private final ChatRenderer.ViewerUnaware viewerUnaware = new ChatRenderer.ViewerUnaware() {
@@ -241,45 +254,5 @@ public final class GamesListener implements Listener {
     @EventHandler
     private void on(AsyncChatEvent event) {
         event.renderer(ChatRenderer.viewerUnaware(this.viewerUnaware));
-    }
-
-    @Nullable private Level getEditOrGameLevel(@NonNull Player player) {
-        Game game = this.gameManager.getCurrentGame(player);
-        if (game != null) return game.getLevel();
-
-        EditorSession editorSession = this.levelEditorsManager.getEditorSession(player);
-        if (editorSession != null) return editorSession.getLevel();
-
-        return null;
-    }
-
-    @NonNull private WorldType getWorldType(@NonNull Player player) {
-        Level level = this.getCurrentPlayerLevel(player);
-        if (level != null && level.getWorld() == player.getWorld()) return WorldType.PB_LEVEL;
-        return this.getWorldType(player.getWorld());
-    }
-
-    @Nullable private Level getCurrentPlayerLevel(@NonNull Player player) {
-        Game game = this.gameManager.getCurrentGame(player);
-        if (game != null) return game.getLevel();
-        EditorSession editorSession = this.levelEditorsManager.getEditorSession(player);
-        if (editorSession != null) return editorSession.getLevel();
-        return null;
-    }
-
-    @NonNull private WorldType getWorldType(@NonNull World world) {
-        if (Settings.getLobbySpawn().getWorld() == world) {
-            return WorldType.PB_LOBBY;
-        }
-        if (this.levelSettingDAO.isLevelWorld(world)) {
-            return WorldType.PB_LEVEL;
-        }
-        return WorldType.NON_PB;
-    }
-
-    public enum WorldType {
-        PB_LOBBY,
-        PB_LEVEL,
-        NON_PB
     }
 }

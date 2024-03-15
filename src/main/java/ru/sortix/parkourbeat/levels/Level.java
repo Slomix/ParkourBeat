@@ -24,7 +24,7 @@ public class Level {
     private boolean isEditing = false;
 
     public boolean isEditing() {
-        return isEditing;
+        return this.isEditing;
     }
 
     public void setEditing(boolean isEditing) {

@@ -1,0 +1,51 @@
+package ru.sortix.parkourbeat.activity;
+
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
+import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.levels.Level;
+
+@Getter
+@RequiredArgsConstructor
+public abstract class UserActivity {
+    protected final @NonNull ParkourBeat plugin;
+    protected final @NonNull Player player;
+    protected final @NonNull Level level;
+
+    public boolean isValidWorld(@NonNull World world) {
+        return this.getLevel().getWorld() == world;
+    }
+
+    public abstract void startActivity();
+
+    public abstract void on(@NonNull PlayerResourcePackStatusEvent event);
+
+    public abstract void on(@NonNull PlayerMoveEvent event);
+
+    public abstract void on(@NonNull PlayerToggleSprintEvent event);
+
+    public abstract void on(@NonNull PlayerInteractEvent event);
+
+    public abstract int getFallHeight();
+
+    public abstract void onPlayerFall();
+
+    public abstract void endActivity();
+
+    protected int getFallHeight(boolean isEditing) {
+        if (isEditing) return -5;
+        return this.level.getLevelSettings().getWorldSettings().getMinWorldHeight() - 1;
+    }
+
+    @NonNull public Location getRespawnLocation() {
+        return this.level.getLevelSettings().getWorldSettings().getSpawn();
+    }
+}
