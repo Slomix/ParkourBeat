@@ -72,6 +72,7 @@ public class PlayActivity extends UserActivity {
                 this.player.sendMessage("Ошибка загрузки мелодии."
                         + " Вам доступна игра без ресурс-пака, "
                         + "однако мы рекомендуем всё же установить пакет ресурсов для более комфортной игры");
+                this.game.setCurrentState(Game.State.READY);
                 return;
             }
             case DECLINED: {
