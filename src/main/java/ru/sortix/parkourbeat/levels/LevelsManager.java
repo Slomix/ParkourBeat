@@ -59,6 +59,10 @@ public class LevelsManager implements PluginManager {
         }
     }
 
+    @NonNull public Collection<GameSettings> getAvailableLevels() {
+        return Collections.unmodifiableCollection(this.availableLevelsByName.values());
+    }
+
     @NonNull public CompletableFuture<Level> createLevel(
             @NonNull String levelName,
             @NonNull World.Environment environment,

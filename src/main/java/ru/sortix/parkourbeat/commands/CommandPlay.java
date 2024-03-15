@@ -11,6 +11,7 @@ import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
 import ru.sortix.parkourbeat.activity.type.PlayActivity;
+import ru.sortix.parkourbeat.inventory.levels.LevelsListMenu;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
@@ -33,7 +34,7 @@ public class CommandPlay extends ParkourBeatCommand implements TabCompleter {
         Player player = (Player) sender;
 
         if (args.length == 0) {
-            sender.sendMessage("Пожалуйста, укажите уровень!");
+            new LevelsListMenu(this.plugin, player).open(player);
             return true;
         }
 
@@ -43,33 +44,36 @@ public class CommandPlay extends ParkourBeatCommand implements TabCompleter {
             sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
             return true;
         }
+        startPlaying(this.plugin, player, levelId);
+        return true;
+    }
 
-        Level level = this.levelsManager.getLoadedLevel(levelId);
+    public static void startPlaying(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId) {
+        Level level = plugin.get(LevelsManager.class).getLoadedLevel(levelId);
         if (level != null) {
             if (level.isEditing()) {
                 player.sendMessage("Данный уровень недоступен для игры, т.к. он сейчас редактируется");
-                return true;
+                return;
             }
         }
 
-        UserActivity activity = this.plugin.get(ActivityManager.class).getActivity(player);
+        UserActivity activity = plugin.get(ActivityManager.class).getActivity(player);
         if (activity instanceof PlayActivity && activity.getLevel() == level) {
             player.sendMessage("Вы уже на этом уровне!");
-            return true;
+            return;
         }
 
         boolean levelLoaded = level != null;
         if (!levelLoaded) player.sendMessage("Загрузка уровня...");
 
-        PlayActivity.createAsync(this.plugin, player, levelId, false).thenAccept(playActivity -> {
+        PlayActivity.createAsync(plugin, player, levelId, false).thenAccept(playActivity -> {
             if (playActivity == null) {
                 player.sendMessage("Не удалось запустить игру");
                 return;
             }
-            this.plugin.get(ActivityManager.class).setActivity(player, playActivity);
+            plugin.get(ActivityManager.class).setActivity(player, playActivity);
             if (!levelLoaded) player.sendMessage("Уровень загружен");
         });
-        return true;
     }
 
     @Override
