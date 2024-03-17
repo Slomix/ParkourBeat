@@ -90,6 +90,11 @@ public class EditActivity extends UserActivity {
     }
 
     @Override
+    public void onTick() {
+        if (this.testingActivity != null) this.testingActivity.onTick();
+    }
+
+    @Override
     public void on(@NonNull PlayerToggleSprintEvent event) {
         if (this.testingActivity != null) this.testingActivity.on(event);
     }

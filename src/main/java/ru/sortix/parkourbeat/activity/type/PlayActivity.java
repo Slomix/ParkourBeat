@@ -97,11 +97,14 @@ public class PlayActivity extends UserActivity {
         if (state == Game.State.PREPARING) {
             gameMoveHandler.onPreparingState(event);
         } else if (state == Game.State.READY) {
-            gameMoveHandler.onReadyState(event);
+            gameMoveHandler.onReadyState(this.player);
         } else if (state == Game.State.RUNNING) {
-            gameMoveHandler.onRunningState(event);
+            gameMoveHandler.onRunningState(this.player, event.getFrom(), event.getTo());
         }
     }
+
+    @Override
+    public void onTick() {}
 
     @Override
     public void on(@NonNull PlayerToggleSprintEvent event) {

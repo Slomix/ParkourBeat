@@ -34,6 +34,9 @@ public class SpectateActivity extends UserActivity {
     public void on(@NonNull PlayerMoveEvent event) {}
 
     @Override
+    public void onTick() {}
+
+    @Override
     public void on(@NonNull PlayerToggleSprintEvent event) {}
 
     @Override

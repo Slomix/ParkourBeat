@@ -1,39 +1,26 @@
 package ru.sortix.parkourbeat.levels;
 
+import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
+@RequiredArgsConstructor
+@Getter
 public class DirectionChecker {
-    private final Direction direction;
-
-    public DirectionChecker(Direction direction) {
-        this.direction = direction;
-    }
+    private final @NonNull Direction direction;
 
     public boolean isCorrectDirection(@NonNull Location behind, @NonNull Location to) {
         switch (direction) {
             case NEGATIVE_X:
-                return behind.getX() > to.getX();
+                return behind.getX() >= to.getX();
             case POSITIVE_X:
-                return behind.getX() < to.getX();
+                return behind.getX() <= to.getX();
             case NEGATIVE_Z:
-                return behind.getZ() > to.getZ();
+                return behind.getZ() >= to.getZ();
             case POSITIVE_Z:
-                return behind.getZ() < to.getZ();
-            default:
-                throw new IllegalArgumentException("Invalid direction: " + this.direction);
-        }
-    }
-
-    public boolean isSameDirection(@NonNull Location from, @NonNull Location to) {
-        switch (direction) {
-            case NEGATIVE_X:
-            case POSITIVE_X:
-                return from.getX() == to.getX();
-            case NEGATIVE_Z:
-            case POSITIVE_Z:
-                return from.getZ() == to.getZ();
+                return behind.getZ() <= to.getZ();
             default:
                 throw new IllegalArgumentException("Invalid direction: " + this.direction);
         }
@@ -95,11 +82,7 @@ public class DirectionChecker {
     }
 
     public boolean isNegative() {
-        return direction == Direction.NEGATIVE_X || direction == Direction.NEGATIVE_Z;
-    }
-
-    public Direction getDirection() {
-        return direction;
+        return this.direction == Direction.NEGATIVE_X || this.direction == Direction.NEGATIVE_Z;
     }
 
     public enum Direction {

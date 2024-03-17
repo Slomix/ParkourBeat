@@ -27,6 +27,8 @@ public abstract class UserActivity {
 
     public abstract void on(@NonNull PlayerMoveEvent event);
 
+    public abstract void onTick();
+
     public abstract void on(@NonNull PlayerToggleSprintEvent event);
 
     public abstract void on(@NonNull PlayerToggleSneakEvent event);

@@ -42,8 +42,7 @@ public class GameMoveHandler {
         event.setCancelled(true);
     }
 
-    public void onReadyState(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
+    public void onReadyState(@NonNull Player player) {
         LevelSettings settings = game.getLevel().getLevelSettings();
         if (settings.getDirectionChecker().isCorrectDirection(startBorder, player.getLocation())) {
             game.start();
@@ -53,8 +52,7 @@ public class GameMoveHandler {
         }
     }
 
-    public void onRunningState(PlayerMoveEvent event) {
-        Player player = event.getPlayer();
+    public void onRunningState(@NonNull Player player, @NonNull Location from, @NonNull Location to) {
         LevelSettings settings = this.game.getLevel().getLevelSettings();
         if (settings.getDirectionChecker().isCorrectDirection(this.finishBorder, player.getLocation())) {
             this.game.completeLevel();
@@ -64,15 +62,11 @@ public class GameMoveHandler {
             this.game.failLevel("§cНельзя бежать назад");
             return;
         }
-        if (!settings.getDirectionChecker().isCorrectDirection(event.getFrom(), event.getTo())) {
-            if (settings.getDirectionChecker().isSameDirection(event.getFrom(), event.getTo())) {
-                this.game.failLevel("§cВы остановились");
-            } else {
-                this.game.failLevel("§cНельзя бежать назад");
-            }
+        if (!settings.getDirectionChecker().isCorrectDirection(from, to)) {
+            this.game.failLevel("§cНельзя бежать назад");
             return;
         }
-        this.accuracyChecker.onPlayerLocationChange(event.getTo());
+        this.accuracyChecker.onPlayerLocationChange(to);
         player.sendActionBar("§aТочность: " + String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f) + "%");
     }
 
