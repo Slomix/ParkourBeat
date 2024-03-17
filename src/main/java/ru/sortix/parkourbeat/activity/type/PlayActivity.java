@@ -115,7 +115,7 @@ public class PlayActivity extends UserActivity {
 
     @Override
     public void on(@NonNull PlayerToggleSneakEvent event) {
-        if (event.isSneaking()) {
+        if (event.isSneaking() && this.game.getCurrentState() == Game.State.RUNNING) {
             this.game.failLevel("§cВы остановились");
         }
     }
