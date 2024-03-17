@@ -11,18 +11,31 @@ public class DirectionChecker {
         this.direction = direction;
     }
 
-    public boolean isCorrectDirection(Location behind, Location forward) {
+    public boolean isCorrectDirection(@NonNull Location behind, @NonNull Location to) {
         switch (direction) {
             case NEGATIVE_X:
-                return behind.getX() > forward.getX();
+                return behind.getX() > to.getX();
             case POSITIVE_X:
-                return behind.getX() < forward.getX();
+                return behind.getX() < to.getX();
             case NEGATIVE_Z:
-                return behind.getZ() > forward.getZ();
+                return behind.getZ() > to.getZ();
             case POSITIVE_Z:
-                return behind.getZ() < forward.getZ();
+                return behind.getZ() < to.getZ();
             default:
-                throw new IllegalArgumentException("Invalid direction: " + direction);
+                throw new IllegalArgumentException("Invalid direction: " + this.direction);
+        }
+    }
+
+    public boolean isSameDirection(@NonNull Location from, @NonNull Location to) {
+        switch (direction) {
+            case NEGATIVE_X:
+            case POSITIVE_X:
+                return from.getX() == to.getX();
+            case NEGATIVE_Z:
+            case POSITIVE_Z:
+                return from.getZ() == to.getZ();
+            default:
+                throw new IllegalArgumentException("Invalid direction: " + this.direction);
         }
     }
 
@@ -37,7 +50,7 @@ public class DirectionChecker {
             case POSITIVE_Z:
                 return location.getZ() > coordinate;
             default:
-                throw new IllegalArgumentException("Invalid direction: " + direction);
+                throw new IllegalArgumentException("Invalid direction: " + this.direction);
         }
     }
 

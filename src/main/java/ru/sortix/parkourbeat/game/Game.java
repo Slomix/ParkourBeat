@@ -6,7 +6,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import me.bomb.amusic.AMusic;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
@@ -128,6 +127,12 @@ public class Game {
             return;
         }
 
+        if (!this.player.isSprinting() || this.player.isSneaking()) {
+            this.currentState = State.RUNNING;
+            this.failLevel("§cЗажмите бег!");
+            return;
+        }
+
         LevelSettings settings = this.level.getLevelSettings();
         settings.getParticleController().startSpawnParticles(this.player);
 
@@ -148,7 +153,15 @@ public class Game {
         this.currentState = currentState;
     }
 
-    public void stopGame(@NonNull StopReason reason) {
+    public void failLevel(@NonNull String reason) {
+        this.stopGame(reason, false);
+    }
+
+    public void completeLevel() {
+        this.stopGame("§aВы прошли уровень", true);
+    }
+
+    private void stopGame(@NonNull String title, boolean levelComplete) {
         if (this.currentState != State.RUNNING) return;
 
         Plugin plugin = this.getPlugin();
@@ -162,7 +175,7 @@ public class Game {
 
                     this.player.setHealth(20);
                     this.player.setGameMode(GameMode.ADVENTURE);
-                    this.player.sendTitle(reason.title, null, 10, 10, 10);
+                    this.player.sendTitle(title, null, 10, 10, 10);
 
                     AMusic.stopSound(this.player);
                     this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
@@ -205,16 +218,5 @@ public class Game {
         PREPARING,
         READY,
         RUNNING,
-    }
-
-    @RequiredArgsConstructor
-    public enum StopReason {
-        FINISH("§aВы прошли уровень"),
-        DEATH("§cВы умерли"),
-        WRONG_DIRECTION("§cНельзя бежать назад"),
-        STOP_MOVEMENT("§cВы остановились"),
-        FALL("§cВы упали");
-
-        @NonNull private final String title;
     }
 }

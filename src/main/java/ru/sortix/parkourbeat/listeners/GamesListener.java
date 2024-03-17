@@ -191,6 +191,11 @@ public final class GamesListener implements Listener {
     }
 
     @EventHandler
+    private void onActivityEvent(PlayerToggleSneakEvent event) {
+        this.doActivityAction(event.getPlayer(), activity -> activity.on(event));
+    }
+
+    @EventHandler
     private void onActivityEvent(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
         if (block == null) return;

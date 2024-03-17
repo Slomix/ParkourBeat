@@ -6,10 +6,7 @@ import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerResourcePackStatusEvent;
-import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.*;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
@@ -50,7 +47,7 @@ public class PlayActivity extends UserActivity {
 
     @Override
     public void startActivity() {
-        this.game.stopGame(Game.StopReason.DEATH);
+        this.game.failLevel("§cВы умерли");
 
         this.player.setGameMode(GameMode.ADVENTURE);
 
@@ -114,6 +111,13 @@ public class PlayActivity extends UserActivity {
     }
 
     @Override
+    public void on(@NonNull PlayerToggleSneakEvent event) {
+        if (event.isSneaking()) {
+            this.game.failLevel("§cВы остановились");
+        }
+    }
+
+    @Override
     public void on(@NonNull PlayerInteractEvent event) {
         event.setUseInteractedBlock(Event.Result.DENY);
     }
@@ -125,12 +129,12 @@ public class PlayActivity extends UserActivity {
 
     @Override
     public void onPlayerFall() {
-        this.game.stopGame(Game.StopReason.FALL);
+        this.game.failLevel("§cВы упали");
     }
 
     @Override
     public void endActivity() {
-        this.game.stopGame(Game.StopReason.DEATH);
+        this.game.failLevel("§cВы умерли");
         this.game.endGame(!this.isEditorGame);
     }
 }

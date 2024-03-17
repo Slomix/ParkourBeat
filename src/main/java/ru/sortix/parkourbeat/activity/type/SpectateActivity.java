@@ -5,10 +5,7 @@ import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerResourcePackStatusEvent;
-import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.*;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.UserActivity;
 import ru.sortix.parkourbeat.levels.Level;
@@ -38,6 +35,9 @@ public class SpectateActivity extends UserActivity {
 
     @Override
     public void on(@NonNull PlayerToggleSprintEvent event) {}
+
+    @Override
+    public void on(@NonNull PlayerToggleSneakEvent event) {}
 
     @Override
     public void on(@NonNull PlayerInteractEvent event) {

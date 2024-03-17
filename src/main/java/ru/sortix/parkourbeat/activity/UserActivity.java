@@ -6,10 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerResourcePackStatusEvent;
-import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.*;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.levels.Level;
 
@@ -31,6 +28,8 @@ public abstract class UserActivity {
     public abstract void on(@NonNull PlayerMoveEvent event);
 
     public abstract void on(@NonNull PlayerToggleSprintEvent event);
+
+    public abstract void on(@NonNull PlayerToggleSneakEvent event);
 
     public abstract void on(@NonNull PlayerInteractEvent event);
 

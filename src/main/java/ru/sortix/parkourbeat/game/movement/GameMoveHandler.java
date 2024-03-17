@@ -48,34 +48,41 @@ public class GameMoveHandler {
         if (settings.getDirectionChecker().isCorrectDirection(startBorder, player.getLocation())) {
             game.start();
             if ((task == null || task.isCancelled()) && !player.isSprinting()) {
-                startDamageTask(player, "§cНе переставайте бежать", Game.StopReason.STOP_MOVEMENT);
+                startDamageTask(player, "§cНе переставайте бежать", "§cВы остановились");
             }
         }
     }
 
     public void onRunningState(PlayerMoveEvent event) {
         Player player = event.getPlayer();
-        LevelSettings settings = game.getLevel().getLevelSettings();
-        if (settings.getDirectionChecker().isCorrectDirection(finishBorder, player.getLocation())) {
-            game.stopGame(Game.StopReason.FINISH);
+        LevelSettings settings = this.game.getLevel().getLevelSettings();
+        if (settings.getDirectionChecker().isCorrectDirection(this.finishBorder, player.getLocation())) {
+            this.game.completeLevel();
             return;
         }
-        if (!settings.getDirectionChecker().isCorrectDirection(event.getFrom(), event.getTo())
-                || !isLookingAtFinish(player)) {
-            game.stopGame(Game.StopReason.WRONG_DIRECTION);
+        if (!isLookingAtFinish(player)) {
+            this.game.failLevel("§cНельзя бежать назад");
             return;
         }
-        accuracyChecker.onPlayerLocationChange(event.getTo());
-        player.sendActionBar("§aТочность: " + String.format("%.2f", accuracyChecker.getAccuracy() * 100f) + "%");
+        if (!settings.getDirectionChecker().isCorrectDirection(event.getFrom(), event.getTo())) {
+            if (settings.getDirectionChecker().isSameDirection(event.getFrom(), event.getTo())) {
+                this.game.failLevel("§cВы остановились");
+            } else {
+                this.game.failLevel("§cНельзя бежать назад");
+            }
+            return;
+        }
+        this.accuracyChecker.onPlayerLocationChange(event.getTo());
+        player.sendActionBar("§aТочность: " + String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f) + "%");
     }
 
     public void onRunningState(PlayerToggleSprintEvent event) {
         Player player = event.getPlayer();
         if (!event.isSprinting()) {
-            startDamageTask(player, "§cНе переставайте бежать", Game.StopReason.STOP_MOVEMENT);
+            startDamageTask(player, "§cНе переставайте бежать", "§cВы остановились");
         } else {
-            if (task != null) {
-                task.cancel();
+            if (this.task != null) {
+                this.task.cancel();
             }
         }
     }
@@ -87,7 +94,7 @@ public class GameMoveHandler {
         return Math.toDegrees(angle) < 100;
     }
 
-    private void startDamageTask(Player player, String reason, Game.StopReason stopReason) {
+    private void startDamageTask(Player player, String reason, String stopReason) {
         player.playSound(player.getLocation(), Sound.ENTITY_WOLF_HURT, 1, 1);
 
         this.task = new BukkitRunnable() {
@@ -101,7 +108,7 @@ public class GameMoveHandler {
                 player.sendTitle(reason, null, 0, 5, 5);
                 boolean stopped;
                 if (player.getHealth() <= NOT_SPRINT_DAMAGE_PER_PERIOD) {
-                    game.stopGame(stopReason);
+                    game.failLevel(stopReason);
                     stopped = true;
                 } else {
                     if (player.getNoDamageTicks() <= 0) {

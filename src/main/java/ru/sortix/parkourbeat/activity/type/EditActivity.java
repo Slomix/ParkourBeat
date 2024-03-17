@@ -8,10 +8,7 @@ import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerMoveEvent;
-import org.bukkit.event.player.PlayerResourcePackStatusEvent;
-import org.bukkit.event.player.PlayerToggleSprintEvent;
+import org.bukkit.event.player.*;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
@@ -94,6 +91,11 @@ public class EditActivity extends UserActivity {
 
     @Override
     public void on(@NonNull PlayerToggleSprintEvent event) {
+        if (this.testingActivity != null) this.testingActivity.on(event);
+    }
+
+    @Override
+    public void on(@NonNull PlayerToggleSneakEvent event) {
         if (this.testingActivity != null) this.testingActivity.on(event);
     }
 
