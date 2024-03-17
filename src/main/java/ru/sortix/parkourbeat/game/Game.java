@@ -177,7 +177,12 @@ public class Game {
                     this.player.sendTitle(title, null, 10, 10, 10);
 
                     AMusic.stopSound(this.player);
-                    this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
+                    if (levelComplete) {
+                        this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
+                        this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 0.5f, 1);
+                    } else {
+                        this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
+                    }
                     settings.getParticleController().stopSpawnParticlesForPlayer(this.player);
                     this.gameMoveHandler.getAccuracyChecker().reset();
 
