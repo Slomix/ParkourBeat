@@ -116,11 +116,14 @@ public class EditActivity extends UserActivity {
 
     @Override
     public void onPlayerFall() {
-        if (this.testingActivity != null) this.testingActivity.onPlayerFall();
-        TeleportUtils.teleportAsync(
-                this.getPlugin(),
-                this.player,
-                this.level.getLevelSettings().getWorldSettings().getSpawn());
+        if (this.testingActivity != null) {
+            this.testingActivity.onPlayerFall();
+        } else {
+            TeleportUtils.teleportAsync(
+                    this.getPlugin(),
+                    this.player,
+                    this.level.getLevelSettings().getWorldSettings().getSpawn());
+        }
     }
 
     @Override

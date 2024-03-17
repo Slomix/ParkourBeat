@@ -162,8 +162,6 @@ public class Game {
     }
 
     private void stopGame(@NonNull String title, boolean levelComplete) {
-        if (this.currentState != State.RUNNING) return;
-
         Plugin plugin = this.getPlugin();
         LevelSettings settings = this.level.getLevelSettings();
         TeleportUtils.teleportAsync(
@@ -172,6 +170,7 @@ public class Game {
                         settings.getWorldSettings().getSpawn())
                 .thenAccept(success -> {
                     if (!success) return;
+                    if (this.currentState != State.RUNNING) return;
 
                     this.player.setHealth(20);
                     this.player.setGameMode(GameMode.ADVENTURE);
