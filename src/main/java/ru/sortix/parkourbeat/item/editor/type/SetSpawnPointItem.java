@@ -2,9 +2,9 @@ package ru.sortix.parkourbeat.item.editor.type;
 
 import static ru.sortix.parkourbeat.utils.LocationUtils.isValidSpawnPoint;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import lombok.NonNull;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -18,8 +18,11 @@ public class SetSpawnPointItem extends EditorItem {
     @SuppressWarnings("deprecation")
     public SetSpawnPointItem(@NonNull ParkourBeat plugin, int slot) {
         super(plugin, slot, newStack(Material.ENDER_PEARL, (meta) -> {
-            meta.setDisplayName("Точка спавна");
-            meta.setLore(new ArrayList<>(Collections.singletonList("Устанавливает точку спавна")));
+            meta.setDisplayName(ChatColor.DARK_AQUA + "Точка спауна (см. описание)");
+            meta.setLore(Arrays.asList(
+                    ChatColor.YELLOW + "Устанавливает точку спауна на уровне ваших ног.",
+                    ChatColor.YELLOW + "Направление взгляда игроков будет точно таким же,",
+                    ChatColor.YELLOW + "как при установке точки спауна"));
         }));
     }
 

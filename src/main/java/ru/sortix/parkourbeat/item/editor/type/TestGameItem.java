@@ -1,6 +1,7 @@
 package ru.sortix.parkourbeat.item.editor.type;
 
 import lombok.NonNull;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -12,7 +13,7 @@ public class TestGameItem extends EditorItem {
     @SuppressWarnings("deprecation")
     public TestGameItem(@NonNull ParkourBeat plugin, int slot) {
         super(plugin, slot, newStack(Material.DIAMOND, (meta) -> {
-            meta.setDisplayName("Протестировать уровень");
+            meta.setDisplayName(ChatColor.AQUA + "Протестировать уровень");
         }));
     }
 

@@ -1,10 +1,10 @@
 package ru.sortix.parkourbeat.item.editor.type;
 
+import java.util.Arrays;
+import java.util.List;
+import javax.annotation.Nullable;
 import lombok.NonNull;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.RayTraceResult;
@@ -18,11 +18,6 @@ import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.location.Waypoint;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 public class EditTrackParticleItem extends EditorItem {
     public static final Color DEFAULT_PARTICLES_COLOR = Color.LIME;
 
@@ -33,13 +28,12 @@ public class EditTrackParticleItem extends EditorItem {
     @SuppressWarnings("deprecation")
     public EditTrackParticleItem(@NonNull ParkourBeat plugin, int slot) {
         super(plugin, slot, newStack(Material.BLAZE_ROD, (meta) -> {
-            meta.setDisplayName("Путь (см. описание)");
-            meta.setLore(new ArrayList<>(Arrays.asList(
-                "ЛКМ - установить точку",
-                "ПКМ - удалить точку",
-                "SHIFT + ЛКМ - увеличить высоту прыжка",
-                "SHIFT + ПКМ - уменьшить высоту прыжка"
-            )));
+            meta.setDisplayName(ChatColor.GOLD + "Путь (см. описание)");
+            meta.setLore(Arrays.asList(
+                    ChatColor.YELLOW + "ЛКМ - установить точку",
+                    ChatColor.YELLOW + "ПКМ - удалить точку",
+                    ChatColor.YELLOW + "SHIFT + ЛКМ - увеличить высоту прыжка",
+                    ChatColor.YELLOW + "SHIFT + ПКМ - уменьшить высоту прыжка"));
         }));
     }
 
@@ -85,7 +79,7 @@ public class EditTrackParticleItem extends EditorItem {
             if (left) {
                 // Обработка добавления новой точки
                 Waypoint newWaypoint =
-                    new Waypoint(interactionPoint, activity.getCurrentColor(), activity.getCurrentHeight());
+                        new Waypoint(interactionPoint, activity.getCurrentColor(), activity.getCurrentHeight());
                 if (insertWaypointInOrder(waypoints, newWaypoint, directionChecker, player, level)) {
                     isChanged = true;
                 }
@@ -109,14 +103,14 @@ public class EditTrackParticleItem extends EditorItem {
     }
 
     private int findNearestWaypointIndex(
-        List<Waypoint> waypoints, double particleCoordinate, DirectionChecker directionChecker) {
+            List<Waypoint> waypoints, double particleCoordinate, DirectionChecker directionChecker) {
         int left = 0;
         int right = waypoints.size() - 1;
 
         while (left <= right) {
             int mid = left + (right - left) / 2;
             double midCoordinate =
-                directionChecker.getCoordinate(waypoints.get(mid).getLocation());
+                    directionChecker.getCoordinate(waypoints.get(mid).getLocation());
 
             if (directionChecker.isNegative()) {
                 if (midCoordinate > particleCoordinate) {
@@ -136,13 +130,13 @@ public class EditTrackParticleItem extends EditorItem {
     }
 
     private boolean insertWaypointInOrder(
-        @NonNull List<Waypoint> waypoints,
-        @NonNull Waypoint newWaypoint,
-        @NonNull DirectionChecker directionChecker,
-        @NonNull Player player,
-        @NonNull Level level) {
+            @NonNull List<Waypoint> waypoints,
+            @NonNull Waypoint newWaypoint,
+            @NonNull DirectionChecker directionChecker,
+            @NonNull Player player,
+            @NonNull Level level) {
         int index = findNearestWaypointIndex(
-            waypoints, directionChecker.getCoordinate(newWaypoint.getLocation()), directionChecker);
+                waypoints, directionChecker.getCoordinate(newWaypoint.getLocation()), directionChecker);
 
         // TODO: Not working if there are many points on the same horizontal
         for (int i = Math.max(0, index - 1); i <= Math.min(waypoints.size() - 1, index + 1); i++) {
@@ -160,11 +154,11 @@ public class EditTrackParticleItem extends EditorItem {
     }
 
     private boolean removeWaypointIfCloseEnough(
-        @NonNull List<Waypoint> waypoints,
-        int index,
-        @NonNull Location particleLoc,
-        @NonNull Player player,
-        @NonNull Level level) {
+            @NonNull List<Waypoint> waypoints,
+            int index,
+            @NonNull Location particleLoc,
+            @NonNull Player player,
+            @NonNull Level level) {
         // TODO: Not working if there are many points on the same horizontal
         for (int i = Math.max(0, index - 1); i <= Math.min(waypoints.size() - 1, index + 1); i++) {
             Waypoint waypoint = waypoints.get(i);
@@ -184,17 +178,17 @@ public class EditTrackParticleItem extends EditorItem {
     }
 
     private boolean adjustWaypointHeight(
-        boolean increase,
-        @NonNull List<Waypoint> waypoints,
-        @NonNull Player player,
-        @NonNull EditActivity activity) {
+            boolean increase,
+            @NonNull List<Waypoint> waypoints,
+            @NonNull Player player,
+            @NonNull EditActivity activity) {
         Waypoint startSegment = getLookingSegment(player, waypoints);
 
         if (startSegment == null) return false;
 
         if (increase) {
             activity.setCurrentHeight(
-                Math.min(255 - startSegment.getLocation().getY(), startSegment.getHeight() + HEIGHT_CHANGE_VALUE));
+                    Math.min(255 - startSegment.getLocation().getY(), startSegment.getHeight() + HEIGHT_CHANGE_VALUE));
         } else {
             activity.setCurrentHeight(Math.max(0, startSegment.getHeight() - HEIGHT_CHANGE_VALUE));
         }
@@ -220,9 +214,9 @@ public class EditTrackParticleItem extends EditorItem {
             Waypoint endSegment = waypoints.get(i + 1);
 
             if (isLookingAt(
-                player,
-                startSegment.getLocation().toVector(),
-                endSegment.getLocation().toVector())) {
+                    player,
+                    startSegment.getLocation().toVector(),
+                    endSegment.getLocation().toVector())) {
                 return startSegment;
             }
         }
@@ -247,8 +241,7 @@ public class EditTrackParticleItem extends EditorItem {
 
     public static final int INTERACT_BLOCK_DISTANCE = 5;
 
-    @Nullable
-    protected static Location getInteractionPoint(@NonNull PlayerInteractEvent event) {
+    @Nullable protected static Location getInteractionPoint(@NonNull PlayerInteractEvent event) {
         Location interactionPoint = event.getInteractionPoint();
         if (interactionPoint != null) return interactionPoint;
 
@@ -256,7 +249,7 @@ public class EditTrackParticleItem extends EditorItem {
         World world = player.getWorld();
         Location eyeLocation = player.getEyeLocation();
         RayTraceResult rayTrace =
-            world.rayTraceBlocks(eyeLocation, eyeLocation.getDirection(), INTERACT_BLOCK_DISTANCE);
+                world.rayTraceBlocks(eyeLocation, eyeLocation.getDirection(), INTERACT_BLOCK_DISTANCE);
         if (rayTrace != null) {
             interactionPoint = rayTrace.getHitPosition().toLocation(world);
         }

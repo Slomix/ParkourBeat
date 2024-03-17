@@ -1,6 +1,7 @@
 package ru.sortix.parkourbeat.item.editor.type;
 
 import lombok.NonNull;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -15,7 +16,7 @@ public class LeaveEditorItem extends EditorItem {
     @SuppressWarnings("deprecation")
     public LeaveEditorItem(@NonNull ParkourBeat plugin, int slot) {
         super(plugin, slot, newStack(Material.REDSTONE_TORCH, (meta) -> {
-            meta.setDisplayName("Покинуть редактор");
+            meta.setDisplayName(ChatColor.RED + "Покинуть редактор");
         }));
     }
 
