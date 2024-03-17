@@ -70,12 +70,12 @@ public class ItemsManager implements PluginManager, Listener {
     private void on(@NonNull PlayerInteractEvent event) {
         if (event.getAction() == Action.PHYSICAL) return;
         if (event.getItem() == null) return;
-        if (event.getPlayer().getCooldown(event.getItem().getType()) > 0) return;
 
         UsableItem usableItem = this.allItems.get(event.getItem());
         if (usableItem == null) return;
-        event.getPlayer().setCooldown(event.getItem().getType(), 10);
         event.setCancelled(true);
+        if (event.getPlayer().getCooldown(event.getItem().getType()) > 0) return;
+        event.getPlayer().setCooldown(event.getItem().getType(), 10);
 
         if (event.getHand() != EquipmentSlot.HAND) return;
         usableItem.onUse(event);
