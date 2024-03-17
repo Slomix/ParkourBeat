@@ -9,6 +9,7 @@ import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.*;
+import org.bukkit.inventory.ItemStack;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
@@ -58,6 +59,7 @@ public class EditActivity extends UserActivity {
     private double currentHeight = 0;
 
     private @Nullable PlayActivity testingActivity = null;
+    private ItemStack[] creativeInventoryContents = null;
 
     private EditActivity(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         super(plugin, player, level);
@@ -157,6 +159,9 @@ public class EditActivity extends UserActivity {
                         return;
                     }
 
+                    this.creativeInventoryContents = this.player.getInventory().getContents();
+                    this.player.getInventory().clear();
+
                     this.level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(this.player);
                     this.testingActivity = playActivity;
                     this.testingActivity.startActivity();
@@ -181,6 +186,8 @@ public class EditActivity extends UserActivity {
                     this.testingActivity.endActivity();
                     this.testingActivity = null;
                     this.startActivity();
+
+                    this.player.getInventory().setContents(this.creativeInventoryContents);
 
                     this.player.sendMessage("Вы покинули режим тестирования");
                 });
