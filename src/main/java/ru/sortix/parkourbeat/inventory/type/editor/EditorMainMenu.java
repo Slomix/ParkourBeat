@@ -17,6 +17,7 @@ import ru.sortix.parkourbeat.inventory.ParkourBeatInventory;
 import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
+import ru.sortix.parkourbeat.levels.settings.Song;
 import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class EditorMainMenu extends ParkourBeatInventory {
@@ -28,7 +29,15 @@ public class EditorMainMenu extends ParkourBeatInventory {
                 1,
                 ItemUtils.modifyMeta(SelectSongMenu.NOTE_HEAD.clone(), meta -> {
                     meta.setDisplayName(ChatColor.GOLD + "Выбрать музыку");
-                    meta.setLore(List.of(ChatColor.YELLOW + "Трек, который будет запускаться"));
+                    meta.setLore(List.of());
+                    Song song = activity.getLevel()
+                            .getLevelSettings()
+                            .getGameSettings()
+                            .getSong();
+                    meta.setLore(Arrays.asList(
+                            ChatColor.YELLOW + "Трек, который будет запускаться",
+                            ChatColor.YELLOW + "Текущая композиция:",
+                            ChatColor.YELLOW + (song == null ? "отсутствует" : song.getSongName())));
                 }),
                 player -> {
                     new SelectSongMenu(plugin, activity.getLevel()).open(player);
@@ -37,7 +46,7 @@ public class EditorMainMenu extends ParkourBeatInventory {
                 2,
                 3,
                 ItemUtils.create(Material.ENDER_PEARL, (meta) -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Точка спауна (см. описание)");
+                    meta.setDisplayName(ChatColor.GOLD + "Точка спауна");
                     meta.setLore(Arrays.asList(
                             ChatColor.YELLOW + "Устанавливает точку спауна на уровне ваших ног.",
                             ChatColor.YELLOW + "Направление взгляда игроков будет точно таким же,",
