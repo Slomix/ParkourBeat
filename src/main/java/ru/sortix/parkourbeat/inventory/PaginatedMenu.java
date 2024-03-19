@@ -50,7 +50,7 @@ public abstract class PaginatedMenu<P extends JavaPlugin, Item> extends PluginIn
         int slotIndex = this.itemsMinSlotIndex;
         for (int itemIndex = firstItemIndex; itemIndex <= lastItemIndex; itemIndex++) {
             Item item = this.allItems.get(itemIndex);
-            this.setItem(slotIndex++, this.createItemDisplay(item), player -> this.onClick(player, item));
+            this.setItem(slotIndex++, this.createItemDisplay(item), event -> this.onClick(event.getPlayer(), item));
         }
 
         this.onPageDisplayed();
@@ -58,14 +58,14 @@ public abstract class PaginatedMenu<P extends JavaPlugin, Item> extends PluginIn
 
     protected void setPreviousPageItem(int row, int column) {
         if (this.currentPageNumber < this.maxPageNumber) {
-            this.setItem(row, column, RegularItems.nextPage(), player -> this.displayPage(this.currentPageNumber + 1));
+            this.setItem(row, column, RegularItems.nextPage(), event -> this.displayPage(this.currentPageNumber + 1));
         }
     }
 
     protected void setNextPageItem(int row, int column) {
         if (this.currentPageNumber > this.minPageNumber) {
             this.setItem(
-                    row, column, RegularItems.previousPage(), player -> this.displayPage(this.currentPageNumber - 1));
+                    row, column, RegularItems.previousPage(), event -> this.displayPage(this.currentPageNumber - 1));
         }
     }
 

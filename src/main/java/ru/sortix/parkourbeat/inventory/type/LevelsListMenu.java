@@ -1,11 +1,13 @@
 package ru.sortix.parkourbeat.inventory.type;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import javax.annotation.Nullable;
 import lombok.NonNull;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import ru.sortix.parkourbeat.ParkourBeat;
@@ -66,7 +68,8 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
     @Override
     protected void onPageDisplayed() {
         this.setNextPageItem(6, 3);
-        this.setItem(6, 5, RegularItems.closeInventory(), HumanEntity::closeInventory);
+        this.setItem(
+                6, 5, RegularItems.closeInventory(), event -> event.getPlayer().closeInventory());
         this.setPreviousPageItem(6, 7);
         this.setItem(
                 6,
@@ -78,7 +81,8 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
                         meta.setDisplayName(ChatColor.GOLD + "Собственные уровни");
                     }
                 }),
-                player -> {
+                event -> {
+                    Player player = event.getPlayer();
                     if (this.editMenu) {
                         new LevelsListMenu(this.plugin, null, false, this.displayTechInfo).open(player);
                     } else {

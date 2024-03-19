@@ -8,6 +8,7 @@ import lombok.NonNull;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.type.EditActivity;
@@ -39,7 +40,8 @@ public class EditorMainMenu extends ParkourBeatInventory {
                             ChatColor.YELLOW + "Текущая композиция:",
                             ChatColor.YELLOW + (song == null ? "отсутствует" : song.getSongName())));
                 }),
-                player -> {
+                event -> {
+                    Player player = event.getPlayer();
                     new SelectSongMenu(plugin, activity.getLevel()).open(player);
                 });
         this.setItem(
@@ -52,7 +54,8 @@ public class EditorMainMenu extends ParkourBeatInventory {
                             ChatColor.YELLOW + "Направление взгляда игроков будет точно таким же,",
                             ChatColor.YELLOW + "как при установке точки спауна"));
                 }),
-                player -> {
+                event -> {
+                    Player player = event.getPlayer();
                     player.closeInventory();
 
                     LevelSettings levelSettings = activity.getLevel().getLevelSettings();
@@ -76,7 +79,8 @@ public class EditorMainMenu extends ParkourBeatInventory {
                     meta.setDisplayName(ChatColor.GOLD + "Покинуть редактор");
                     meta.setLore(List.of(ChatColor.YELLOW + "Блоки и настройки будут сохранены"));
                 }),
-                player -> {
+                event -> {
+                    Player player = event.getPlayer();
                     TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn())
                             .thenAccept(success -> {
                                 if (!success) return;
@@ -92,7 +96,8 @@ public class EditorMainMenu extends ParkourBeatInventory {
                             ChatColor.RED + "" + ChatColor.BOLD + "Все установленные точки трека",
                             ChatColor.RED + "" + ChatColor.BOLD + "будут БЕЗВОЗВРАТНО удалены"));
                 }),
-                player -> {
+                event -> {
+                    Player player = event.getPlayer();
                     player.closeInventory();
                     EditTrackPointsItem.clearAllPoints(activity.getLevel());
                     player.sendMessage("Все точки сброшены");
@@ -106,7 +111,8 @@ public class EditorMainMenu extends ParkourBeatInventory {
                             ChatColor.RED + "" + ChatColor.BOLD + "Уровень будет удалён",
                             ChatColor.RED + "" + ChatColor.BOLD + "БЕЗ возможности восстановления"));
                 }),
-                player -> {
+                event -> {
+                    Player player = event.getPlayer();
                     player.closeInventory();
                     CommandDelete.deleteLevel(
                             plugin,

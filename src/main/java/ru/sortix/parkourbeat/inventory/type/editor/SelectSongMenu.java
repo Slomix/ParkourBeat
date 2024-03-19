@@ -1,7 +1,6 @@
 package ru.sortix.parkourbeat.inventory.type.editor;
 
 import lombok.NonNull;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import ru.sortix.parkourbeat.ParkourBeat;
@@ -34,7 +33,9 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, Song> {
     @Override
     protected void onPageDisplayed() {
         this.setNextPageItem(6, 3);
-        this.setItem(6, 5, RegularItems.closeInventory(), HumanEntity::closeInventory);
+        this.setItem(6, 5, RegularItems.closeInventory(), clickEvent -> clickEvent
+                .getPlayer()
+                .closeInventory());
         this.setPreviousPageItem(6, 7);
     }
 

@@ -16,11 +16,12 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import ru.sortix.parkourbeat.inventory.event.ClickEvent;
 
 public abstract class PluginInventory<P extends JavaPlugin> implements InventoryHolder {
     protected final @NonNull P plugin;
     private final Inventory handle;
-    private final Map<Integer, Consumer<Player>> actions = new HashMap<>();
+    private final Map<Integer, Consumer<ClickEvent>> clickActions = new HashMap<>();
 
     protected PluginInventory(@NonNull P plugin, int rows, @NonNull String title) {
         this.plugin = plugin;
@@ -34,25 +35,25 @@ public abstract class PluginInventory<P extends JavaPlugin> implements Inventory
         this.handle = plugin.getServer().createInventory(this, type, title);
     }
 
-    protected void setItem(int row, int column, @Nullable ItemStack stack, @Nullable Consumer<Player> action) {
+    protected void setItem(int row, int column, @Nullable ItemStack stack, @Nullable Consumer<ClickEvent> action) {
         int slot = ((row - 1) * 9) + (column - 1);
         this.setItem(slot, stack, action);
     }
 
-    protected void setItem(int slotIndex, @Nullable ItemStack stack, @Nullable Consumer<Player> action) {
+    protected void setItem(int slotIndex, @Nullable ItemStack stack, @Nullable Consumer<ClickEvent> action) {
         this.handle.setItem(slotIndex, stack);
         if (stack == null) {
-            if (action == null) this.actions.remove(slotIndex);
+            if (action == null) this.clickActions.remove(slotIndex);
             else throw new IllegalArgumentException("Action must be null with null item");
         } else {
-            if (action == null) this.actions.remove(slotIndex);
-            else this.actions.put(slotIndex, action);
+            if (action == null) this.clickActions.remove(slotIndex);
+            else this.clickActions.put(slotIndex, action);
         }
     }
 
     protected void clearInventory() {
         this.handle.clear();
-        this.actions.clear();
+        this.clickActions.clear();
     }
 
     public final void open(@NonNull Player player) {
@@ -61,10 +62,12 @@ public abstract class PluginInventory<P extends JavaPlugin> implements Inventory
 
     protected final void handle(@NonNull InventoryClickEvent event) {
         event.setCancelled(true);
-        Consumer<Player> action = this.actions.get(event.getRawSlot());
+        Consumer<ClickEvent> action = this.clickActions.get(event.getRawSlot());
         if (action == null) return;
+        ClickEvent clickEvent = ClickEvent.newInstance(event);
+        if (clickEvent == null) return;
         try {
-            action.accept((Player) event.getWhoClicked());
+            action.accept(clickEvent);
         } catch (Exception e) {
             this.plugin
                     .getLogger()

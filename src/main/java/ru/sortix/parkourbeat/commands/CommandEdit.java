@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat.commands;
 
+import java.util.Collection;
 import lombok.NonNull;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -11,8 +12,6 @@ import ru.sortix.parkourbeat.inventory.type.LevelsListMenu;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 
-import java.util.Collection;
-
 public class CommandEdit extends ParkourBeatCommand {
     public CommandEdit(@NonNull ParkourBeat plugin) {
         super(plugin);
@@ -20,7 +19,7 @@ public class CommandEdit extends ParkourBeatCommand {
 
     @Override
     public boolean onCommand(
-        @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
+            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (!sender.hasPermission("parkourbeat.command.edit")) {
             sender.sendMessage("Недостаточно прав");
             return true;
@@ -34,16 +33,13 @@ public class CommandEdit extends ParkourBeatCommand {
         Player player = (Player) sender;
         boolean bypassForAdmins = args.length >= 1 && args[0].equals("*");
         new LevelsListMenu(
-            this.plugin,
-            player.getUniqueId(),
-            bypassForAdmins,
-            player.hasPermission("parkourbeat.admin")
-        ).open(player);
+                        this.plugin, player.getUniqueId(), bypassForAdmins, player.hasPermission("parkourbeat.admin"))
+                .open(player);
         return true;
     }
 
     public static void startEditing(
-        @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull GameSettings settings) {
+            @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull GameSettings settings) {
         plugin.get(LevelsManager.class).loadLevel(settings.getLevelId()).thenAccept(level -> {
             if (level == null) {
                 player.sendMessage("Не удалось загрузить данные уровня");
