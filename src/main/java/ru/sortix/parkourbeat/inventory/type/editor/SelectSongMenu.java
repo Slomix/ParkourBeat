@@ -33,9 +33,9 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, Song> {
 
     @Override
     protected void onPageDisplayed() {
-        this.setNextPageItem(6, 1);
+        this.setNextPageItem(6, 3);
         this.setItem(6, 5, RegularItems.closeInventory(), HumanEntity::closeInventory);
-        this.setPreviousPageItem(6, 9);
+        this.setPreviousPageItem(6, 7);
     }
 
     @Override

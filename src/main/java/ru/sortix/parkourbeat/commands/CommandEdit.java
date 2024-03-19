@@ -1,29 +1,26 @@
 package ru.sortix.parkourbeat.commands;
 
-import java.util.Collection;
-import java.util.List;
 import lombok.NonNull;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.type.EditActivity;
+import ru.sortix.parkourbeat.inventory.type.LevelsListMenu;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 
-public class CommandEdit extends ParkourBeatCommand implements TabCompleter {
-    private final LevelsManager levelsManager;
+import java.util.Collection;
 
+public class CommandEdit extends ParkourBeatCommand {
     public CommandEdit(@NonNull ParkourBeat plugin) {
         super(plugin);
-        this.levelsManager = plugin.get(LevelsManager.class);
     }
 
     @Override
     public boolean onCommand(
-            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
+        @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (!sender.hasPermission("parkourbeat.command.edit")) {
             sender.sendMessage("Недостаточно прав");
             return true;
@@ -35,28 +32,21 @@ public class CommandEdit extends ParkourBeatCommand implements TabCompleter {
         }
 
         Player player = (Player) sender;
+        boolean bypassForAdmins = args.length >= 1 && args[0].equals("*");
+        new LevelsListMenu(
+            this.plugin,
+            player.getUniqueId(),
+            bypassForAdmins,
+            player.hasPermission("parkourbeat.admin")
+        ).open(player);
+        return true;
+    }
 
-        if (args.length < 1) {
-            player.sendMessage("Недостаточно аргументов! Используйте: /edit <имя уровня>");
-            return false;
-        }
-
-        String levelName = String.join(" ", args);
-        GameSettings settings = this.levelsManager.findLevelSettingsByName(levelName);
-
-        if (settings == null) {
-            sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
-            return true;
-        }
-
-        if (!settings.isOwner(sender, true, true)) {
-            player.sendMessage("Вы не являетесь владельцем этого уровня!");
-            return true;
-        }
-
-        this.levelsManager.loadLevel(settings.getLevelId()).thenAccept(level -> {
+    public static void startEditing(
+        @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull GameSettings settings) {
+        plugin.get(LevelsManager.class).loadLevel(settings.getLevelId()).thenAccept(level -> {
             if (level == null) {
-                sender.sendMessage("Не удалось загрузить данные уровня");
+                player.sendMessage("Не удалось загрузить данные уровня");
                 return;
             }
 
@@ -65,7 +55,7 @@ public class CommandEdit extends ParkourBeatCommand implements TabCompleter {
                 return;
             }
 
-            ActivityManager activityManager = this.plugin.get(ActivityManager.class);
+            ActivityManager activityManager = plugin.get(ActivityManager.class);
 
             Collection<Player> playersOnLevel = activityManager.getPlayersOnTheLevel(level);
             playersOnLevel.removeIf(player1 -> settings.isOwner(player1, true, true));
@@ -75,7 +65,7 @@ public class CommandEdit extends ParkourBeatCommand implements TabCompleter {
                 return;
             }
 
-            EditActivity.createAsync(this.plugin, player, level).thenAccept(editActivity -> {
+            EditActivity.createAsync(plugin, player, level).thenAccept(editActivity -> {
                 if (editActivity == null) {
                     player.sendMessage("Не удалось запустить редактор уровня");
                     return;
@@ -83,13 +73,5 @@ public class CommandEdit extends ParkourBeatCommand implements TabCompleter {
                 activityManager.setActivity(player, editActivity);
             });
         });
-        return true;
-    }
-
-    @Override
-    public List<String> onTabComplete(
-            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        if (args.length == 0) return null;
-        return this.levelsManager.getValidLevelNames(String.join(" ", args), sender);
     }
 }

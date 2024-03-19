@@ -24,12 +24,16 @@ public class GameSettings {
         this.song = song;
     }
 
-    public boolean isOwner(@NonNull CommandSender sender, boolean bypassAdmins, boolean bypassMsg) {
+    public boolean isOwner(@NonNull UUID playerId) {
+        return this.ownerId.equals(playerId);
+    }
+
+    public boolean isOwner(@NonNull CommandSender sender, boolean bypassForAdmins, boolean bypassMsg) {
         if (sender instanceof Player) {
             if (this.ownerId.equals(((Player) sender).getUniqueId())) {
                 return true;
             }
-            if (bypassAdmins && sender.hasPermission("parkourbeat.restrictions.bypass")) {
+            if (bypassForAdmins && sender.hasPermission("parkourbeat.restrictions.bypass")) {
                 if (bypassMsg) sender.sendMessage("Использован обход прав, поскольку вы являетесь оператором сервера");
                 return true;
             }
