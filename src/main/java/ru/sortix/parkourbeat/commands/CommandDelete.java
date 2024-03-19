@@ -39,7 +39,7 @@ public class CommandDelete extends ParkourBeatCommand implements TabCompleter {
         }
 
         String levelName = String.join(" ", args);
-        GameSettings settings = this.levelsManager.findLevelSettingsByName(levelName);
+        GameSettings settings = this.levelsManager.findLevelSettingsByUniqueName(levelName);
 
         if (settings == null) {
             sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
@@ -58,8 +58,9 @@ public class CommandDelete extends ParkourBeatCommand implements TabCompleter {
     @Override
     public List<String> onTabComplete(
             @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
+        if (sender instanceof Player) return null;
         if (args.length == 0) return null;
-        return this.levelsManager.getValidLevelNames(String.join(" ", args), sender);
+        return this.levelsManager.getUniqueLevelNames(String.join(" ", args), sender);
     }
 
     public static void deleteLevel(

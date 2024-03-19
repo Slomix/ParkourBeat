@@ -1,12 +1,12 @@
 package ru.sortix.parkourbeat.inventory.type.editor;
 
 import lombok.NonNull;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.SongsManager;
 import ru.sortix.parkourbeat.inventory.PaginatedMenu;
 import ru.sortix.parkourbeat.inventory.RegularItems;
+import ru.sortix.parkourbeat.inventory.event.ClickEvent;
 import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.settings.Song;
@@ -40,9 +40,9 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, Song> {
     }
 
     @Override
-    protected void onClick(@NonNull Player player, @NonNull Song song) {
+    protected void onClick(@NonNull ClickEvent event, @NonNull Song song) {
         this.level.getLevelSettings().getGameSettings().setSong(song);
-        player.sendMessage("Вы успешно установили песню: " + song.getSongName());
-        player.closeInventory();
+        event.getPlayer().sendMessage("Вы успешно установили песню: " + song.getSongName());
+        event.getPlayer().closeInventory();
     }
 }

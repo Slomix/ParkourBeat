@@ -7,11 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
-import ru.sortix.parkourbeat.activity.ActivityManager;
-import ru.sortix.parkourbeat.activity.UserActivity;
-import ru.sortix.parkourbeat.activity.type.PlayActivity;
 import ru.sortix.parkourbeat.inventory.type.LevelsListMenu;
-import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 
@@ -39,54 +35,27 @@ public class CommandPlay extends ParkourBeatCommand implements TabCompleter {
         Player player = (Player) sender;
 
         if (args.length == 0) {
-            new LevelsListMenu(this.plugin, null, false, player.hasPermission("parkourbeat.admin")).open(player);
+            new LevelsListMenu(this.plugin, player, null).open(player);
             return true;
         }
 
         String levelName = String.join(" ", args);
-        GameSettings settings = this.levelsManager.findLevelSettingsByName(levelName);
+        GameSettings settings = this.levelsManager.findLevelSettingsByUniqueName(levelName);
 
         if (settings == null) {
             sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
             return true;
         }
 
-        startPlaying(this.plugin, player, settings);
+        LevelsListMenu.startPlaying(this.plugin, player, settings);
         return true;
-    }
-
-    public static void startPlaying(
-            @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull GameSettings settings) {
-        Level level = plugin.get(LevelsManager.class).getLoadedLevel(settings.getLevelId());
-        if (level != null && level.isEditing()) {
-            player.sendMessage("Данный уровень недоступен для игры, т.к. он сейчас редактируется");
-            return;
-        }
-
-        UserActivity activity = plugin.get(ActivityManager.class).getActivity(player);
-        if (activity instanceof PlayActivity && activity.getLevel() == level) {
-            player.sendMessage("Вы уже на этом уровне!");
-            return;
-        }
-
-        boolean levelLoaded = level != null;
-        if (!levelLoaded) player.sendMessage("Загрузка уровня...");
-
-        PlayActivity.createAsync(plugin, player, settings.getLevelId(), false).thenAccept(playActivity -> {
-            if (playActivity == null) {
-                player.sendMessage("Не удалось запустить игру");
-                return;
-            }
-
-            plugin.get(ActivityManager.class).setActivity(player, playActivity);
-            if (!levelLoaded) player.sendMessage("Уровень загружен");
-        });
     }
 
     @Override
     public List<String> onTabComplete(
             @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
+        if (!(sender instanceof Player)) return null;
         if (args.length == 0) return null;
-        return this.levelsManager.getValidLevelNames(String.join(" ", args), null);
+        return this.levelsManager.getUniqueLevelNames(String.join(" ", args), null);
     }
 }

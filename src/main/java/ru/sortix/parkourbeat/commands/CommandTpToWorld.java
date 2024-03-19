@@ -7,11 +7,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
-import ru.sortix.parkourbeat.activity.ActivityManager;
-import ru.sortix.parkourbeat.activity.type.SpectateActivity;
+import ru.sortix.parkourbeat.inventory.type.LevelsListMenu;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
-import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class CommandTpToWorld extends ParkourBeatCommand implements TabCompleter {
     private final LevelsManager levelsManager;
@@ -36,36 +34,19 @@ public class CommandTpToWorld extends ParkourBeatCommand implements TabCompleter
 
         Player player = (Player) sender;
         if (args.length == 0) {
-            sender.sendMessage("Укажите название уровня. Для телепортации на спаун используйте /spawn");
+            new LevelsListMenu(this.plugin, player, null).open(player);
             return true;
         }
 
         String levelName = String.join(" ", args);
-        GameSettings settings = this.levelsManager.findLevelSettingsByName(levelName);
+        GameSettings settings = this.levelsManager.findLevelSettingsByUniqueName(levelName);
 
         if (settings == null) {
             sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
             return true;
         }
 
-        this.levelsManager.loadLevel(settings.getLevelId()).thenAccept(level -> {
-            if (level == null) {
-                sender.sendMessage("Не удалось загрузить данные уровня");
-                return;
-            }
-            if (level.getWorld() == player.getWorld()) {
-                sender.sendMessage("Вы уже в этом мире");
-                return;
-            }
-
-            SpectateActivity.createAsync(this.plugin, player, level).thenAccept(spectateActivity -> {
-                TeleportUtils.teleportAsync(this.plugin, player, level.getSpawn())
-                        .thenAccept(success -> {
-                            if (!success) return;
-                            this.plugin.get(ActivityManager.class).setActivity(player, spectateActivity);
-                        });
-            });
-        });
+        LevelsListMenu.startSpectating(this.plugin, player, settings);
         return true;
     }
 
@@ -74,6 +55,6 @@ public class CommandTpToWorld extends ParkourBeatCommand implements TabCompleter
             @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (!(sender instanceof Player)) return null;
         if (args.length == 0) return null;
-        return this.levelsManager.getValidLevelNames(String.join(" ", args), null);
+        return this.levelsManager.getUniqueLevelNames(String.join(" ", args), null);
     }
 }

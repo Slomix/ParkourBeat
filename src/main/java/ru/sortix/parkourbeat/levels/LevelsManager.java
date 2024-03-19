@@ -17,6 +17,7 @@ import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
+import ru.sortix.parkourbeat.utils.StringUtils;
 import ru.sortix.parkourbeat.utils.java.ClassUtils;
 
 public class LevelsManager implements PluginManager {
@@ -29,7 +30,8 @@ public class LevelsManager implements PluginManager {
     @Getter
     private final LevelSettingsManager levelsSettings;
 
-    private final Map<String, GameSettings> availableLevelsByName = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private final Map<String, GameSettings> availableLevelsByUniqueName = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    private final Map<UUID, GameSettings> availableLevelsByUniqueId = new HashMap<>();
     private final Map<UUID, Level> loadedLevels = new HashMap<>();
     private final boolean gameRulesSupport = ClassUtils.isClassPresent("org.bukkit.GameRule");
 
@@ -46,9 +48,10 @@ public class LevelsManager implements PluginManager {
     }
 
     private void loadAvailableLevelNames() {
-        this.availableLevelsByName.putAll(
+        this.availableLevelsByUniqueName.putAll(
                 this.levelsSettings.getLevelSettingDAO().loadAllAvailableLevelGameSettingsSync());
-        for (GameSettings gameSettings : this.availableLevelsByName.values()) {
+        for (GameSettings gameSettings : this.availableLevelsByUniqueName.values()) {
+            this.availableLevelsByUniqueId.put(gameSettings.getLevelId(), gameSettings);
             UUID levelId = gameSettings.getLevelId();
             String levelName = gameSettings.getLevelName();
             this.plugin
@@ -58,7 +61,7 @@ public class LevelsManager implements PluginManager {
     }
 
     @NonNull public Collection<GameSettings> getAvailableLevelsSettings() {
-        return Collections.unmodifiableCollection(this.availableLevelsByName.values());
+        return Collections.unmodifiableCollection(this.availableLevelsByUniqueName.values());
     }
 
     @NonNull public CompletableFuture<Level> createLevel(
@@ -68,12 +71,12 @@ public class LevelsManager implements PluginManager {
             @NonNull String ownerName) {
 
         CompletableFuture<Level> result = new CompletableFuture<>();
-        if (this.availableLevelsByName.containsKey(levelName)) {
+        if (this.availableLevelsByUniqueName.containsKey(levelName)) {
             result.complete(null);
             return result;
         }
 
-        UUID levelId = UUID.randomUUID();
+        UUID levelId = this.getNextLevelId();
         WorldCreator worldCreator = this.levelsSettings.getLevelSettingDAO().newWorldCreator(levelId);
         worldCreator.generator(this.worldsManager.getEmptyGenerator());
         if (false) worldCreator.environment(environment); // creates a new world not a copy
@@ -99,13 +102,22 @@ public class LevelsManager implements PluginManager {
                     Level level = new Level(levelId, levelName, world, levelSettings);
                     level.setEditing(true);
 
-                    this.availableLevelsByName.put(
+                    this.availableLevelsByUniqueName.put(
                             level.getLevelName(), level.getLevelSettings().getGameSettings());
+                    this.availableLevelsByUniqueId.put(levelId, null);
                     this.levelsSettings.addLevelSettings(levelId, levelSettings);
                     this.loadedLevels.put(levelId, level);
 
                     result.complete(level);
                 });
+        return result;
+    }
+
+    @NonNull private UUID getNextLevelId() {
+        UUID result;
+        do {
+            result = UUID.randomUUID();
+        } while (this.availableLevelsByUniqueId.containsKey(result));
         return result;
     }
 
@@ -153,7 +165,7 @@ public class LevelsManager implements PluginManager {
                 return;
             }
 
-            this.availableLevelsByName.remove(settings.getLevelName());
+            this.availableLevelsByUniqueName.remove(settings.getLevelName());
             this.levelsSettings.getLevelSettingDAO().deleteLevelWorldAndSettings(levelId);
             result.complete(true);
         });
@@ -213,18 +225,18 @@ public class LevelsManager implements PluginManager {
         return this.loadedLevels.get(levelId);
     }
 
-    @NonNull public List<String> getValidLevelNames(@NonNull String levelNamePrefix, @Nullable CommandSender owner) {
+    @NonNull public List<String> getUniqueLevelNames(@NonNull String levelNamePrefix, @Nullable CommandSender owner) {
         levelNamePrefix = levelNamePrefix.toLowerCase();
 
         List<String> result = new ArrayList<>();
 
         if (owner == null) {
-            for (GameSettings gameSettings : this.availableLevelsByName.values()) {
+            for (GameSettings gameSettings : this.availableLevelsByUniqueName.values()) {
                 if (!gameSettings.getLevelName().startsWith(levelNamePrefix)) continue;
                 result.add(gameSettings.getLevelName());
             }
         } else {
-            for (GameSettings gameSettings : this.availableLevelsByName.values()) {
+            for (GameSettings gameSettings : this.availableLevelsByUniqueName.values()) {
                 if (!gameSettings.isOwner(owner, false, false)) continue;
                 if (!gameSettings.getLevelName().startsWith(levelNamePrefix)) continue;
                 result.add(gameSettings.getLevelName());
@@ -299,8 +311,13 @@ public class LevelsManager implements PluginManager {
         world.setGameRule((GameRule<Integer>) byName, newValue);
     }
 
-    @Nullable public GameSettings findLevelSettingsByName(@NonNull String levelName) {
-        return this.availableLevelsByName.get(levelName);
+    @Nullable public GameSettings findLevelSettingsByUniqueName(@NonNull String levelName) {
+        UUID levelId = StringUtils.parseUUID(levelName);
+        if (levelId != null) {
+            return this.availableLevelsByUniqueId.get(levelId);
+        } else {
+            return this.availableLevelsByUniqueName.get(levelName);
+        }
     }
 
     @Override

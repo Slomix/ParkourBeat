@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import ru.sortix.parkourbeat.inventory.event.ClickEvent;
 
 public abstract class PaginatedMenu<P extends JavaPlugin, Item> extends PluginInventory<P> {
     private final int itemsMinSlotIndex;
@@ -50,7 +50,7 @@ public abstract class PaginatedMenu<P extends JavaPlugin, Item> extends PluginIn
         int slotIndex = this.itemsMinSlotIndex;
         for (int itemIndex = firstItemIndex; itemIndex <= lastItemIndex; itemIndex++) {
             Item item = this.allItems.get(itemIndex);
-            this.setItem(slotIndex++, this.createItemDisplay(item), event -> this.onClick(event.getPlayer(), item));
+            this.setItem(slotIndex++, this.createItemDisplay(item), event -> this.onClick(event, item));
         }
 
         this.onPageDisplayed();
@@ -73,5 +73,5 @@ public abstract class PaginatedMenu<P extends JavaPlugin, Item> extends PluginIn
 
     protected abstract void onPageDisplayed();
 
-    protected abstract void onClick(@NonNull Player player, @NonNull Item item);
+    protected abstract void onClick(@NonNull ClickEvent event, @NonNull Item item);
 }
