@@ -20,13 +20,13 @@ import ru.sortix.parkourbeat.utils.TeleportUtils;
 public class EditorMainMenu extends ParkourBeatInventory {
     @SuppressWarnings("deprecation")
     public EditorMainMenu(@NonNull ParkourBeat plugin, @NonNull EditActivity activity) {
-        super(plugin, 3, "Редактор уровня");
+        super(plugin, 3, "Параметры уровня");
         this.setItem(
                 2,
                 3,
-                ItemUtils.create(Material.PAPER, meta -> {
+                ItemUtils.modifyMeta(SelectSongMenu.NOTE_HEAD.clone(), meta -> {
                     meta.setDisplayName(ChatColor.GOLD + "Выбрать музыку");
-                    meta.setLore(List.of(ChatColor.YELLOW + "Выбрать трек, который будет запускаться"));
+                    meta.setLore(List.of(ChatColor.YELLOW + "Трек, который будет запускаться"));
                 }),
                 player -> {
                     new SelectSongMenu(plugin, activity.getLevel()).open(player);
