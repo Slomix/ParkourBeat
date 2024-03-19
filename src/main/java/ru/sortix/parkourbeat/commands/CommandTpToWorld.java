@@ -24,6 +24,11 @@ public class CommandTpToWorld extends ParkourBeatCommand implements TabCompleter
     @Override
     public boolean onCommand(
             @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
+        if (!sender.hasPermission("parkourbeat.command.tptoworld")) {
+            sender.sendMessage("Недостаточно прав");
+            return true;
+        }
+
         if (!(sender instanceof Player)) {
             sender.sendMessage("Команда только для игроков");
             return true;

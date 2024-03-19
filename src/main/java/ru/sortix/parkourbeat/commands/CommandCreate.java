@@ -30,6 +30,10 @@ public class CommandCreate extends ParkourBeatCommand implements TabCompleter {
     @Override
     public boolean onCommand(
             @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
+        if (!sender.hasPermission("parkourbeat.command.create")) {
+            sender.sendMessage("Недостаточно прав");
+            return true;
+        }
 
         if (args.length < 1) {
             sender.sendMessage("Недостаточно аргументов! Используйте: /" + label + " <имя уровня> [окружение]");

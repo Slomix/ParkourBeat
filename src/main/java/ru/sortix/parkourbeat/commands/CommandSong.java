@@ -17,10 +17,16 @@ public class CommandSong extends ParkourBeatCommand {
     @Override
     public boolean onCommand(
             @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
+        if (!sender.hasPermission("parkourbeat.command.song")) {
+            sender.sendMessage("Недостаточно прав");
+            return true;
+        }
+
         if (!(sender instanceof Player)) {
             sender.sendMessage("Команда только для игроков");
             return true;
         }
+
         Player player = (Player) sender;
         UserActivity activity = this.plugin.get(ActivityManager.class).getActivity(player);
         if (!(activity instanceof EditActivity)) {

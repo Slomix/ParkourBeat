@@ -13,10 +13,11 @@ public class CommandTest extends ParkourBeatCommand {
     @Override
     public boolean onCommand(
             @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        if (!sender.hasPermission("parkourbeat.test")) {
+        if (!sender.hasPermission("parkourbeat.command.test")) {
             sender.sendMessage("Недостаточно прав");
             return true;
         }
+
         sender.sendMessage("Nothing here");
         return true;
     }

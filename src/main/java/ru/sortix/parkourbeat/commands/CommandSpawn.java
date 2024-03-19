@@ -17,10 +17,16 @@ public class CommandSpawn extends ParkourBeatCommand {
     @Override
     public boolean onCommand(
             @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
+        if (!sender.hasPermission("parkourbeat.command.spawn")) {
+            sender.sendMessage("Недостаточно прав");
+            return true;
+        }
+
         if (!(sender instanceof Player)) {
             sender.sendMessage("Команда только для игроков");
             return true;
         }
+
         Player player = (Player) sender;
         this.plugin.get(ActivityManager.class).setActivity(player, null);
         TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn());
