@@ -18,11 +18,9 @@ import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.inventory.type.editor.SelectSongMenu;
 import ru.sortix.parkourbeat.item.ItemsManager;
 import ru.sortix.parkourbeat.item.editor.EditorItem;
-import ru.sortix.parkourbeat.item.editor.type.EditTrackParticleItem;
+import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
-import ru.sortix.parkourbeat.levels.ParticleController;
-import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class EditActivity extends UserActivity {
@@ -52,7 +50,7 @@ public class EditActivity extends UserActivity {
 
     @Getter
     @Setter
-    private Color currentColor = EditTrackParticleItem.DEFAULT_PARTICLES_COLOR;
+    private Color currentColor = EditTrackPointsItem.DEFAULT_PARTICLES_COLOR;
 
     @Getter
     @Setter
@@ -121,10 +119,7 @@ public class EditActivity extends UserActivity {
         if (this.testingActivity != null) {
             this.testingActivity.onPlayerFall();
         } else {
-            TeleportUtils.teleportAsync(
-                    this.getPlugin(),
-                    this.player,
-                    this.level.getLevelSettings().getWorldSettings().getSpawn());
+            TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn());
         }
     }
 
@@ -173,10 +168,7 @@ public class EditActivity extends UserActivity {
     public void endTesting() {
         if (this.testingActivity == null) throw new IllegalArgumentException("Testing not started");
 
-        TeleportUtils.teleportAsync(
-                        this.plugin,
-                        this.player,
-                        this.level.getLevelSettings().getWorldSettings().getSpawn())
+        TeleportUtils.teleportAsync(this.plugin, this.player, this.level.getSpawn())
                 .thenAccept(success -> {
                     if (!success) {
                         this.player.sendMessage("Не удалось покинуть режим тестирования");
@@ -202,21 +194,17 @@ public class EditActivity extends UserActivity {
     }
 
     @NonNull private CompletableFuture<Boolean> start() {
-        WorldSettings worldSettings = this.level.getLevelSettings().getWorldSettings();
         CompletableFuture<Boolean> result = new CompletableFuture<>();
-        TeleportUtils.teleportAsync(this.plugin, this.player, worldSettings.getSpawn())
+        TeleportUtils.teleportAsync(this.plugin, this.player, this.level.getSpawn())
                 .thenAccept(success -> {
                     if (!success) {
                         result.complete(false);
                         return;
                     }
 
-                    ParticleController particleController =
-                            this.level.getLevelSettings().getParticleController();
-
                     this.player.sendMessage("Редактор уровня \"" + this.level.getLevelName() + "\" успешно запущен");
 
-                    particleController.loadParticleLocations(worldSettings.getWaypoints());
+                    this.level.getLevelSettings().updateParticleLocations();
 
                     this.level.setEditing(true);
                     result.complete(true);

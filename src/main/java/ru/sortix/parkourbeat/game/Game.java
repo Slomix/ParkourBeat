@@ -16,10 +16,8 @@ import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.ParticleController;
-import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.Song;
-import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 @Getter
@@ -36,8 +34,7 @@ public class Game {
             try {
                 // TODO: Проверять это на этапе загрузки настроек мира и мне кажется
                 // лучше чтобы мир отгружался при result.complete(false)
-                LevelSettings levelSettings = level.getLevelSettings();
-                if (!isValidSpawnPoint(levelSettings.getWorldSettings().getSpawn(), levelSettings)) {
+                if (!isValidSpawnPoint(level.getSpawn(), level.getLevelSettings())) {
                     player.sendMessage("Точка спауна установлена неверно. Невозможно начать игру.");
                     result.complete(null);
 
@@ -60,23 +57,23 @@ public class Game {
 
     private static void prepareGame(@NonNull ParkourBeat plugin, @NonNull Game game) {
         Player player = game.getPlayer();
-        LevelSettings settings = game.level.getLevelSettings();
-        WorldSettings worldSettings = settings.getWorldSettings();
-        GameSettings gameSettings = settings.getGameSettings();
+        Level level = game.level;
+        LevelSettings settings = level.getLevelSettings();
 
-        TeleportUtils.teleportAsync(plugin, player, worldSettings.getSpawn()).thenAccept(success -> {
+        TeleportUtils.teleportAsync(plugin, player, level.getSpawn()).thenAccept(success -> {
             if (!success) return;
 
             ParticleController particleController = settings.getParticleController();
 
             if (!particleController.isLoaded()) {
-                particleController.loadParticleLocations(worldSettings.getWaypoints());
+                particleController.loadParticleLocations(
+                        settings.getWorldSettings().getWaypoints());
             }
 
             player.setGameMode(GameMode.ADVENTURE);
 
             boolean ready = true;
-            Song song = gameSettings.getSong();
+            Song song = settings.getGameSettings().getSong();
             if (song != null) {
                 String currentPlayList = AMusic.getPackName(player); // nullable
                 String requiredPlaylist = song.getSongPlaylist();
@@ -163,11 +160,7 @@ public class Game {
 
     private void stopGame(@NonNull String title, boolean levelComplete) {
         Plugin plugin = this.getPlugin();
-        LevelSettings settings = this.level.getLevelSettings();
-        TeleportUtils.teleportAsync(
-                        this.getPlugin(),
-                        this.player,
-                        settings.getWorldSettings().getSpawn())
+        TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn())
                 .thenAccept(success -> {
                     if (!success) return;
                     if (this.currentState != State.RUNNING) return;
@@ -183,7 +176,7 @@ public class Game {
                     } else {
                         this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
                     }
-                    settings.getParticleController().stopSpawnParticlesForPlayer(this.player);
+                    this.level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(this.player);
                     this.gameMoveHandler.getAccuracyChecker().reset();
 
                     for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {

@@ -102,7 +102,7 @@ public final class GamesListener implements Listener {
             event.setRespawnLocation(Settings.getLobbySpawn());
         } else {
             this.doActivityAction(player, activity -> {
-                event.setRespawnLocation(activity.getRespawnLocation());
+                event.setRespawnLocation(activity.getLevel().getSpawn());
                 activity.startActivity();
             });
         }

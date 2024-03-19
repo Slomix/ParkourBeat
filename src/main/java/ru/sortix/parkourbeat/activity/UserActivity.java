@@ -3,7 +3,6 @@ package ru.sortix.parkourbeat.activity;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.*;
@@ -44,9 +43,5 @@ public abstract class UserActivity {
     protected int getFallHeight(boolean isEditing) {
         if (isEditing) return -5;
         return this.level.getLevelSettings().getWorldSettings().getMinWorldHeight() - 1;
-    }
-
-    @NonNull public Location getRespawnLocation() {
-        return this.level.getLevelSettings().getWorldSettings().getSpawn();
     }
 }

@@ -176,7 +176,7 @@ public class LevelsManager implements PluginManager {
             worldUnloading = new CompletableFuture<>();
             List<CompletableFuture<Boolean>> futures = new ArrayList<>();
             for (Player player : world.getPlayers()) {
-                player.sendMessage("Уровень, на которым вы находились, был удалён");
+                player.sendMessage("Уровень, на которым вы находились, был отгружен");
                 futures.add(TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn()));
             }
             CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))

@@ -54,10 +54,7 @@ public class SpectateActivity extends UserActivity {
 
     @Override
     public void onPlayerFall() {
-        TeleportUtils.teleportAsync(
-                this.getPlugin(),
-                this.player,
-                this.level.getLevelSettings().getWorldSettings().getSpawn());
+        TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn());
     }
 
     @Override

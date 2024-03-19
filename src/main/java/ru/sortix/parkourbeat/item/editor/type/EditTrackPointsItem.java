@@ -15,11 +15,10 @@ import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.item.editor.EditorItem;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.Level;
-import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.location.Waypoint;
 
-public class EditTrackParticleItem extends EditorItem {
+public class EditTrackPointsItem extends EditorItem {
     public static final Color DEFAULT_PARTICLES_COLOR = Color.LIME;
 
     public static final double MIN_DISTANCE_BETWEEN_POINTS = 0.5;
@@ -27,7 +26,7 @@ public class EditTrackParticleItem extends EditorItem {
     public static final int REMOVE_POINT_DISTANCE = 1;
 
     @SuppressWarnings("deprecation")
-    public EditTrackParticleItem(@NonNull ParkourBeat plugin, int slot) {
+    public EditTrackPointsItem(@NonNull ParkourBeat plugin, int slot) {
         super(plugin, slot, ItemUtils.create(Material.BLAZE_ROD, (meta) -> {
             meta.setDisplayName(ChatColor.GOLD + "Путь (см. описание)");
             meta.setLore(Arrays.asList(
@@ -61,15 +60,16 @@ public class EditTrackParticleItem extends EditorItem {
         }
 
         boolean isChanged = false;
-        List<Waypoint> waypoints = level.getLevelSettings().getWorldSettings().getWaypoints();
+        WorldSettings worldSettings = level.getLevelSettings().getWorldSettings();
+        List<Waypoint> waypoints = worldSettings.getWaypoints();
 
         if (player.isSneaking()) {
-            // Обработка изменения высоты сегментов
+            // Изменение высоты сегментов
             if (adjustWaypointHeight(left, waypoints, player, activity)) {
                 isChanged = true;
             }
         } else {
-            // Обработка точек
+            // Добавление и удаление точек
             Location interactionPoint = getInteractionPoint(event);
             if (interactionPoint == null) {
                 return;
@@ -99,11 +99,19 @@ public class EditTrackParticleItem extends EditorItem {
 
         // Обновляем частицы если были изменения
         if (isChanged) {
-            updateParticleController(waypoints, level.getLevelSettings().getParticleController());
+            level.getLevelSettings().updateParticleLocations();
         }
     }
 
-    private int findNearestWaypointIndex(
+    public static void clearAllPoints(@NonNull Level level) {
+        WorldSettings worldSettings = level.getLevelSettings().getWorldSettings();
+        worldSettings.getWaypoints().clear();
+        worldSettings.addStartAndFinishPoints();
+        worldSettings.updateBorders();
+        level.getLevelSettings().updateParticleLocations();
+    }
+
+    private static int findNearestWaypointIndex(
             List<Waypoint> waypoints, double particleCoordinate, DirectionChecker directionChecker) {
         int left = 0;
         int right = waypoints.size() - 1;
@@ -130,7 +138,7 @@ public class EditTrackParticleItem extends EditorItem {
         return left;
     }
 
-    private boolean insertWaypointInOrder(
+    private static boolean insertWaypointInOrder(
             @NonNull List<Waypoint> waypoints,
             @NonNull Waypoint newWaypoint,
             @NonNull DirectionChecker directionChecker,
@@ -154,7 +162,7 @@ public class EditTrackParticleItem extends EditorItem {
         return true;
     }
 
-    private boolean removeWaypointIfCloseEnough(
+    private static boolean removeWaypointIfCloseEnough(
             @NonNull List<Waypoint> waypoints,
             int index,
             @NonNull Location particleLoc,
@@ -178,7 +186,7 @@ public class EditTrackParticleItem extends EditorItem {
         return false;
     }
 
-    private boolean adjustWaypointHeight(
+    private static boolean adjustWaypointHeight(
             boolean increase,
             @NonNull List<Waypoint> waypoints,
             @NonNull Player player,
@@ -197,18 +205,14 @@ public class EditTrackParticleItem extends EditorItem {
         return true;
     }
 
-    private void updateBorders(int index, @NonNull Level level) {
+    private static void updateBorders(int index, @NonNull Level level) {
         WorldSettings worldSettings = level.getLevelSettings().getWorldSettings();
         if (index == 0 || index == worldSettings.getWaypoints().size() - 1) {
             worldSettings.updateBorders();
         }
     }
 
-    private void updateParticleController(List<Waypoint> waypoints, ParticleController particleController) {
-        particleController.loadParticleLocations(waypoints);
-    }
-
-    private Waypoint getLookingSegment(@NonNull Player player, @NonNull List<Waypoint> waypoints) {
+    private static Waypoint getLookingSegment(@NonNull Player player, @NonNull List<Waypoint> waypoints) {
 
         for (int i = 0; i < waypoints.size() - 1; i++) {
             Waypoint startSegment = waypoints.get(i);
@@ -224,7 +228,7 @@ public class EditTrackParticleItem extends EditorItem {
         return null;
     }
 
-    public boolean isLookingAt(@NonNull Player player, @NonNull Vector block1, @NonNull Vector block2) {
+    public static boolean isLookingAt(@NonNull Player player, @NonNull Vector block1, @NonNull Vector block2) {
         Vector toBlock1 = block1.subtract(player.getEyeLocation().toVector()).setY(0);
         Vector toBlock2 = block2.subtract(player.getEyeLocation().toVector()).setY(0);
 

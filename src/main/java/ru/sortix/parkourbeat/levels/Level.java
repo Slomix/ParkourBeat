@@ -4,6 +4,7 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.Location;
 import org.bukkit.World;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
@@ -29,6 +30,10 @@ public class Level {
 
     public void setEditing(boolean isEditing) {
         this.isEditing = isEditing;
+    }
+
+    @NonNull public Location getSpawn() {
+        return this.levelSettings.getWorldSettings().getSpawn();
     }
 
     @Override

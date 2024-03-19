@@ -58,10 +58,7 @@ public class CommandTpToWorld extends ParkourBeatCommand implements TabCompleter
             }
 
             SpectateActivity.createAsync(this.plugin, player, level).thenAccept(spectateActivity -> {
-                TeleportUtils.teleportAsync(
-                                this.plugin,
-                                player,
-                                level.getLevelSettings().getWorldSettings().getSpawn())
+                TeleportUtils.teleportAsync(this.plugin, player, level.getSpawn())
                         .thenAccept(success -> {
                             if (!success) return;
                             this.plugin.get(ActivityManager.class).setActivity(player, spectateActivity);

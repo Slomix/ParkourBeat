@@ -47,4 +47,9 @@ public class LevelSettings {
         directionChecker = new DirectionChecker(worldSettings.getDirection());
         particleController.setDirectionChecker(directionChecker);
     }
+
+    public void updateParticleLocations() {
+        this.getParticleController()
+                .loadParticleLocations(this.getWorldSettings().getWaypoints());
+    }
 }

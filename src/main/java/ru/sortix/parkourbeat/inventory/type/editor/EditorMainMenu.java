@@ -11,9 +11,11 @@ import org.bukkit.Material;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.type.EditActivity;
+import ru.sortix.parkourbeat.commands.CommandDelete;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.inventory.ParkourBeatInventory;
 import ru.sortix.parkourbeat.item.ItemUtils;
+import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.utils.TeleportUtils;
 
@@ -23,7 +25,7 @@ public class EditorMainMenu extends ParkourBeatInventory {
         super(plugin, 3, "Параметры уровня");
         this.setItem(
                 2,
-                3,
+                1,
                 ItemUtils.modifyMeta(SelectSongMenu.NOTE_HEAD.clone(), meta -> {
                     meta.setDisplayName(ChatColor.GOLD + "Выбрать музыку");
                     meta.setLore(List.of(ChatColor.YELLOW + "Трек, который будет запускаться"));
@@ -33,7 +35,7 @@ public class EditorMainMenu extends ParkourBeatInventory {
                 });
         this.setItem(
                 2,
-                5,
+                3,
                 ItemUtils.create(Material.ENDER_PEARL, (meta) -> {
                     meta.setDisplayName(ChatColor.GOLD + "Точка спауна (см. описание)");
                     meta.setLore(Arrays.asList(
@@ -60,7 +62,7 @@ public class EditorMainMenu extends ParkourBeatInventory {
                 });
         this.setItem(
                 2,
-                7,
+                5,
                 ItemUtils.create(Material.REDSTONE_TORCH, (meta) -> {
                     meta.setDisplayName(ChatColor.GOLD + "Покинуть редактор");
                     meta.setLore(List.of(ChatColor.YELLOW + "Блоки и настройки будут сохранены"));
@@ -71,6 +73,33 @@ public class EditorMainMenu extends ParkourBeatInventory {
                                 if (!success) return;
                                 this.plugin.get(ActivityManager.class).setActivity(player, null);
                             });
+                });
+        this.setItem(
+                2,
+                7,
+                ItemUtils.create(Material.NETHER_STAR, (meta) -> {
+                    meta.setDisplayName(ChatColor.GOLD + "Сбросить все точки");
+                    meta.setLore(Arrays.asList(
+                            ChatColor.RED + "" + ChatColor.BOLD + "Все установленные точки трека",
+                            ChatColor.RED + "" + ChatColor.BOLD + "будут БЕЗВОЗВРАТНО удалены"));
+                }),
+                player -> {
+                    player.closeInventory();
+                    EditTrackPointsItem.clearAllPoints(activity.getLevel());
+                    player.sendMessage("Все точки сброшены");
+                });
+        this.setItem(
+                2,
+                9,
+                ItemUtils.create(Material.BARRIER, (meta) -> {
+                    meta.setDisplayName(ChatColor.GOLD + "Удалить уровень");
+                    meta.setLore(Arrays.asList(
+                            ChatColor.RED + "" + ChatColor.BOLD + "Уровень будет удалён",
+                            ChatColor.RED + "" + ChatColor.BOLD + "БЕЗ возможности восстановления"));
+                }),
+                player -> {
+                    player.closeInventory();
+                    CommandDelete.deleteLevel(plugin, player, activity.getLevel());
                 });
     }
 }

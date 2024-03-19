@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
-import ru.sortix.parkourbeat.item.editor.type.EditTrackParticleItem;
+import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.location.Waypoint;
 import ru.sortix.parkourbeat.utils.java.ParticleUtils;
 
@@ -187,7 +187,7 @@ public class ParticleController {
             }
             break;
         }
-        return lastColor == null ? EditTrackParticleItem.DEFAULT_PARTICLES_COLOR : lastColor;
+        return lastColor == null ? EditTrackPointsItem.DEFAULT_PARTICLES_COLOR : lastColor;
     }
 
     private List<Location> createStraightPath(Location start, Location end) {

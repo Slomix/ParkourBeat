@@ -42,14 +42,18 @@ public class WorldSettings {
         this.minWorldHeight = this.findMinWorldHeight();
 
         if (waypoints.isEmpty()) {
-            waypoints.add(new Waypoint(Settings.getStartBorder().toLocation(world), Color.LIME, 0));
-            waypoints.add(new Waypoint(Settings.getFinishBorder().toLocation(world), Color.LIME, 0));
+            this.addStartAndFinishPoints();
         }
 
         this.startBorder = waypoints.get(0).getLocation().toVector();
         this.finishBorder = waypoints.get(waypoints.size() - 1).getLocation().toVector();
 
         this.world.setSpawnLocation(spawn);
+    }
+
+    public void addStartAndFinishPoints() {
+        this.waypoints.add(new Waypoint(Settings.getStartBorder().toLocation(world), Color.LIME, 0));
+        this.waypoints.add(new Waypoint(Settings.getFinishBorder().toLocation(world), Color.LIME, 0));
     }
 
     private int findMinWorldHeight() {
