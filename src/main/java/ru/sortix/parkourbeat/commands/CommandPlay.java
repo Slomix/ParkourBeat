@@ -11,7 +11,7 @@ import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
 import ru.sortix.parkourbeat.activity.type.PlayActivity;
-import ru.sortix.parkourbeat.inventory.levels.LevelsListMenu;
+import ru.sortix.parkourbeat.inventory.type.LevelsListMenu;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 
@@ -39,7 +39,7 @@ public class CommandPlay extends ParkourBeatCommand implements TabCompleter {
         Player player = (Player) sender;
 
         if (args.length == 0) {
-            new LevelsListMenu(this.plugin, player).open(player);
+            new LevelsListMenu(this.plugin).open(player);
             return true;
         }
 

@@ -1,7 +1,6 @@
 package ru.sortix.parkourbeat.inventory;
 
-import java.util.function.Consumer;
-import javax.annotation.Nullable;
+import java.util.function.BiConsumer;
 import lombok.NonNull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -9,13 +8,20 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryEvent;
 import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import ru.sortix.parkourbeat.ParkourBeat;
 
-@SuppressWarnings("CodeBlock2Expr")
 public class InventoriesListener implements Listener {
+    private static final BiConsumer<PluginInventory<?>, InventoryClickEvent> handlerInventoryClickEvent =
+            PluginInventory::handle;
+    private static final BiConsumer<PluginInventory<?>, InventoryDragEvent> handlerInventoryDragEvent =
+            PluginInventory::handle;
+    private static final BiConsumer<PluginInventory<?>, InventoryCloseEvent> handlerInventoryCloseEvent =
+            PluginInventory::handle;
+
     private final Plugin plugin;
 
     public InventoriesListener(@NonNull ParkourBeat plugin) {
@@ -24,38 +30,33 @@ public class InventoriesListener implements Listener {
 
     @EventHandler
     private void on(InventoryClickEvent event) {
-        this.doPluginInventoryAction(event.getInventory(), inventory -> {
-            event.setCancelled(true);
-            inventory.onClick(((Player) event.getWhoClicked()), event.getSlot());
-        });
+        this.handleEvent(event, handlerInventoryClickEvent);
     }
 
     @EventHandler
     private void on(InventoryDragEvent event) {
-        this.doPluginInventoryAction(event.getInventory(), inventory -> {
-            event.setCancelled(true);
-        });
+        this.handleEvent(event, handlerInventoryDragEvent);
     }
 
     @EventHandler
     private void on(InventoryCloseEvent event) {
-        this.doPluginInventoryAction(event.getInventory(), inventory -> {
-            inventory.onClose((Player) event.getPlayer());
-        });
+        this.handleEvent(event, handlerInventoryCloseEvent);
+    }
+
+    private <E extends InventoryEvent> void handleEvent(
+            @NonNull E event, @NonNull BiConsumer<PluginInventory<?>, E> handler) {
+        Inventory inventory = event.getInventory();
+        if (!(inventory.getHolder() instanceof PluginInventory<?>)) return;
+        handler.accept((PluginInventory<?>) inventory.getHolder(), event);
     }
 
     @EventHandler
     private void on(PluginDisableEvent event) {
         if (event.getPlugin() != this.plugin) return;
         for (Player player : this.plugin.getServer().getOnlinePlayers()) {
-            this.doPluginInventoryAction(
-                    player.getOpenInventory().getTopInventory(), inventory -> player.closeInventory());
+            if (player.getOpenInventory().getTopInventory().getHolder() instanceof PluginInventory<?>) {
+                player.closeInventory();
+            }
         }
-    }
-
-    private void doPluginInventoryAction(@Nullable Inventory inventory, @NonNull Consumer<PluginInventory<?>> action) {
-        if (inventory == null) return;
-        if (!(inventory.getHolder() instanceof PluginInventory<?>)) return;
-        action.accept(((PluginInventory<?>) inventory.getHolder()));
     }
 }

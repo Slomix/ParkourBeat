@@ -1,20 +1,76 @@
 package ru.sortix.parkourbeat.inventory;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import javax.annotation.Nullable;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
-@RequiredArgsConstructor
 public abstract class PluginInventory<P extends JavaPlugin> implements InventoryHolder {
     protected final @NonNull P plugin;
+    private final Inventory handle;
+    private final Map<Integer, Consumer<Player>> actions = new HashMap<>();
 
-    public final void open(@NonNull Player player) {
-        player.openInventory(this.getInventory());
+    protected PluginInventory(@NonNull P plugin, int rows, @NonNull String title) {
+        this.plugin = plugin;
+        //noinspection deprecation
+        this.handle = plugin.getServer().createInventory(this, rows * 9, title);
     }
 
-    public abstract void onClick(@NonNull Player player, int slot);
+    protected PluginInventory(@NonNull P plugin, @NonNull InventoryType type, @NonNull String title) {
+        this.plugin = plugin;
+        //noinspection deprecation
+        this.handle = plugin.getServer().createInventory(this, type, title);
+    }
 
-    public abstract void onClose(@NonNull Player player);
+    protected void setItem(int slot, @Nullable ItemStack stack, @Nullable Consumer<Player> action) {
+        this.handle.setItem(slot, stack);
+        if (stack == null) {
+            if (action == null) this.actions.remove(slot);
+            else throw new IllegalArgumentException("Action must be null with null item");
+        } else {
+            if (action == null) this.actions.remove(slot);
+            else this.actions.put(slot, action);
+        }
+    }
+
+    protected void clearInventory() {
+        this.handle.clear();
+        this.actions.clear();
+    }
+
+    public final void open(@NonNull Player player) {
+        player.openInventory(this.handle);
+    }
+
+    protected final void handle(@NonNull InventoryClickEvent event) {
+        event.setCancelled(true);
+        Consumer<Player> action = this.actions.get(event.getSlot());
+        if (action != null) action.accept((Player) event.getWhoClicked());
+    }
+
+    protected final void handle(@NonNull InventoryDragEvent event) {
+        event.setCancelled(true);
+    }
+
+    protected final void handle(@NonNull InventoryCloseEvent event) {
+        this.onClose((Player) event.getPlayer());
+    }
+
+    protected void onClose(@NonNull Player player) {}
+
+    @Override
+    public final @NotNull Inventory getInventory() {
+        return this.handle;
+    }
 }

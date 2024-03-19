@@ -15,7 +15,7 @@ import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.game.Game;
-import ru.sortix.parkourbeat.inventory.editor.SelectSongMenu;
+import ru.sortix.parkourbeat.inventory.type.editor.SelectSongMenu;
 import ru.sortix.parkourbeat.item.ItemsManager;
 import ru.sortix.parkourbeat.item.editor.EditorItem;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackParticleItem;
