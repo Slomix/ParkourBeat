@@ -52,6 +52,7 @@ public class ParkourBeat extends JavaPlugin {
         this.registerCommand(CommandEdit::new, "edit");
         this.registerCommand(CommandPlay::new, "play");
         this.registerCommand(CommandSong::new, "song");
+        this.registerCommand(CommandSpawn::new, "spawn");
         this.registerCommand(CommandTest::new, "test");
         this.registerCommand(CommandTpToWorld::new, "tptoworld");
 

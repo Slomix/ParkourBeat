@@ -5,6 +5,10 @@ api-version: 1.13
 author: Sortix, Bomb
 depend: [ AMusic ]
 commands:
+  spawn:
+    aliases:
+      - 'hub'
+      - 'lobby'
   tptoworld:
   play:
   edit:

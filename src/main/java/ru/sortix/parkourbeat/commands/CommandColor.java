@@ -19,7 +19,7 @@ public class CommandColor extends ParkourBeatCommand {
     public boolean onCommand(
             @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("Команда только для игроков!");
+            sender.sendMessage("Команда только для игроков");
             return true;
         }
         Player player = (Player) sender;

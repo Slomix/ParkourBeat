@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.type.SpectateActivity;
-import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.utils.TeleportUtils;
 
@@ -26,14 +25,13 @@ public class CommandTpToWorld extends ParkourBeatCommand implements TabCompleter
     public boolean onCommand(
             @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage("Command only for players!");
+            sender.sendMessage("Команда только для игроков");
             return true;
         }
 
         Player player = (Player) sender;
         if (args.length == 0) {
-            this.plugin.get(ActivityManager.class).setActivity(player, null);
-            TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn());
+            sender.sendMessage("Укажите название уровня. Для телепортации на спаун используйте /spawn");
             return true;
         }
 

@@ -6,11 +6,11 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
-import ru.sortix.parkourbeat.activity.UserActivity;
-import ru.sortix.parkourbeat.activity.type.EditActivity;
+import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.utils.TeleportUtils;
 
-public class CommandSong extends ParkourBeatCommand {
-    public CommandSong(@NonNull ParkourBeat plugin) {
+public class CommandSpawn extends ParkourBeatCommand {
+    public CommandSpawn(@NonNull ParkourBeat plugin) {
         super(plugin);
     }
 
@@ -22,12 +22,8 @@ public class CommandSong extends ParkourBeatCommand {
             return true;
         }
         Player player = (Player) sender;
-        UserActivity activity = this.plugin.get(ActivityManager.class).getActivity(player);
-        if (!(activity instanceof EditActivity)) {
-            player.sendMessage("Вы не в режиме редактирования");
-            return true;
-        }
-        ((EditActivity) activity).openSongMenu();
+        this.plugin.get(ActivityManager.class).setActivity(player, null);
+        TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn());
         return true;
     }
 }
