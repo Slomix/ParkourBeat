@@ -3,25 +3,38 @@ package ru.sortix.parkourbeat.levels;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NonNull;
+import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.event.world.WorldUnloadEvent;
 import org.bukkit.generator.ChunkGenerator;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredListener;
 import ru.sortix.parkourbeat.levels.gen.EmptyChunkGenerator;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
+import ru.sortix.parkourbeat.utils.TeleportUtils;
 import ru.sortix.parkourbeat.utils.java.CopyDirVisitor;
 import ru.sortix.parkourbeat.utils.shedule.BukkitAsyncExecutor;
 import ru.sortix.parkourbeat.utils.shedule.BukkitSyncExecutor;
 import ru.sortix.parkourbeat.utils.shedule.CurrentThreadExecutor;
 
-public class WorldsManager implements PluginManager {
+public class WorldsManager implements PluginManager, Listener {
+    private final Plugin plugin;
     private final Logger logger;
     private final Server server;
 
@@ -37,13 +50,17 @@ public class WorldsManager implements PluginManager {
     @Getter
     private final Executor asyncExecutor;
 
+    private final Map<World, List<CompletableFuture<Boolean>>> unloadingWorldsFutures = new HashMap<>();
+
     public WorldsManager(@NonNull Plugin plugin) {
+        this.plugin = plugin;
         this.logger = plugin.getLogger();
         this.server = plugin.getServer();
         this.emptyGenerator = new EmptyChunkGenerator(this.server);
         this.currentThreadExecutor = new CurrentThreadExecutor();
         this.syncExecutor = new BukkitSyncExecutor(plugin);
         this.asyncExecutor = new BukkitAsyncExecutor(plugin);
+        this.server.getPluginManager().registerEvents(this, plugin);
     }
 
     @NonNull public CompletableFuture<World> createWorldFromDefaultContainer(
@@ -126,6 +143,100 @@ public class WorldsManager implements PluginManager {
                 .toFile();
     }
 
+    @NonNull public CompletableFuture<Boolean> unloadBukkitWorld(
+            @NonNull World world, boolean save, @NonNull Location fallbackLocation) {
+
+        if (world == this.server.getWorlds().iterator().next()) {
+            // world is default
+            this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
+                    + " т.к. он является основным миром сервера");
+            return CompletableFuture.completedFuture(false);
+        }
+
+        if (this.server.getWorld(world.getName()) == null) {
+            // world already unloaded
+            return CompletableFuture.completedFuture(true);
+        }
+
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        boolean unloadingStarted = this.unloadingWorldsFutures.containsKey(world);
+        this.unloadingWorldsFutures
+                .computeIfAbsent(world, world1 -> new ArrayList<>())
+                .add(result);
+
+        if (!unloadingStarted) {
+            this.startWorldUnloading(world, save, fallbackLocation);
+        }
+
+        return result;
+    }
+
+    private void startWorldUnloading(@NonNull World world, boolean save, @NonNull Location fallbackLocation) {
+
+        List<CompletableFuture<Boolean>> teleportationFutures = new ArrayList<>();
+        for (Player player : world.getPlayers()) {
+            player.sendMessage("Мир, в котором вы находились, был отключён");
+            teleportationFutures.add(TeleportUtils.teleportAsync(this.plugin, player, fallbackLocation));
+        }
+
+        CompletableFuture<Void> onPlayersTeleported;
+        if (teleportationFutures.isEmpty()) {
+            onPlayersTeleported = CompletableFuture.completedFuture(null);
+        } else {
+            onPlayersTeleported = CompletableFuture.allOf(teleportationFutures.toArray(new CompletableFuture[0]));
+        }
+
+        onPlayersTeleported.thenAcceptAsync(
+                unused -> {
+                    if (world.getPlayers().isEmpty()) {
+                        this.server.unloadWorld(world, save); // call WorldUnloadEvent
+                        return;
+                    }
+                    this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
+                            + " т.к. не удалось освободить его от игроков");
+                    this.unloadingWorldsFutures.remove(world).forEach(future -> future.complete(false));
+                },
+                this.syncExecutor);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    private void on(WorldUnloadEvent event) {
+        List<CompletableFuture<Boolean>> consumers = this.unloadingWorldsFutures.remove(event.getWorld());
+        if (consumers == null) return;
+        boolean eventAllowed = !event.isCancelled();
+        if (!eventAllowed) {
+            this.logger.severe("Не удалось отгрузить мир \"" + event.getWorld().getName() + "\", "
+                    + "т.к. один из указанных плагинов отменил отгрузку мира в " + WorldUnloadEvent.class.getName()
+                    + ": "
+                    + getHandlingPlugins(WorldUnloadEvent.getHandlerList()).stream()
+                            .map(Plugin::getName)
+                            .collect(Collectors.joining(", ")));
+        }
+        for (CompletableFuture<Boolean> completableFuture : consumers) {
+            completableFuture.complete(eventAllowed);
+        }
+    }
+
+    @NonNull private static Set<Plugin> getHandlingPlugins(@NonNull HandlerList eventHandlerList) {
+        Set<Plugin> plugins = new HashSet<>();
+        for (RegisteredListener registeredListener : eventHandlerList.getRegisteredListeners()) {
+            Plugin plugin = registeredListener.getPlugin();
+            if (!plugin.isEnabled()) continue;
+            plugins.add(plugin);
+        }
+        return plugins;
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private void on(PlayerTeleportEvent event) {
+        if (event.getFrom().getWorld() == event.getTo().getWorld()) return;
+        if (!this.unloadingWorldsFutures.containsKey(event.getTo().getWorld())) return;
+        event.getPlayer().sendMessage("Мир, в который вы телепортируетесь, отключается...");
+        event.setCancelled(true);
+    }
+
     @Override
-    public void disable() {}
+    public void disable() {
+        HandlerList.unregisterAll(this);
+    }
 }

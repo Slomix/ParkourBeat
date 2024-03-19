@@ -10,7 +10,6 @@ import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
@@ -18,7 +17,6 @@ import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
-import ru.sortix.parkourbeat.utils.TeleportUtils;
 import ru.sortix.parkourbeat.utils.java.ClassUtils;
 
 public class LevelsManager implements PluginManager {
@@ -174,29 +172,10 @@ public class LevelsManager implements PluginManager {
             worldUnloading = CompletableFuture.completedFuture(true);
         } else {
             worldUnloading = new CompletableFuture<>();
-            List<CompletableFuture<Boolean>> futures = new ArrayList<>();
-            for (Player player : world.getPlayers()) {
-                player.sendMessage("Уровень, на которым вы находились, был отгружен");
-                futures.add(TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn()));
-            }
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                    .thenAcceptAsync(
-                            unused -> {
-                                if (!world.getPlayers().isEmpty()) {
-                                    this.plugin
-                                            .getLogger()
-                                            .severe("Unable to unload world: " + world + " (players not teleported)");
-                                    worldUnloading.complete(false);
-                                    return;
-                                }
-                                if (!this.plugin.getServer().unloadWorld(world, false)) {
-                                    this.plugin.getLogger().severe("Unable to unload world: " + world);
-                                    worldUnloading.complete(false);
-                                    return;
-                                }
-                                worldUnloading.complete(true);
-                            },
-                            this.worldsManager.getSyncExecutor());
+            this.plugin
+                    .get(WorldsManager.class)
+                    .unloadBukkitWorld(world, false, Settings.getLobbySpawn())
+                    .thenAccept(worldUnloading::complete);
         }
 
         worldUnloading.thenAccept(success -> {

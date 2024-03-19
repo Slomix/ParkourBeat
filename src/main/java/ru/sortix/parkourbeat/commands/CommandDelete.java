@@ -73,7 +73,9 @@ public class CommandDelete extends ParkourBeatCommand implements TabCompleter {
         ActivityManager activityManager = plugin.get(ActivityManager.class);
 
         for (Player player : level.getWorld().getPlayers()) {
-            player.sendMessage("Уровень \"" + level.getLevelName() + "\" был удален");
+            if (player != sender) {
+                player.sendMessage("Уровень \"" + level.getLevelName() + "\" был удален");
+            }
             activityManager.setActivity(player, null);
         }
 
