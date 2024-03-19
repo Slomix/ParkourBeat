@@ -15,7 +15,6 @@ import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.game.Game;
-import ru.sortix.parkourbeat.inventory.type.editor.SelectSongMenu;
 import ru.sortix.parkourbeat.item.ItemsManager;
 import ru.sortix.parkourbeat.item.editor.EditorItem;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
@@ -46,9 +45,6 @@ public class EditActivity extends UserActivity {
     }
 
     @Getter
-    private final SelectSongMenu selectSongMenu;
-
-    @Getter
     @Setter
     private Color currentColor = EditTrackPointsItem.DEFAULT_PARTICLES_COLOR;
 
@@ -61,7 +57,6 @@ public class EditActivity extends UserActivity {
 
     private EditActivity(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         super(plugin, player, level);
-        this.selectSongMenu = new SelectSongMenu(plugin, level);
     }
 
     @Override
@@ -187,10 +182,6 @@ public class EditActivity extends UserActivity {
 
     public boolean isTesting() {
         return this.testingActivity != null;
-    }
-
-    public void openSongMenu() {
-        this.selectSongMenu.open(this.player);
     }
 
     @NonNull private CompletableFuture<Boolean> start() {

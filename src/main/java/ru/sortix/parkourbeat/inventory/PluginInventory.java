@@ -3,6 +3,7 @@ package ru.sortix.parkourbeat.inventory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.logging.Level;
 import javax.annotation.Nullable;
 import lombok.NonNull;
 import org.bukkit.entity.Player;
@@ -61,7 +62,19 @@ public abstract class PluginInventory<P extends JavaPlugin> implements Inventory
     protected final void handle(@NonNull InventoryClickEvent event) {
         event.setCancelled(true);
         Consumer<Player> action = this.actions.get(event.getRawSlot());
-        if (action != null) action.accept((Player) event.getWhoClicked());
+        if (action == null) return;
+        try {
+            action.accept((Player) event.getWhoClicked());
+        } catch (Exception e) {
+            this.plugin
+                    .getLogger()
+                    .log(
+                            Level.SEVERE,
+                            "Unable to handle action of player "
+                                    + event.getWhoClicked().getName() + " in inventory "
+                                    + this.getClass().getName() + " with raw slot index " + event.getRawSlot(),
+                            e);
+        }
     }
 
     protected final void handle(@NonNull InventoryDragEvent event) {

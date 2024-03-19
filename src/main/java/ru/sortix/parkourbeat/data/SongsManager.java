@@ -3,9 +3,9 @@ package ru.sortix.parkourbeat.data;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
@@ -13,42 +13,40 @@ import lombok.NonNull;
 import me.bomb.amusic.AMusic;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.levels.settings.Song;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
 
 public class SongsManager implements PluginManager {
     private final Logger logger;
-    private final Map<String, String> allSongs;
+    private final Map<String, Song> allSongs;
     private final Path path;
 
     public SongsManager(@NonNull ParkourBeat plugin) {
         this.logger = plugin.getLogger();
-        this.allSongs = new TreeMap<>();
+        this.allSongs = new LinkedHashMap<>();
         this.path = new File(JavaPlugin.getPlugin(AMusic.class).getDataFolder(), "Music").toPath();
-        reload();
+        this.reloadSongs();
     }
 
-    public void reload() {
-        try (Stream<Path> paths = Files.walk(path)) {
+    public void reloadSongs() {
+        this.allSongs.clear();
+        try (Stream<Path> paths = Files.walk(this.path)) {
             paths.filter(Files::isRegularFile).forEach(file -> {
-                String parent = file.getParent().getFileName().toString();
-                String filename = file.getFileName().toString();
-                int dotIndex = filename.lastIndexOf(".");
+                String songPlaylist = file.getParent().getFileName().toString();
+                String songName = file.getFileName().toString();
+                int dotIndex = songName.lastIndexOf(".");
                 if (dotIndex > 0) {
-                    filename = filename.substring(0, dotIndex);
+                    songName = songName.substring(0, dotIndex);
                 }
-                this.allSongs.put(filename, parent);
+                this.allSongs.put(songName, new Song(songPlaylist, songName));
             });
         } catch (Exception e) {
             this.logger.log(Level.SEVERE, "Unable to reload songs", e);
         }
     }
 
-    public Set<String> getAllSongs() {
-        return this.allSongs.keySet();
-    }
-
-    public String getSongPlaylist(String name) {
-        return this.allSongs.get(name);
+    @NonNull public Collection<Song> getAllSongs() {
+        return this.allSongs.values();
     }
 
     @Override
