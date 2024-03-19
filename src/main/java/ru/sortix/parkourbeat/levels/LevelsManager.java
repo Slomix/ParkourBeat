@@ -57,7 +57,7 @@ public class LevelsManager implements PluginManager {
         }
     }
 
-    @NonNull public Collection<GameSettings> getAvailableLevels() {
+    @NonNull public Collection<GameSettings> getAvailableLevelsSettings() {
         return Collections.unmodifiableCollection(this.availableLevelsByName.values());
     }
 
@@ -299,9 +299,8 @@ public class LevelsManager implements PluginManager {
         world.setGameRule((GameRule<Integer>) byName, newValue);
     }
 
-    @Nullable public UUID findLevelIdByName(@NonNull String levelName) {
-        GameSettings gameSettings = this.availableLevelsByName.get(levelName);
-        return gameSettings == null ? null : gameSettings.getLevelId();
+    @Nullable public GameSettings findLevelSettingsByName(@NonNull String levelName) {
+        return this.availableLevelsByName.get(levelName);
     }
 
     @Override

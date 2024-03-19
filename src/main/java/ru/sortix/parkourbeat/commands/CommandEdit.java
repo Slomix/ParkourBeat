@@ -2,7 +2,6 @@ package ru.sortix.parkourbeat.commands;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
 import lombok.NonNull;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -43,23 +42,21 @@ public class CommandEdit extends ParkourBeatCommand implements TabCompleter {
         }
 
         String levelName = String.join(" ", args);
-        UUID levelId = this.levelsManager.findLevelIdByName(levelName);
-        if (levelId == null) {
+        GameSettings settings = this.levelsManager.findLevelSettingsByName(levelName);
+
+        if (settings == null) {
             sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
             return true;
         }
-        this.levelsManager.loadLevel(levelId).thenAccept(level -> {
+
+        if (!settings.isOwner(sender, true, true)) {
+            player.sendMessage("Вы не являетесь владельцем этого уровня!");
+            return true;
+        }
+
+        this.levelsManager.loadLevel(settings.getLevelId()).thenAccept(level -> {
             if (level == null) {
                 sender.sendMessage("Не удалось загрузить данные уровня");
-                return;
-            }
-
-            GameSettings gameSettings = level.getLevelSettings().getGameSettings();
-            if (!gameSettings.isOwner(sender, true, true)) {
-                player.sendMessage("Вы не являетесь владельцем этого уровня!");
-                if (level.getWorld().getPlayers().isEmpty()) {
-                    this.levelsManager.unloadLevelAsync(levelId);
-                }
                 return;
             }
 
@@ -71,7 +68,7 @@ public class CommandEdit extends ParkourBeatCommand implements TabCompleter {
             ActivityManager activityManager = this.plugin.get(ActivityManager.class);
 
             Collection<Player> playersOnLevel = activityManager.getPlayersOnTheLevel(level);
-            playersOnLevel.removeIf(player1 -> gameSettings.isOwner(player1, true, true));
+            playersOnLevel.removeIf(player1 -> settings.isOwner(player1, true, true));
 
             if (!playersOnLevel.isEmpty()) {
                 player.sendMessage("Нельзя редактировать уровень, на котором находятся игроки");

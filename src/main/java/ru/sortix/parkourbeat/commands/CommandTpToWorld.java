@@ -1,7 +1,6 @@
 package ru.sortix.parkourbeat.commands;
 
 import java.util.List;
-import java.util.UUID;
 import lombok.NonNull;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -11,6 +10,7 @@ import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.type.SpectateActivity;
 import ru.sortix.parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class CommandTpToWorld extends ParkourBeatCommand implements TabCompleter {
@@ -41,13 +41,14 @@ public class CommandTpToWorld extends ParkourBeatCommand implements TabCompleter
         }
 
         String levelName = String.join(" ", args);
-        UUID levelId = this.levelsManager.findLevelIdByName(levelName);
-        if (levelId == null) {
+        GameSettings settings = this.levelsManager.findLevelSettingsByName(levelName);
+
+        if (settings == null) {
             sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
             return true;
         }
 
-        this.levelsManager.loadLevel(levelId).thenAccept(level -> {
+        this.levelsManager.loadLevel(settings.getLevelId()).thenAccept(level -> {
             if (level == null) {
                 sender.sendMessage("Не удалось загрузить данные уровня");
                 return;

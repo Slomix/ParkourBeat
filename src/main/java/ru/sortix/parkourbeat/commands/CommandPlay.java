@@ -14,6 +14,7 @@ import ru.sortix.parkourbeat.activity.type.PlayActivity;
 import ru.sortix.parkourbeat.inventory.type.LevelsListMenu;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.levels.settings.GameSettings;
 
 public class CommandPlay extends ParkourBeatCommand implements TabCompleter {
     private final LevelsManager levelsManager;
@@ -44,12 +45,14 @@ public class CommandPlay extends ParkourBeatCommand implements TabCompleter {
         }
 
         String levelName = String.join(" ", args);
-        UUID levelId = this.levelsManager.findLevelIdByName(levelName);
-        if (levelId == null) {
+        GameSettings settings = this.levelsManager.findLevelSettingsByName(levelName);
+
+        if (settings == null) {
             sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
             return true;
         }
-        startPlaying(this.plugin, player, levelId);
+
+        startPlaying(this.plugin, player, settings.getLevelId());
         return true;
     }
 

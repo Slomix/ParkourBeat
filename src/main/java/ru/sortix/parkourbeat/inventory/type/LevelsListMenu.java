@@ -17,7 +17,7 @@ public class LevelsListMenu extends ParkourBeatInventory {
     public LevelsListMenu(@NonNull ParkourBeat plugin) {
         super(plugin, 6, "Уровни");
         int slot = 0;
-        for (GameSettings gameSettings : this.plugin.get(LevelsManager.class).getAvailableLevels()) {
+        for (GameSettings gameSettings : this.plugin.get(LevelsManager.class).getAvailableLevelsSettings()) {
             this.setItem(
                     slot++,
                     ItemUtils.modifyMeta(new ItemStack(Material.PAPER), meta -> {

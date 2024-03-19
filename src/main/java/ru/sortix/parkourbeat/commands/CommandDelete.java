@@ -1,7 +1,6 @@
 package ru.sortix.parkourbeat.commands;
 
 import java.util.List;
-import java.util.UUID;
 import lombok.NonNull;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -11,6 +10,7 @@ import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.levels.settings.GameSettings;
 
 public class CommandDelete extends ParkourBeatCommand implements TabCompleter {
     private final LevelsManager levelsManager;
@@ -39,24 +39,24 @@ public class CommandDelete extends ParkourBeatCommand implements TabCompleter {
         }
 
         String levelName = String.join(" ", args);
-        UUID levelId = this.levelsManager.findLevelIdByName(levelName);
-        if (levelId == null) {
+        GameSettings settings = this.levelsManager.findLevelSettingsByName(levelName);
+
+        if (settings == null) {
             sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
             return true;
         }
 
-        this.levelsManager.loadLevel(levelId).thenAccept(level -> {
+        if (!settings.isOwner(sender, true, true)) {
+            sender.sendMessage("Вы не являетесь владельцем этого уровня");
+            return true;
+        }
+
+        this.levelsManager.loadLevel(settings.getLevelId()).thenAccept(level -> {
             if (level == null) {
                 sender.sendMessage("Не удалось загрузить данные уровня");
                 return;
             }
-            if (!level.getLevelSettings().getGameSettings().isOwner(sender, true, true)) {
-                sender.sendMessage("Вы не являетесь владельцем этого уровня");
-                if (level.getWorld().getPlayers().isEmpty()) {
-                    this.levelsManager.unloadLevelAsync(level.getLevelId());
-                }
-                return;
-            }
+
             deleteLevel(this.plugin, sender, level);
         });
         return true;
