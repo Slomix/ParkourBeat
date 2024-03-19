@@ -38,7 +38,7 @@ public class ItemsManager implements PluginManager, Listener {
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
-    private void registerItems(UsableItem... items) {
+    private void registerItems(@NonNull UsableItem... items) {
         for (UsableItem usableItem : items) {
             ItemStack itemStack = usableItem.getItemStack();
             if (!itemStack.getType().isItem()) {

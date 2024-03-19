@@ -55,14 +55,14 @@ public class SelectSongMenu extends ParkourBeatInventory {
         }
 
         if (page > 0) {
-            this.setItem(45, RegularItems.previousPage(), player -> this.previous());
+            this.setItem(6, 1, RegularItems.previousPage(), player -> this.previous());
         }
+
+        this.setItem(6, 5, RegularItems.closeInventory(), HumanEntity::closeInventory);
 
         if (page < this.maxPage) {
-            this.setItem(53, RegularItems.nextPage(), player -> this.next());
+            this.setItem(6, 9, RegularItems.nextPage(), player -> this.next());
         }
-
-        this.setItem(49, RegularItems.closeInventory(), HumanEntity::closeInventory);
     }
 
     public void next() {

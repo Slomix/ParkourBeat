@@ -33,14 +33,19 @@ public abstract class PluginInventory<P extends JavaPlugin> implements Inventory
         this.handle = plugin.getServer().createInventory(this, type, title);
     }
 
-    protected void setItem(int slot, @Nullable ItemStack stack, @Nullable Consumer<Player> action) {
-        this.handle.setItem(slot, stack);
+    protected void setItem(int row, int column, @Nullable ItemStack stack, @Nullable Consumer<Player> action) {
+        int slot = ((row - 1) * 9) + (column - 1);
+        this.setItem(slot, stack, action);
+    }
+
+    protected void setItem(int slotIndex, @Nullable ItemStack stack, @Nullable Consumer<Player> action) {
+        this.handle.setItem(slotIndex, stack);
         if (stack == null) {
-            if (action == null) this.actions.remove(slot);
+            if (action == null) this.actions.remove(slotIndex);
             else throw new IllegalArgumentException("Action must be null with null item");
         } else {
-            if (action == null) this.actions.remove(slot);
-            else this.actions.put(slot, action);
+            if (action == null) this.actions.remove(slotIndex);
+            else this.actions.put(slotIndex, action);
         }
     }
 
@@ -55,7 +60,7 @@ public abstract class PluginInventory<P extends JavaPlugin> implements Inventory
 
     protected final void handle(@NonNull InventoryClickEvent event) {
         event.setCancelled(true);
-        Consumer<Player> action = this.actions.get(event.getSlot());
+        Consumer<Player> action = this.actions.get(event.getRawSlot());
         if (action != null) action.accept((Player) event.getWhoClicked());
     }
 

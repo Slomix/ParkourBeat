@@ -11,6 +11,7 @@ import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.type.EditActivity;
+import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.item.editor.EditorItem;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.Level;
@@ -27,7 +28,7 @@ public class EditTrackParticleItem extends EditorItem {
 
     @SuppressWarnings("deprecation")
     public EditTrackParticleItem(@NonNull ParkourBeat plugin, int slot) {
-        super(plugin, slot, newStack(Material.BLAZE_ROD, (meta) -> {
+        super(plugin, slot, ItemUtils.create(Material.BLAZE_ROD, (meta) -> {
             meta.setDisplayName(ChatColor.GOLD + "Путь (см. описание)");
             meta.setLore(Arrays.asList(
                     ChatColor.YELLOW + "ЛКМ - установить точку",

@@ -6,12 +6,13 @@ import org.bukkit.Material;
 import org.bukkit.event.player.PlayerInteractEvent;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.type.EditActivity;
+import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.item.editor.EditorItem;
 
 public class TestGameItem extends EditorItem {
     @SuppressWarnings("deprecation")
     public TestGameItem(@NonNull ParkourBeat plugin, int slot) {
-        super(plugin, slot, newStack(Material.DIAMOND, (meta) -> {
+        super(plugin, slot, ItemUtils.create(Material.DIAMOND, (meta) -> {
             meta.setDisplayName(ChatColor.AQUA + "Протестировать уровень");
         }));
     }
