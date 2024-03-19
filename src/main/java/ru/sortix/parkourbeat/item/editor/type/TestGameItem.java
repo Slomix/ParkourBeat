@@ -3,7 +3,6 @@ package ru.sortix.parkourbeat.item.editor.type;
 import lombok.NonNull;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.type.EditActivity;
@@ -19,8 +18,6 @@ public class TestGameItem extends EditorItem {
 
     @Override
     public void onUse(@NonNull PlayerInteractEvent event, @NonNull EditActivity activity) {
-        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-
         if (activity.isTesting()) activity.endTesting();
         else activity.startTesting();
     }
