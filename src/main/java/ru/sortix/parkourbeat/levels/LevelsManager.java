@@ -144,16 +144,16 @@ public class LevelsManager implements PluginManager {
         return result;
     }
 
-    @NonNull public CompletableFuture<Boolean> deleteLevelAsync(@NonNull Level level) {
+    @NonNull public CompletableFuture<Boolean> deleteLevelAsync(@NonNull GameSettings settings) {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
-        UUID levelId = level.getLevelId();
+        UUID levelId = settings.getLevelId();
         this.unloadLevelAsync(levelId).thenAccept(success -> {
             if (!success) {
                 result.complete(false);
                 return;
             }
 
-            this.availableLevelsByName.remove(level.getLevelName());
+            this.availableLevelsByName.remove(settings.getLevelName());
             this.levelsSettings.getLevelSettingDAO().deleteLevelWorldAndSettings(levelId);
             result.complete(true);
         });

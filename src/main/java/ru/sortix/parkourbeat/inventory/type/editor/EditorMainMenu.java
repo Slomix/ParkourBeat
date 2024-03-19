@@ -99,7 +99,10 @@ public class EditorMainMenu extends ParkourBeatInventory {
                 }),
                 player -> {
                     player.closeInventory();
-                    CommandDelete.deleteLevel(plugin, player, activity.getLevel());
+                    CommandDelete.deleteLevel(
+                            plugin,
+                            player,
+                            activity.getLevel().getLevelSettings().getGameSettings());
                 });
     }
 }

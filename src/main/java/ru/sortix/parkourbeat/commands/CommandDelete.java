@@ -51,14 +51,7 @@ public class CommandDelete extends ParkourBeatCommand implements TabCompleter {
             return true;
         }
 
-        this.levelsManager.loadLevel(settings.getLevelId()).thenAccept(level -> {
-            if (level == null) {
-                sender.sendMessage("Не удалось загрузить данные уровня");
-                return;
-            }
-
-            deleteLevel(this.plugin, sender, level);
-        });
+        deleteLevel(this.plugin, sender, settings);
         return true;
     }
 
@@ -69,23 +62,26 @@ public class CommandDelete extends ParkourBeatCommand implements TabCompleter {
         return this.levelsManager.getValidLevelNames(String.join(" ", args), sender);
     }
 
-    public static void deleteLevel(@NonNull ParkourBeat plugin, @NonNull CommandSender sender, @NonNull Level level) {
+    public static void deleteLevel(
+            @NonNull ParkourBeat plugin, @NonNull CommandSender sender, @NonNull GameSettings settings) {
+        LevelsManager levelsManager = plugin.get(LevelsManager.class);
         ActivityManager activityManager = plugin.get(ActivityManager.class);
 
-        for (Player player : level.getWorld().getPlayers()) {
-            if (player != sender) {
-                player.sendMessage("Уровень \"" + level.getLevelName() + "\" был удален");
+        Level loadedLevel = levelsManager.getLoadedLevel(settings.getLevelId());
+        if (loadedLevel != null) {
+            for (Player player : loadedLevel.getWorld().getPlayers()) {
+                if (player != sender) {
+                    player.sendMessage("Уровень \"" + settings.getLevelName() + "\" был удален");
+                }
+                activityManager.setActivity(player, null);
             }
-            activityManager.setActivity(player, null);
         }
 
-        LevelsManager levelsManager = plugin.get(LevelsManager.class);
-
-        levelsManager.deleteLevelAsync(level).thenAccept(success -> {
+        levelsManager.deleteLevelAsync(settings).thenAccept(success -> {
             if (success) {
-                sender.sendMessage("Вы успешно удалили уровень \"" + level.getLevelName() + "\"");
+                sender.sendMessage("Вы успешно удалили уровень \"" + settings.getLevelName() + "\"");
             } else {
-                sender.sendMessage("Не удалось удалить уровень \"" + level.getLevelName() + "\"");
+                sender.sendMessage("Не удалось удалить уровень \"" + settings.getLevelName() + "\"");
             }
         });
     }
