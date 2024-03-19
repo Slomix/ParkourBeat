@@ -15,8 +15,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackParticleItem;
-import ru.sortix.parkourbeat.item.editor.type.LeaveEditorItem;
-import ru.sortix.parkourbeat.item.editor.type.SetSpawnPointItem;
+import ru.sortix.parkourbeat.item.editor.type.EditorMenuItem;
 import ru.sortix.parkourbeat.item.editor.type.TestGameItem;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
 
@@ -30,10 +29,7 @@ public class ItemsManager implements PluginManager, Listener {
         this.allItems = new HashMap<>();
 
         this.registerItems(
-                new EditTrackParticleItem(plugin, 0),
-                new SetSpawnPointItem(plugin, 2),
-                new TestGameItem(plugin, 4),
-                new LeaveEditorItem(plugin, 8));
+                new TestGameItem(plugin, 0), new EditorMenuItem(plugin, 1), new EditTrackParticleItem(plugin, 2));
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }

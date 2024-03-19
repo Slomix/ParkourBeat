@@ -16,7 +16,7 @@ import ru.sortix.parkourbeat.levels.settings.Song;
 import ru.sortix.parkourbeat.utils.Heads;
 
 public class SelectSongMenu extends ParkourBeatInventory {
-    private static final ItemStack NOTE_HEAD =
+    public static final ItemStack NOTE_HEAD =
             Heads.getHeadByHash("f22e40b4bfbcc0433044d86d67685f0567025904271d0a74996afbe3f9be2c0f");
 
     private final int maxPage;
@@ -51,6 +51,7 @@ public class SelectSongMenu extends ParkourBeatInventory {
                     player -> {
                         this.gameSettings.setSong(song);
                         player.sendMessage("Вы успешно установили песню: " + song.getSongName());
+                        player.closeInventory();
                     });
         }
 
