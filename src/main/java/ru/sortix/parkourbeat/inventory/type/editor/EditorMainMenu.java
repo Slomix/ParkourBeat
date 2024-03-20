@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import lombok.NonNull;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -98,6 +99,12 @@ public class EditorMainMenu extends ParkourBeatInventory {
                     }
 
                     player.sendMessage("У вас есть 30 сек., чтобы указать в чате HEX-цвет. Например: #FFCC66");
+                    TextComponent msg1 = new TextComponent(
+                            "Подобрать цвет можно " + ChatColor.UNDERLINE + "тут" + ChatColor.RESET + " (кликабельно)");
+                    msg1.setClickEvent(
+                            new ClickEvent(ClickEvent.Action.OPEN_URL, "https://google.com/search?q=hex+палитра"));
+                    player.sendMessage(msg1);
+
                     manager.requestChatInput(player, 20 * 30).thenAccept(message -> {
                         if (message == null) {
                             player.sendMessage("Цвет не выбран");
@@ -119,9 +126,9 @@ public class EditorMainMenu extends ParkourBeatInventory {
 
                         player.sendMessage("Выбранный цвет:");
 
-                        TextComponent textComponent = new TextComponent("#" + hex);
-                        textComponent.setColor(ChatColor.of("#" + hex));
-                        player.sendMessage(textComponent);
+                        TextComponent msg2 = new TextComponent("#" + hex);
+                        msg2.setColor(ChatColor.of("#" + hex));
+                        player.sendMessage(msg2);
                     });
                 });
         this.setItem(
