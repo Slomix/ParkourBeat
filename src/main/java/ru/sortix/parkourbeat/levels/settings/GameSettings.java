@@ -2,10 +2,7 @@ package ru.sortix.parkourbeat.levels.settings;
 
 import java.util.UUID;
 import javax.annotation.Nullable;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -20,7 +17,10 @@ public class GameSettings {
 
     private final @NonNull UUID ownerId;
     private final @NonNull String ownerName;
-    private final @NonNull String displayName;
+
+    @Setter
+    private @NonNull String displayName;
+
     private final long createdAtMills;
     private @Nullable Song song;
 

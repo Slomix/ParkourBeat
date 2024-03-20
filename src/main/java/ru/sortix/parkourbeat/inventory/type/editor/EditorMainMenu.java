@@ -30,56 +30,23 @@ public class EditorMainMenu extends ParkourBeatInventory {
     public EditorMainMenu(@NonNull ParkourBeat plugin, @NonNull EditActivity activity) {
         super(plugin, 5, "Параметры уровня");
         this.setItem(
-                2,
-                3,
-                ItemUtils.modifyMeta(SelectSongMenu.NOTE_HEAD.clone(), meta -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Выбрать музыку");
-                    meta.setLore(List.of());
-                    Song song = activity.getLevel()
-                            .getLevelSettings()
-                            .getGameSettings()
-                            .getSong();
-                    meta.setLore(Arrays.asList(
-                            ChatColor.YELLOW + "Трек, который будет запускаться",
-                            ChatColor.YELLOW + "Текущая композиция:",
-                            ChatColor.YELLOW + (song == null ? "отсутствует" : song.getSongName())));
-                }),
-                event -> {
-                    Player player = event.getPlayer();
-
-                    new SelectSongMenu(plugin, activity.getLevel()).open(player);
-                });
-        this.setItem(
-                2,
+                1,
                 5,
-                ItemUtils.create(Material.ENDER_PEARL, (meta) -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Точка спауна");
-                    meta.setLore(Arrays.asList(
-                            ChatColor.YELLOW + "Устанавливает точку спауна на уровне ваших ног.",
-                            ChatColor.YELLOW + "Направление взгляда игроков будет точно таким же,",
-                            ChatColor.YELLOW + "как при установке точки спауна"));
+                ItemUtils.create(Material.REDSTONE_TORCH, (meta) -> {
+                    meta.setDisplayName(ChatColor.GOLD + "Покинуть редактор");
+                    meta.setLore(List.of(ChatColor.YELLOW + "Блоки и настройки будут сохранены"));
                 }),
                 event -> {
                     Player player = event.getPlayer();
-                    player.closeInventory();
-
-                    LevelSettings levelSettings = activity.getLevel().getLevelSettings();
-                    Location playerLocation = player.getLocation();
-
-                    if (!isValidSpawnPoint(playerLocation, levelSettings)) {
-                        player.sendMessage("Точка спауна не может быть установлена здесь.");
-                        return;
-                    }
-
-                    levelSettings.getWorldSettings().setSpawn(playerLocation);
-
-                    player.sendMessage("Точка спауна установлена на уровне ваших ног. "
-                            + "Убедитесь, что направление взгляда выбрано корректно! "
-                            + "Именно в эту сторону будут повёрнуты игроки при телепортации");
+                    TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn())
+                            .thenAccept(success -> {
+                                if (!success) return;
+                                this.plugin.get(ActivityManager.class).setActivity(player, null);
+                            });
                 });
         this.setItem(
+                3,
                 2,
-                7,
                 ItemUtils.create(Material.FIREWORK_STAR, (meta) -> {
                     meta.setDisplayName(ChatColor.GOLD + "Цвет частиц");
                     meta.setLore(Arrays.asList(
@@ -98,7 +65,7 @@ public class EditorMainMenu extends ParkourBeatInventory {
                         return;
                     }
 
-                    player.sendMessage("У вас есть 30 сек., чтобы указать в чате HEX-цвет. Например: #FFCC66");
+                    player.sendMessage("У вас есть 30 сек, чтобы указать в чате HEX-цвет. Например: #FFCC66");
                     TextComponent msg1 = new TextComponent(
                             "Подобрать цвет можно " + ChatColor.UNDERLINE + "тут" + ChatColor.RESET + " (кликабельно)");
                     msg1.setClickEvent(
@@ -132,7 +99,92 @@ public class EditorMainMenu extends ParkourBeatInventory {
                     });
                 });
         this.setItem(
+                3,
                 4,
+                ItemUtils.modifyMeta(SelectSongMenu.NOTE_HEAD.clone(), meta -> {
+                    meta.setDisplayName(ChatColor.GOLD + "Выбрать музыку");
+                    meta.setLore(List.of());
+                    Song song = activity.getLevel()
+                            .getLevelSettings()
+                            .getGameSettings()
+                            .getSong();
+                    meta.setLore(Arrays.asList(
+                            ChatColor.YELLOW + "Трек, который будет запускаться",
+                            ChatColor.YELLOW + "Текущая композиция:",
+                            ChatColor.YELLOW + (song == null ? "отсутствует" : song.getSongName())));
+                }),
+                event -> {
+                    Player player = event.getPlayer();
+
+                    new SelectSongMenu(plugin, activity.getLevel()).open(player);
+                });
+        this.setItem(
+                3,
+                6,
+                ItemUtils.create(Material.ENDER_PEARL, (meta) -> {
+                    meta.setDisplayName(ChatColor.GOLD + "Точка спауна");
+                    meta.setLore(Arrays.asList(
+                            ChatColor.YELLOW + "Устанавливает точку спауна на уровне ваших ног.",
+                            ChatColor.YELLOW + "Направление взгляда игроков будет точно таким же,",
+                            ChatColor.YELLOW + "как при установке точки спауна"));
+                }),
+                event -> {
+                    Player player = event.getPlayer();
+                    player.closeInventory();
+
+                    LevelSettings levelSettings = activity.getLevel().getLevelSettings();
+                    Location playerLocation = player.getLocation();
+
+                    if (!isValidSpawnPoint(playerLocation, levelSettings)) {
+                        player.sendMessage("Точка спауна не может быть установлена здесь.");
+                        return;
+                    }
+
+                    levelSettings.getWorldSettings().setSpawn(playerLocation);
+
+                    player.sendMessage("Точка спауна установлена на уровне ваших ног. "
+                            + "Убедитесь, что направление взгляда выбрано корректно! "
+                            + "Именно в эту сторону будут повёрнуты игроки при телепортации");
+                });
+        this.setItem(
+                3,
+                8,
+                ItemUtils.create(Material.WRITABLE_BOOK, (meta) -> {
+                    meta.setDisplayName(ChatColor.GOLD + "Переименовать уровень");
+                    meta.setLore(Arrays.asList(
+                            ChatColor.YELLOW + "Вам будет необходимо отправить",
+                            ChatColor.YELLOW + "новое название в чат"));
+                }),
+                event -> {
+                    Player player = event.getPlayer();
+                    player.closeInventory();
+
+                    PlayersInputManager manager = this.plugin.get(PlayersInputManager.class);
+                    if (manager.isInputRequested(player)) {
+                        player.sendMessage("Функция недоступна в данный момент");
+                        return;
+                    }
+
+                    player.sendMessage("У вас есть 30 сек, чтобы указать в чате новое название уровня");
+                    manager.requestChatInput(player, 20 * 30).thenAccept(newName -> {
+                        if (newName == null) {
+                            player.sendMessage("Новое название не введено");
+                            return;
+                        }
+
+                        if (newName.length() > 30) {
+                            player.sendMessage("Название не может превышать 30 символов");
+                            return;
+                        }
+
+                        String oldName = activity.getLevel().getDisplayName();
+
+                        activity.getLevel().getLevelSettings().getGameSettings().setDisplayName(newName);
+                        player.sendMessage("Название изменено с \"" + oldName + "\" на \"" + newName + "\"");
+                    });
+                });
+        this.setItem(
+                5,
                 3,
                 ItemUtils.create(Material.NETHER_STAR, (meta) -> {
                     meta.setDisplayName(ChatColor.GOLD + "Сбросить все точки");
@@ -148,22 +200,7 @@ public class EditorMainMenu extends ParkourBeatInventory {
                     player.sendMessage("Все точки сброшены");
                 });
         this.setItem(
-                4,
                 5,
-                ItemUtils.create(Material.REDSTONE_TORCH, (meta) -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Покинуть редактор");
-                    meta.setLore(List.of(ChatColor.YELLOW + "Блоки и настройки будут сохранены"));
-                }),
-                event -> {
-                    Player player = event.getPlayer();
-                    TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn())
-                            .thenAccept(success -> {
-                                if (!success) return;
-                                this.plugin.get(ActivityManager.class).setActivity(player, null);
-                            });
-                });
-        this.setItem(
-                4,
                 7,
                 ItemUtils.create(Material.BARRIER, (meta) -> {
                     meta.setDisplayName(ChatColor.GOLD + "Удалить уровень");
