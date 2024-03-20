@@ -1,35 +1,30 @@
 package ru.sortix.parkourbeat.commands;
 
-import lombok.NonNull;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
+import dev.rollczi.litecommands.annotations.command.Command;
+import dev.rollczi.litecommands.annotations.context.Context;
+import dev.rollczi.litecommands.annotations.execute.Execute;
+import dev.rollczi.litecommands.annotations.permission.Permission;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.utils.TeleportUtils;
 
-public class CommandSpawn extends ParkourBeatCommand {
-    public CommandSpawn(@NonNull ParkourBeat plugin) {
-        super(plugin);
-    }
+import static ru.sortix.parkourbeat.constant.PermissionConstants.COMMAND_PERMISSION;
 
-    @Override
-    public boolean onCommand(
-            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        if (!sender.hasPermission("parkourbeat.command.spawn")) {
-            sender.sendMessage("Недостаточно прав");
-            return true;
-        }
+@Command(
+        name = "spawn",
+        aliases = {"lobby", "hub"})
+@RequiredArgsConstructor
+public class CommandSpawn {
 
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("Команда только для игроков");
-            return true;
-        }
+    private final ParkourBeat plugin;
 
-        Player player = (Player) sender;
+    @Execute
+    @Permission(COMMAND_PERMISSION + ".spawn")
+    public void onCommand(@Context Player player) {
         this.plugin.get(ActivityManager.class).setActivity(player, null);
         TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn());
-        return true;
     }
 }

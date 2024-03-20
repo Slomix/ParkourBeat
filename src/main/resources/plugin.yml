@@ -4,21 +4,3 @@ version: 0.5
 api-version: 1.13
 author: Sortix, Bomb
 depend: [ AMusic ]
-commands:
-  color: {}
-  convertdata: {}
-  create: {}
-  delete: {}
-  edit: {}
-  play:
-    aliases:
-      - 'levels'
-      - 'level'
-      - 'lvl'
-  song: {}
-  spawn:
-    aliases:
-      - 'hub'
-      - 'lobby'
-  test: {}
-  tptoworld: {}
