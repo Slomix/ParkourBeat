@@ -20,6 +20,7 @@ import ru.sortix.parkourbeat.item.ItemsManager;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.WorldsManager;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
+import ru.sortix.parkourbeat.listeners.FixesListener;
 import ru.sortix.parkourbeat.listeners.GamesListener;
 import ru.sortix.parkourbeat.listeners.WorldsListener;
 import ru.sortix.parkourbeat.location.Waypoint;
@@ -57,6 +58,7 @@ public class ParkourBeat extends JavaPlugin {
         this.registerCommand(CommandTest::new, "test");
         this.registerCommand(CommandTpToWorld::new, "tptoworld");
 
+        this.registerListener(parkourBeat -> new FixesListener());
         this.registerListener(GamesListener::new);
         this.registerListener(WorldsListener::new);
         this.registerListener(InventoriesListener::new);
