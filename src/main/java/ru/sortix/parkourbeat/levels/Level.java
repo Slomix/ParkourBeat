@@ -8,37 +8,32 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
+@Getter
 @RequiredArgsConstructor
 public class Level {
-    @Getter
-    private final @NonNull UUID levelId;
-
-    @Getter
-    private final @NonNull String levelName;
-
-    @Getter
-    private final @NonNull World world;
-
-    @Getter
     private final @NonNull LevelSettings levelSettings;
-
+    private final @NonNull World world;
     private boolean isEditing = false;
-
-    public boolean isEditing() {
-        return this.isEditing;
-    }
 
     public void setEditing(boolean isEditing) {
         this.isEditing = isEditing;
     }
 
-    @NonNull public Location getSpawn() {
-        return this.levelSettings.getWorldSettings().getSpawn();
-    }
-
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof Level)) return false;
-        return ((Level) other).levelId.equals(this.levelId);
+        return ((Level) other).getUniqueId().equals(this.getUniqueId());
+    }
+
+    @NonNull public String getDisplayName() {
+        return this.levelSettings.getGameSettings().getDisplayName();
+    }
+
+    @NonNull public UUID getUniqueId() {
+        return this.levelSettings.getGameSettings().getUniqueId();
+    }
+
+    @NonNull public Location getSpawn() {
+        return this.levelSettings.getWorldSettings().getSpawn();
     }
 }

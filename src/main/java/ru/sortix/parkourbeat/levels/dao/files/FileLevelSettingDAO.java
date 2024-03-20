@@ -3,8 +3,9 @@ package ru.sortix.parkourbeat.levels.dao.files;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -16,6 +17,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
@@ -32,7 +34,8 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     private final GameSettingsDAO gameSettingsDAO;
     private final WorldSettingsDAO worldSettingsDAO;
 
-    public FileLevelSettingDAO(@NonNull Plugin plugin) {
+    public FileLevelSettingDAO(@NonNull LevelsManager levelsManager) {
+        Plugin plugin = levelsManager.getPlugin();
         this.logger = plugin.getLogger();
         this.server = plugin.getServer();
 
@@ -56,13 +59,13 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     }
 
     @Override
-    public void saveLevelSettings(LevelSettings settings) {
+    public void saveLevelSettings(@NonNull LevelSettings settings) {
         try {
             WorldSettings worldSettings = settings.getWorldSettings();
             GameSettings gameSettings = settings.getGameSettings();
 
-            File worldSettingsFile = getFile(gameSettings.getLevelId(), "world_settings.yml");
-            File gameSettingFile = getFile(gameSettings.getLevelId(), "game_settings.yml");
+            File worldSettingsFile = getFile(gameSettings.getUniqueId(), "world_settings.yml");
+            File gameSettingFile = getFile(gameSettings.getUniqueId(), "game_settings.yml");
 
             FileConfiguration worldSettingsConfig = YamlConfiguration.loadConfiguration(worldSettingsFile);
             FileConfiguration gameSettingsConfig = YamlConfiguration.loadConfiguration(gameSettingFile);
@@ -75,7 +78,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         } catch (Exception e) {
             this.logger.log(
                     Level.SEVERE,
-                    "Unable to save level " + settings.getGameSettings().getLevelId(),
+                    "Unable to save level " + settings.getGameSettings().getUniqueId(),
                     e);
         }
     }
@@ -189,8 +192,8 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
                 .replace("\\", "/"); // fix Windows issues
     }
 
-    @NonNull public Map<String, GameSettings> loadAllAvailableLevelGameSettingsSync() {
-        Map<String, GameSettings> result = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
+    @NonNull public Collection<GameSettings> loadAllAvailableLevelGameSettingsSync() {
+        List<GameSettings> result = new ArrayList<>();
 
         if (!this.levelsDirRelativeDir.isDirectory()) {
             this.logger.warning("Levels directory not found: " + this.levelsDirRelativeDir.getAbsolutePath());
@@ -221,10 +224,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
                 this.logger.warning("Unable to load name of level " + levelId);
                 continue;
             }
-            String levelName = gameSettings.getLevelName();
-            if (result.put(levelName, gameSettings) != null) {
-                this.logger.warning("Duplicate level name: " + levelName);
-            }
+            result.add(gameSettings);
         }
         return result;
     }

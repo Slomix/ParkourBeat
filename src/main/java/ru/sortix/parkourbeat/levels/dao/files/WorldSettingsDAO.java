@@ -12,7 +12,7 @@ import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.location.Waypoint;
 
 public class WorldSettingsDAO {
-    public void set(WorldSettings worldSettings, FileConfiguration config) {
+    public void set(@NonNull WorldSettings worldSettings, @NonNull FileConfiguration config) {
         Location spawn = worldSettings.getSpawn().clone();
         spawn.setWorld(null);
         config.set("spawn", spawn);

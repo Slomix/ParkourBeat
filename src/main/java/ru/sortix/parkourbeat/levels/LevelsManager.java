@@ -1,8 +1,10 @@
 package ru.sortix.parkourbeat.levels;
 
+import com.google.common.collect.Lists;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
@@ -30,10 +32,10 @@ public class LevelsManager implements PluginManager {
     @Getter
     private final LevelSettingsManager levelsSettings;
 
-    private final Map<String, GameSettings> availableLevelsByUniqueName = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);
-    private final Map<UUID, GameSettings> availableLevelsByUniqueId = new HashMap<>();
+    private final AvailableLevelsCollection availableLevels;
     private final Map<UUID, Level> loadedLevels = new HashMap<>();
     private final boolean gameRulesSupport = ClassUtils.isClassPresent("org.bukkit.GameRule");
+    private int nextLevelNumber = 1;
 
     public LevelsManager(@NonNull ParkourBeat plugin) {
         this.plugin = plugin;
@@ -43,39 +45,33 @@ public class LevelsManager implements PluginManager {
             throw new IllegalStateException(
                     "Default level directory not found: " + this.defaultLevelDirectory.getAbsolutePath());
         }
-        this.levelsSettings = new LevelSettingsManager(new FileLevelSettingDAO(plugin));
-        loadAvailableLevelNames();
+        this.levelsSettings = new LevelSettingsManager(new FileLevelSettingDAO(this));
+        this.availableLevels = new AvailableLevelsCollection(this.plugin.getLogger());
+        this.loadAvailableLevelNames();
     }
 
     private void loadAvailableLevelNames() {
-        this.availableLevelsByUniqueName.putAll(
-                this.levelsSettings.getLevelSettingDAO().loadAllAvailableLevelGameSettingsSync());
-        for (GameSettings gameSettings : this.availableLevelsByUniqueName.values()) {
-            this.availableLevelsByUniqueId.put(gameSettings.getLevelId(), gameSettings);
-            UUID levelId = gameSettings.getLevelId();
-            String levelName = gameSettings.getLevelName();
-            this.plugin
-                    .getLogger()
-                    .info("Loaded world " + levelId + ": " + levelName + " by " + gameSettings.getOwnerName());
+        for (GameSettings gameSettings :
+                this.levelsSettings.getLevelSettingDAO().loadAllAvailableLevelGameSettingsSync()) {
+            this.availableLevels.add(gameSettings);
+        }
+        for (GameSettings gameSettings : this.availableLevels) {
+            if (this.nextLevelNumber <= gameSettings.getUniqueNumber()) {
+                this.nextLevelNumber = gameSettings.getUniqueNumber() + 1;
+            }
         }
     }
 
     @NonNull public Collection<GameSettings> getAvailableLevelsSettings() {
-        return Collections.unmodifiableCollection(this.availableLevelsByUniqueName.values());
+        return Collections.unmodifiableCollection(Lists.newArrayList(this.availableLevels.iterator()));
     }
 
     @NonNull public CompletableFuture<Level> createLevel(
-            @NonNull String levelName,
+            @NonNull String displayName,
             @NonNull World.Environment environment,
             @NonNull UUID ownerId,
             @NonNull String ownerName) {
-
         CompletableFuture<Level> result = new CompletableFuture<>();
-        if (this.availableLevelsByUniqueName.containsKey(levelName)) {
-            result.complete(null);
-            return result;
-        }
-
         UUID levelId = this.getNextLevelId();
         WorldCreator worldCreator = this.levelsSettings.getLevelSettingDAO().newWorldCreator(levelId);
         worldCreator.generator(this.worldsManager.getEmptyGenerator());
@@ -98,13 +94,13 @@ public class LevelsManager implements PluginManager {
                     }
                     prepareLevelWorld(world, true);
 
-                    LevelSettings levelSettings = LevelSettings.create(levelId, levelName, world, ownerId, ownerName);
-                    Level level = new Level(levelId, levelName, world, levelSettings);
+                    int uniqueNumber = this.nextLevelNumber++;
+                    LevelSettings levelSettings =
+                            LevelSettings.create(world, levelId, uniqueNumber, displayName, ownerId, ownerName);
+                    Level level = new Level(levelSettings, world);
                     level.setEditing(true);
 
-                    this.availableLevelsByUniqueName.put(
-                            level.getLevelName(), level.getLevelSettings().getGameSettings());
-                    this.availableLevelsByUniqueId.put(levelId, null);
+                    this.availableLevels.add(level.getLevelSettings().getGameSettings());
                     this.levelsSettings.addLevelSettings(levelId, levelSettings);
                     this.loadedLevels.put(levelId, level);
 
@@ -117,7 +113,7 @@ public class LevelsManager implements PluginManager {
         UUID result;
         do {
             result = UUID.randomUUID();
-        } while (this.availableLevelsByUniqueId.containsKey(result));
+        } while (this.availableLevels.byUniqueId(result) != null);
         return result;
     }
 
@@ -141,8 +137,7 @@ public class LevelsManager implements PluginManager {
                         this.prepareLevelWorld(world, false);
 
                         LevelSettings levelSettings = this.levelsSettings.loadLevelSettings(levelId);
-                        String levelName = levelSettings.getGameSettings().getLevelName();
-                        Level loadedLevel = new Level(levelId, levelName, world, levelSettings);
+                        Level loadedLevel = new Level(levelSettings, world);
                         this.loadedLevels.put(levelId, loadedLevel);
 
                         result.complete(loadedLevel);
@@ -158,14 +153,14 @@ public class LevelsManager implements PluginManager {
 
     @NonNull public CompletableFuture<Boolean> deleteLevelAsync(@NonNull GameSettings settings) {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
-        UUID levelId = settings.getLevelId();
+        UUID levelId = settings.getUniqueId();
         this.unloadLevelAsync(levelId).thenAccept(success -> {
             if (!success) {
                 result.complete(false);
                 return;
             }
 
-            this.availableLevelsByUniqueName.remove(settings.getLevelName());
+            this.availableLevels.remove(settings);
             this.levelsSettings.getLevelSettingDAO().deleteLevelWorldAndSettings(levelId);
             result.complete(true);
         });
@@ -203,8 +198,61 @@ public class LevelsManager implements PluginManager {
         return result;
     }
 
+    @NonNull public CompletableFuture<Boolean> upgradeDataAsync(
+            @NonNull UUID levelId, @Nullable Consumer<LevelSettings> updater) {
+        boolean unload = !this.isLevelLoaded(levelId);
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
+        this.loadLevel(levelId).thenAccept(level -> {
+            LevelSettings settings;
+            try {
+                settings = this.levelsSettings.loadLevelSettings(levelId);
+            } catch (Exception e) {
+                this.plugin
+                        .getLogger()
+                        .log(
+                                java.util.logging.Level.SEVERE,
+                                "Не удалось загрузить данные уровня " + levelId + " для конвертации",
+                                e);
+                result.complete(false);
+                return;
+            }
+            boolean success = true;
+            if (updater != null) {
+                try {
+                    updater.accept(settings);
+                } catch (Exception e) {
+                    this.plugin
+                            .getLogger()
+                            .log(
+                                    java.util.logging.Level.SEVERE,
+                                    "Не удалось произвести конвертацию уровня " + levelId,
+                                    e);
+                    success = false;
+                }
+            }
+            try {
+                this.levelsSettings.saveWorldSettings(levelId);
+            } catch (Exception e) {
+                this.plugin
+                        .getLogger()
+                        .log(
+                                java.util.logging.Level.SEVERE,
+                                "Не удалось сохранить данные уровня " + levelId + " после конвертации",
+                                e);
+                success = false;
+            }
+            if (unload) {
+                boolean finalSuccess = success;
+                this.unloadLevelAsync(levelId).thenAccept(success2 -> result.complete(finalSuccess && success2));
+            } else {
+                result.complete(success);
+            }
+        });
+        return result;
+    }
+
     public void saveLevelSettingsAndBlocks(@NonNull Level level) {
-        this.levelsSettings.saveWorldSettings(level.getLevelId());
+        this.levelsSettings.saveWorldSettings(level.getUniqueId());
         try {
             level.getWorld().save();
         } catch (Exception e) {
@@ -230,16 +278,19 @@ public class LevelsManager implements PluginManager {
 
         List<String> result = new ArrayList<>();
 
+        String uniqueName;
         if (owner == null) {
-            for (GameSettings gameSettings : this.availableLevelsByUniqueName.values()) {
-                if (!gameSettings.getLevelName().startsWith(levelNamePrefix)) continue;
-                result.add(gameSettings.getLevelName());
+            for (GameSettings gameSettings : this.availableLevels.withUniqueNames()) {
+                uniqueName = gameSettings.getUniqueName();
+                if (uniqueName == null || !uniqueName.startsWith(levelNamePrefix)) continue;
+                result.add(uniqueName);
             }
         } else {
-            for (GameSettings gameSettings : this.availableLevelsByUniqueName.values()) {
+            for (GameSettings gameSettings : this.availableLevels.withUniqueNames()) {
                 if (!gameSettings.isOwner(owner, false, false)) continue;
-                if (!gameSettings.getLevelName().startsWith(levelNamePrefix)) continue;
-                result.add(gameSettings.getLevelName());
+                uniqueName = gameSettings.getUniqueName();
+                if (uniqueName == null || !uniqueName.startsWith(levelNamePrefix)) continue;
+                result.add(uniqueName);
             }
         }
 
@@ -311,12 +362,15 @@ public class LevelsManager implements PluginManager {
         world.setGameRule((GameRule<Integer>) byName, newValue);
     }
 
-    @Nullable public GameSettings findLevelSettingsByUniqueName(@NonNull String levelName) {
-        UUID levelId = StringUtils.parseUUID(levelName);
+    @Nullable public GameSettings findLevel(@NonNull String levelUniqueNameOrIdOrNumber) {
+        UUID levelId = StringUtils.parseUUID(levelUniqueNameOrIdOrNumber);
         if (levelId != null) {
-            return this.availableLevelsByUniqueId.get(levelId);
-        } else {
-            return this.availableLevelsByUniqueName.get(levelName);
+            return this.availableLevels.byUniqueId(levelId);
+        }
+        try {
+            return this.availableLevels.byUniqueNumber(Integer.parseInt(levelUniqueNameOrIdOrNumber));
+        } catch (NumberFormatException e) {
+            return this.availableLevels.byUniqueName(levelUniqueNameOrIdOrNumber);
         }
     }
 

@@ -198,7 +198,7 @@ public class Game {
 
         if (unloadLevel) {
             if (settings.getWorldSettings().isWorldEmpty()) {
-                this.levelsManager.unloadLevelAsync(settings.getGameSettings().getLevelId());
+                this.levelsManager.unloadLevelAsync(settings.getGameSettings().getUniqueId());
             }
         }
 

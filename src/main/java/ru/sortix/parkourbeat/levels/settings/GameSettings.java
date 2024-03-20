@@ -14,10 +14,14 @@ import org.bukkit.entity.Player;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class GameSettings {
-    private final @NonNull UUID levelId;
-    private final @NonNull String levelName;
+    private final @NonNull UUID uniqueId;
+    private final @Nullable String uniqueName;
+    private final int uniqueNumber;
+
     private final @NonNull UUID ownerId;
     private final @NonNull String ownerName;
+    private final @NonNull String displayName;
+    private final long createdAtMills;
     private @Nullable Song song;
 
     public void setSong(@NonNull Song song) {

@@ -40,7 +40,7 @@ public class CommandEdit extends ParkourBeatCommand implements TabCompleter {
         }
 
         String levelName = String.join(" ", args);
-        GameSettings settings = this.levelsManager.findLevelSettingsByUniqueName(levelName);
+        GameSettings settings = this.levelsManager.findLevel(levelName);
 
         if (settings == null) {
             sender.sendMessage("Уровень \"" + levelName + "\" не найден!");

@@ -13,11 +13,10 @@ import ru.sortix.parkourbeat.levels.ParticleController;
 
 @Getter
 public class LevelSettings {
-
     private final WorldSettings worldSettings;
     private final GameSettings gameSettings;
     private final ParticleController particleController;
-    private DirectionChecker directionChecker;
+    private final DirectionChecker directionChecker;
 
     public LevelSettings(@NonNull WorldSettings worldSettings, @NonNull GameSettings gameSettings) {
         this.worldSettings = worldSettings;
@@ -30,22 +29,19 @@ public class LevelSettings {
         this.worldSettings.sortWaypoints(this.directionChecker);
     }
 
-    public static LevelSettings create(
-            @NonNull UUID levelId,
-            @NonNull String levelName,
+    @NonNull public static LevelSettings create(
             @NonNull World world,
+            @NonNull UUID uniqueId,
+            int uniqueNumber,
+            @NonNull String displayName,
             @NonNull UUID ownerId,
             @NonNull String ownerName) {
         Location defaultSpawn = Settings.getDefaultWorldSpawn().clone();
         defaultSpawn.setWorld(world);
         return new LevelSettings(
                 new WorldSettings(world, defaultSpawn, Settings.getDirection(), new ArrayList<>()),
-                new GameSettings(levelId, levelName, ownerId, ownerName));
-    }
-
-    public void updateDirectionChecker() {
-        directionChecker = new DirectionChecker(worldSettings.getDirection());
-        particleController.setDirectionChecker(directionChecker);
+                new GameSettings(
+                        uniqueId, null, uniqueNumber, ownerId, ownerName, displayName, System.currentTimeMillis()));
     }
 
     public void updateParticleLocations() {

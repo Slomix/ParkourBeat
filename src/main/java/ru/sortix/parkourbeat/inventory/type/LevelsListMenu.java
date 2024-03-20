@@ -1,9 +1,7 @@
 package ru.sortix.parkourbeat.inventory.type;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import javax.annotation.Nullable;
 import lombok.NonNull;
 import net.md_5.bungee.api.ChatColor;
@@ -53,20 +51,29 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
         return settings;
     }
 
+    private static final SimpleDateFormat LEVEL_CREATION_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
+
     @Override
     @SuppressWarnings("deprecation")
     protected @NonNull ItemStack createItemDisplay(@NonNull GameSettings gameSettings) {
         return ItemUtils.modifyMeta(new ItemStack(Material.PAPER), meta -> {
-            meta.setDisplayName(ChatColor.GOLD + gameSettings.getLevelName());
+            meta.setDisplayName(ChatColor.GOLD + gameSettings.getDisplayName());
 
             List<String> lore = new ArrayList<>();
             if (this.displayTechInfo) {
-                lore.add(ChatColor.YELLOW + "ID: " + gameSettings.getLevelId());
+                lore.add(ChatColor.YELLOW + "UUID: " + gameSettings.getUniqueId());
+            }
+            if (gameSettings.getUniqueName() == null) {
+                lore.add(ChatColor.YELLOW + "Номер для команд: " + gameSettings.getUniqueNumber());
+            } else {
+                lore.add(ChatColor.YELLOW + "Название для команд: " + gameSettings.getUniqueName());
             }
             lore.add(ChatColor.YELLOW + "Создатель: " + gameSettings.getOwnerName());
             if (this.displayTechInfo) {
                 lore.add(ChatColor.YELLOW + "UUID создателя: " + gameSettings.getOwnerId());
             }
+            lore.add(ChatColor.YELLOW + "Дата создания: "
+                    + LEVEL_CREATION_DATE_FORMAT.format(new Date(gameSettings.getCreatedAtMills())));
             lore.add(ChatColor.YELLOW + "Трек: "
                     + (gameSettings.getSong() == null
                             ? "отсутствует"
@@ -122,7 +129,7 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
                     this.viewer.sendMessage(ComponentUtils.createCopyTextComponent(
                             ChatColor.YELLOW + "> Скопировать UUID уровня <",
                             ChatColor.GOLD + "Нажмите для копирования",
-                            settings.getLevelId().toString()));
+                            settings.getUniqueId().toString()));
                 }
             } else {
                 startSpectating(this.plugin, event.getPlayer(), settings);
@@ -132,7 +139,7 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
 
     public static void startPlaying(
             @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull GameSettings settings) {
-        Level level = plugin.get(LevelsManager.class).getLoadedLevel(settings.getLevelId());
+        Level level = plugin.get(LevelsManager.class).getLoadedLevel(settings.getUniqueId());
         if (level != null && level.isEditing()) {
             player.sendMessage("Данный уровень недоступен для игры, т.к. он сейчас редактируется");
             return;
@@ -147,7 +154,7 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
         boolean levelLoaded = level != null;
         if (!levelLoaded) player.sendMessage("Загрузка уровня...");
 
-        PlayActivity.createAsync(plugin, player, settings.getLevelId(), false).thenAccept(playActivity -> {
+        PlayActivity.createAsync(plugin, player, settings.getUniqueId(), false).thenAccept(playActivity -> {
             if (playActivity == null) {
                 player.sendMessage("Не удалось запустить игру");
                 return;
@@ -160,7 +167,7 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
 
     public static void startSpectating(
             @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull GameSettings settings) {
-        plugin.get(LevelsManager.class).loadLevel(settings.getLevelId()).thenAccept(level -> {
+        plugin.get(LevelsManager.class).loadLevel(settings.getUniqueId()).thenAccept(level -> {
             if (level == null) {
                 player.sendMessage("Не удалось загрузить данные уровня");
                 return;
@@ -186,7 +193,7 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
             return;
         }
 
-        plugin.get(LevelsManager.class).loadLevel(settings.getLevelId()).thenAccept(level -> {
+        plugin.get(LevelsManager.class).loadLevel(settings.getUniqueId()).thenAccept(level -> {
             if (level == null) {
                 player.sendMessage("Не удалось загрузить данные уровня");
                 return;

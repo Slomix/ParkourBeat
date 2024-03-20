@@ -26,12 +26,13 @@ public class EditActivity extends UserActivity {
     @NonNull public static CompletableFuture<EditActivity> createAsync(
             @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         UserActivity activity = plugin.get(ActivityManager.class).getActivity(player);
-        if (activity instanceof EditActivity && activity.getLevel().getLevelId().equals(level.getLevelId())) {
+        if (activity instanceof EditActivity
+                && activity.getLevel().getUniqueId().equals(level.getUniqueId())) {
             return CompletableFuture.completedFuture((EditActivity) activity);
         }
 
         CompletableFuture<EditActivity> result = new CompletableFuture<>();
-        Game.createAsync(plugin, player, level.getLevelId()).thenAccept(game -> {
+        Game.createAsync(plugin, player, level.getUniqueId()).thenAccept(game -> {
             if (game == null) {
                 result.complete(null);
                 return;
@@ -132,17 +133,18 @@ public class EditActivity extends UserActivity {
                     this.level.getLevelSettings().getParticleController().stopSpawnParticles();
                     this.level.setEditing(false);
 
-                    this.player.sendMessage("Редактор уровня \"" + this.level.getLevelName() + "\" успешно остановлен");
+                    this.player.sendMessage(
+                            "Редактор уровня \"" + this.level.getDisplayName() + "\" успешно остановлен");
 
                     this.plugin.get(LevelsManager.class).saveLevelSettingsAndBlocks(this.level);
-                    this.plugin.get(LevelsManager.class).unloadLevelAsync(this.level.getLevelId());
+                    this.plugin.get(LevelsManager.class).unloadLevelAsync(this.level.getUniqueId());
                 });
     }
 
     public void startTesting() {
         if (this.testingActivity != null) throw new IllegalArgumentException("Testing already started");
 
-        PlayActivity.createAsync(this.plugin, this.player, this.level.getLevelId(), true)
+        PlayActivity.createAsync(this.plugin, this.player, this.level.getUniqueId(), true)
                 .thenAccept(playActivity -> {
                     if (playActivity == null) {
                         this.player.sendMessage("Не удалось войти в режим тестирования");
@@ -193,7 +195,7 @@ public class EditActivity extends UserActivity {
                         return;
                     }
 
-                    this.player.sendMessage("Редактор уровня \"" + this.level.getLevelName() + "\" успешно запущен");
+                    this.player.sendMessage("Редактор уровня \"" + this.level.getDisplayName() + "\" успешно запущен");
 
                     this.level.getLevelSettings().updateParticleLocations();
 

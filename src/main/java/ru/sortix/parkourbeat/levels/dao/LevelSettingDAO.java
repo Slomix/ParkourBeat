@@ -1,6 +1,6 @@
 package ru.sortix.parkourbeat.levels.dao;
 
-import java.util.Map;
+import java.util.Collection;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import lombok.NonNull;
@@ -12,7 +12,7 @@ import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 public interface LevelSettingDAO {
     @Nullable LevelSettings loadLevelSettings(@NonNull UUID levelId);
 
-    void saveLevelSettings(LevelSettings settings);
+    void saveLevelSettings(@NonNull LevelSettings settings);
 
     @Nullable World getBukkitWorld(@NonNull UUID levelId);
 
@@ -22,5 +22,5 @@ public interface LevelSettingDAO {
 
     boolean isLevelWorld(@NonNull World world);
 
-    @NonNull Map<String, GameSettings> loadAllAvailableLevelGameSettingsSync();
+    @NonNull Collection<GameSettings> loadAllAvailableLevelGameSettingsSync();
 }

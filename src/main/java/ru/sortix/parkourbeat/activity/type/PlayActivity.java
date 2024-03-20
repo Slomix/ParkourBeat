@@ -20,7 +20,7 @@ public class PlayActivity extends UserActivity {
             @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId, boolean isEditorGame) {
         UserActivity activity = plugin.get(ActivityManager.class).getActivity(player);
         if (activity instanceof PlayActivity
-                && activity.getLevel().getLevelId().equals(levelId)
+                && activity.getLevel().getUniqueId().equals(levelId)
                 && ((PlayActivity) activity).isEditorGame == isEditorGame) {
             return CompletableFuture.completedFuture((PlayActivity) activity);
         }

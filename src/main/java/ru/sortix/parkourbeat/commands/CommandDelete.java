@@ -39,7 +39,7 @@ public class CommandDelete extends ParkourBeatCommand implements TabCompleter {
         }
 
         String levelName = String.join(" ", args);
-        GameSettings settings = this.levelsManager.findLevelSettingsByUniqueName(levelName);
+        GameSettings settings = this.levelsManager.findLevel(levelName);
 
         if (settings == null) {
             sender.sendMessage("Уровень \"" + levelName + "\" не найден!");
@@ -68,11 +68,11 @@ public class CommandDelete extends ParkourBeatCommand implements TabCompleter {
         LevelsManager levelsManager = plugin.get(LevelsManager.class);
         ActivityManager activityManager = plugin.get(ActivityManager.class);
 
-        Level loadedLevel = levelsManager.getLoadedLevel(settings.getLevelId());
+        Level loadedLevel = levelsManager.getLoadedLevel(settings.getUniqueId());
         if (loadedLevel != null) {
             for (Player player : loadedLevel.getWorld().getPlayers()) {
                 if (player != sender) {
-                    player.sendMessage("Уровень \"" + settings.getLevelName() + "\" был удален");
+                    player.sendMessage("Уровень \"" + settings.getDisplayName() + "\" был удален");
                 }
                 activityManager.setActivity(player, null);
             }
@@ -80,9 +80,9 @@ public class CommandDelete extends ParkourBeatCommand implements TabCompleter {
 
         levelsManager.deleteLevelAsync(settings).thenAccept(success -> {
             if (success) {
-                sender.sendMessage("Вы успешно удалили уровень \"" + settings.getLevelName() + "\"");
+                sender.sendMessage("Вы успешно удалили уровень \"" + settings.getDisplayName() + "\"");
             } else {
-                sender.sendMessage("Не удалось удалить уровень \"" + settings.getLevelName() + "\"");
+                sender.sendMessage("Не удалось удалить уровень \"" + settings.getDisplayName() + "\"");
             }
         });
     }

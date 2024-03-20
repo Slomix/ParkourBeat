@@ -24,7 +24,7 @@ public class SpectateActivity extends UserActivity {
     @Override
     public void startActivity() {
         this.player.setGameMode(GameMode.SPECTATOR);
-        this.player.sendMessage("Вы наблюдаете за уровнем \"" + this.level.getLevelName() + "\"");
+        this.player.sendMessage("Вы наблюдаете за уровнем \"" + this.level.getDisplayName() + "\"");
     }
 
     @Override
