@@ -1,6 +1,7 @@
 package ru.sortix.parkourbeat.commands;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -31,7 +32,11 @@ public class CommandConvertData extends ParkourBeatCommand {
                 AtomicInteger success = new AtomicInteger();
                 AtomicInteger failed = new AtomicInteger();
                 List<CompletableFuture<Void>> futures = new ArrayList<>();
-                for (GameSettings settings : levelsManager.getAvailableLevelsSettings()) {
+
+                List<GameSettings> allSettings = new ArrayList<>(levelsManager.getAvailableLevelsSettings());
+                allSettings.sort(Comparator.comparingLong(GameSettings::getCreatedAtMills));
+
+                for (GameSettings settings : allSettings) {
                     futures.add(levelsManager
                             .upgradeDataAsync(settings.getUniqueId(), null)
                             .thenAccept(success2 -> {

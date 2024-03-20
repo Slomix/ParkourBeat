@@ -38,16 +38,12 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
     }
 
     @NonNull private Collection<GameSettings> getAvailableLevels(@Nullable UUID ownerId) {
-        Collection<GameSettings> settings = this.plugin.get(LevelsManager.class).getAvailableLevelsSettings();
-        if (ownerId == null) return settings;
-
-        settings = new ArrayList<>(settings);
-        Player owner = this.plugin.getServer().getPlayer(ownerId);
-        if (owner == null) {
+        List<GameSettings> settings =
+                new ArrayList<>(this.plugin.get(LevelsManager.class).getAvailableLevelsSettings());
+        if (ownerId != null) {
             settings.removeIf(gameSettings -> !gameSettings.isOwner(ownerId));
-        } else {
-            settings.removeIf(gameSettings -> !gameSettings.isOwner(owner, false, false));
         }
+        settings.sort(Comparator.comparingLong(GameSettings::getCreatedAtMills));
         return settings;
     }
 
