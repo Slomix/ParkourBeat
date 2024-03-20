@@ -24,6 +24,7 @@ import ru.sortix.parkourbeat.listeners.FixesListener;
 import ru.sortix.parkourbeat.listeners.GamesListener;
 import ru.sortix.parkourbeat.listeners.WorldsListener;
 import ru.sortix.parkourbeat.location.Waypoint;
+import ru.sortix.parkourbeat.player.input.PlayersInputManager;
 import ru.sortix.parkourbeat.utils.NonWorldAndYawPitchLocation;
 import ru.sortix.parkourbeat.utils.NonWorldLocation;
 
@@ -46,6 +47,7 @@ public class ParkourBeat extends JavaPlugin {
         Settings.load(this);
         this.registerManager(SongsManager::new);
         this.registerManager(LevelsManager::new);
+        this.registerManager(PlayersInputManager::new);
 
         this.registerCommand(CommandColor::new, "color");
         this.registerCommand(CommandConvertData::new, "convertdata");
