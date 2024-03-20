@@ -6,6 +6,7 @@ author: Sortix, Bomb
 depend: [ AMusic ]
 commands:
   color: {}
+  convertdata: {}
   create: {}
   delete: {}
   edit: {}

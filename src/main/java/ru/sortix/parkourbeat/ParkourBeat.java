@@ -47,6 +47,7 @@ public class ParkourBeat extends JavaPlugin {
         this.registerManager(LevelsManager::new);
 
         this.registerCommand(CommandColor::new, "color");
+        this.registerCommand(CommandConvertData::new, "convertdata");
         this.registerCommand(CommandCreate::new, "create");
         this.registerCommand(CommandDelete::new, "delete");
         this.registerCommand(CommandEdit::new, "edit");
