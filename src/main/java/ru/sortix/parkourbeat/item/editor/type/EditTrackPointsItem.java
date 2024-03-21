@@ -27,7 +27,7 @@ public class EditTrackPointsItem extends EditorItem {
 
     @SuppressWarnings("deprecation")
     public EditTrackPointsItem(@NonNull ParkourBeat plugin, int slot) {
-        super(plugin, slot, ItemUtils.create(Material.BLAZE_ROD, (meta) -> {
+        super(plugin, slot, 0, ItemUtils.create(Material.BLAZE_ROD, (meta) -> {
             meta.setDisplayName(ChatColor.GOLD + "Путь (см. описание)");
             meta.setLore(Arrays.asList(
                     ChatColor.YELLOW + "ЛКМ - установить точку",

@@ -10,8 +10,8 @@ import ru.sortix.parkourbeat.activity.type.EditActivity;
 import ru.sortix.parkourbeat.item.UsableItem;
 
 public abstract class EditorItem extends UsableItem {
-    public EditorItem(@NonNull ParkourBeat plugin, int slot, @NonNull ItemStack itemStack) {
-        super(plugin, slot, itemStack.clone());
+    public EditorItem(@NonNull ParkourBeat plugin, int slot, int cooldownTicks, @NonNull ItemStack itemStack) {
+        super(plugin, slot, cooldownTicks, itemStack.clone());
     }
 
     @Override

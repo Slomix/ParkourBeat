@@ -71,7 +71,9 @@ public class ItemsManager implements PluginManager, Listener {
         if (usableItem == null) return;
         event.setCancelled(true);
         if (event.getPlayer().getCooldown(event.getItem().getType()) > 0) return;
-        event.getPlayer().setCooldown(event.getItem().getType(), 10);
+        if (usableItem.getCooldownTicks() > 0) {
+            event.getPlayer().setCooldown(event.getItem().getType(), usableItem.getCooldownTicks());
+        }
 
         if (event.getHand() != EquipmentSlot.HAND) return;
         usableItem.onUse(event);

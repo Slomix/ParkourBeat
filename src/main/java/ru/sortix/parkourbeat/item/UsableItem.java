@@ -11,8 +11,9 @@ import ru.sortix.parkourbeat.ParkourBeat;
 @Getter
 public abstract class UsableItem {
     protected final @NonNull ParkourBeat plugin;
-    protected final int slot;
-    protected final @NonNull ItemStack itemStack;
+    final int slot;
+    private final int cooldownTicks;
+    final @NonNull ItemStack itemStack;
 
     protected abstract void onUse(@NonNull PlayerInteractEvent event);
 }

@@ -13,7 +13,7 @@ import ru.sortix.parkourbeat.item.editor.EditorItem;
 public class EditorMenuItem extends EditorItem {
     @SuppressWarnings("deprecation")
     public EditorMenuItem(@NonNull ParkourBeat plugin, int slot) {
-        super(plugin, slot, ItemUtils.create(Material.COMPARATOR, (meta) -> {
+        super(plugin, slot, 20, ItemUtils.create(Material.COMPARATOR, (meta) -> {
             meta.setDisplayName(ChatColor.RED + "Параметры уровня");
         }));
     }

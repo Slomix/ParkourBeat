@@ -12,7 +12,7 @@ import ru.sortix.parkourbeat.item.editor.EditorItem;
 public class TestGameItem extends EditorItem {
     @SuppressWarnings("deprecation")
     public TestGameItem(@NonNull ParkourBeat plugin, int slot) {
-        super(plugin, slot, ItemUtils.create(Material.DIAMOND, (meta) -> {
+        super(plugin, slot, 20, ItemUtils.create(Material.DIAMOND, (meta) -> {
             meta.setDisplayName(ChatColor.AQUA + "Протестировать уровень");
         }));
     }
