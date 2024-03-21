@@ -148,11 +148,8 @@ public class EditorMainMenu extends ParkourBeatInventory {
             String hex = message.startsWith("#") ? message.substring(1) : message;
             Color color;
             try {
-                int r = Integer.valueOf(hex.substring(0, 2), 16);
-                int g = Integer.valueOf(hex.substring(2, 4), 16);
-                int b = Integer.valueOf(hex.substring(4, 6), 16);
-                color = Color.fromRGB(r, g, b);
-            } catch (Exception e) {
+                color = Color.fromRGB(Integer.valueOf(hex, 16));
+            } catch (IllegalArgumentException e) {
                 player.sendMessage("Ошибка. Пожалуйста, убедитесь, что вы ввели правильный HEX-код");
                 return;
             }
