@@ -15,6 +15,7 @@ public class WorldSettingsDAO {
     public void set(@NonNull WorldSettings worldSettings, @NonNull FileConfiguration config) {
         Location spawn = worldSettings.getSpawn().clone();
         spawn.setWorld(null);
+        config.set("environment", worldSettings.getEnvironment().name());
         config.set("spawn", spawn);
         config.set("start_border", worldSettings.getStartBorder());
         config.set("finish_border", worldSettings.getFinishBorder());
@@ -33,9 +34,15 @@ public class WorldSettingsDAO {
     }
 
     @NonNull public WorldSettings load(@NonNull FileConfiguration config, @NonNull World world) {
+        String environmentName = config.getString("environment");
+        if (environmentName == null) {
+            throw new IllegalArgumentException("String \"environment\" not found");
+        }
+        World.Environment environment = World.Environment.valueOf(environmentName);
+
         Location spawn = config.getSerializable("spawn", Location.class);
         if (spawn == null) {
-            throw new IllegalArgumentException("Object \"spawn\" not found");
+            throw new IllegalArgumentException("Location \"spawn\" not found");
         }
         spawn.setWorld(world);
         DirectionChecker.Direction direction;
@@ -48,12 +55,12 @@ public class WorldSettingsDAO {
         //noinspection unchecked
         List<Waypoint> particleSegment = (List<Waypoint>) config.getList("waypoints");
         if (particleSegment == null) {
-            throw new IllegalArgumentException("List not found: \"waypoints\"");
+            throw new IllegalArgumentException("List of Waypoints \"waypoints\" not found");
         }
         for (Waypoint waypoint : particleSegment) {
             waypoint.getLocation().setWorld(world);
         }
 
-        return new WorldSettings(world, spawn, direction, particleSegment);
+        return new WorldSettings(world, environment, spawn, direction, particleSegment);
     }
 }

@@ -31,6 +31,7 @@ public class LevelSettings {
 
     @NonNull public static LevelSettings create(
             @NonNull World world,
+            @NonNull World.Environment environment,
             @NonNull UUID uniqueId,
             int uniqueNumber,
             @NonNull String displayName,
@@ -39,7 +40,7 @@ public class LevelSettings {
         Location defaultSpawn = Settings.getDefaultWorldSpawn().clone();
         defaultSpawn.setWorld(world);
         return new LevelSettings(
-                new WorldSettings(world, defaultSpawn, Settings.getDirection(), new ArrayList<>()),
+                new WorldSettings(world, environment, defaultSpawn, Settings.getDirection(), new ArrayList<>()),
                 new GameSettings(
                         uniqueId, null, uniqueNumber, ownerId, ownerName, displayName, System.currentTimeMillis()));
     }

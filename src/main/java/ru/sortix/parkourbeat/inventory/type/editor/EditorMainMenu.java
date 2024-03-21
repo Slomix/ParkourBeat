@@ -5,7 +5,10 @@ import static ru.sortix.parkourbeat.utils.LocationUtils.isValidSpawnPoint;
 import java.util.Arrays;
 import java.util.List;
 import lombok.NonNull;
-import org.bukkit.ChatColor;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -19,15 +22,85 @@ import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.Song;
+import ru.sortix.parkourbeat.player.input.PlayersInputManager;
 import ru.sortix.parkourbeat.utils.TeleportUtils;
 
 public class EditorMainMenu extends ParkourBeatInventory {
     @SuppressWarnings("deprecation")
     public EditorMainMenu(@NonNull ParkourBeat plugin, @NonNull EditActivity activity) {
-        super(plugin, 3, "Параметры уровня");
+        super(plugin, 5, "Параметры уровня");
         this.setItem(
-                2,
                 1,
+                5,
+                ItemUtils.create(Material.REDSTONE_TORCH, (meta) -> {
+                    meta.setDisplayName(ChatColor.GOLD + "Покинуть редактор");
+                    meta.setLore(List.of(ChatColor.YELLOW + "Блоки и настройки будут сохранены"));
+                }),
+                event -> {
+                    Player player = event.getPlayer();
+                    TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn())
+                            .thenAccept(success -> {
+                                if (!success) return;
+                                this.plugin.get(ActivityManager.class).setActivity(player, null);
+                            });
+                });
+        this.setItem(
+                3,
+                2,
+                ItemUtils.create(Material.FIREWORK_STAR, (meta) -> {
+                    meta.setDisplayName(ChatColor.GOLD + "Цвет частиц");
+                    meta.setLore(Arrays.asList(
+                            ChatColor.YELLOW + "Изменяет цвет частиц после",
+                            ChatColor.YELLOW + "достижения определённой позиции.",
+                            ChatColor.YELLOW + "Вам потребуется указать в чате",
+                            ChatColor.YELLOW + "HEX-цвет. Например: #FFCC66"));
+                }),
+                event -> {
+                    Player player = event.getPlayer();
+                    player.closeInventory();
+
+                    PlayersInputManager manager = this.plugin.get(PlayersInputManager.class);
+                    if (manager.isInputRequested(player)) {
+                        player.sendMessage("Функция недоступна в данный момент");
+                        return;
+                    }
+
+                    player.sendMessage("У вас есть 30 сек, чтобы указать в чате HEX-цвет. Например: #FFCC66");
+                    TextComponent msg1 = new TextComponent(
+                            "Подобрать цвет можно " + ChatColor.UNDERLINE + "тут" + ChatColor.RESET + " (кликабельно)");
+                    msg1.setClickEvent(
+                            new ClickEvent(ClickEvent.Action.OPEN_URL, "https://google.com/search?q=hex+палитра"));
+                    player.sendMessage(msg1);
+
+                    manager.requestChatInput(player, 20 * 30).thenAccept(message -> {
+                        if (message == null) {
+                            player.sendMessage("Цвет не выбран");
+                            return;
+                        }
+
+                        String hex = message.startsWith("#") ? message.substring(1) : message;
+                        Color color;
+                        try {
+                            int r = Integer.valueOf(hex.substring(0, 2), 16);
+                            int g = Integer.valueOf(hex.substring(2, 4), 16);
+                            int b = Integer.valueOf(hex.substring(4, 6), 16);
+                            color = Color.fromRGB(r, g, b);
+                        } catch (Exception e) {
+                            player.sendMessage("Ошибка. Пожалуйста, убедитесь, что вы ввели правильный HEX-код");
+                            return;
+                        }
+                        activity.setCurrentColor(color);
+
+                        player.sendMessage("Выбранный цвет:");
+
+                        TextComponent msg2 = new TextComponent("#" + hex);
+                        msg2.setColor(ChatColor.of("#" + hex));
+                        player.sendMessage(msg2);
+                    });
+                });
+        this.setItem(
+                3,
+                4,
                 ItemUtils.modifyMeta(SelectSongMenu.NOTE_HEAD.clone(), meta -> {
                     meta.setDisplayName(ChatColor.GOLD + "Выбрать музыку");
                     meta.setLore(List.of());
@@ -42,11 +115,12 @@ public class EditorMainMenu extends ParkourBeatInventory {
                 }),
                 event -> {
                     Player player = event.getPlayer();
+
                     new SelectSongMenu(plugin, activity.getLevel()).open(player);
                 });
         this.setItem(
-                2,
                 3,
+                6,
                 ItemUtils.create(Material.ENDER_PEARL, (meta) -> {
                     meta.setDisplayName(ChatColor.GOLD + "Точка спауна");
                     meta.setLore(Arrays.asList(
@@ -73,23 +147,45 @@ public class EditorMainMenu extends ParkourBeatInventory {
                             + "Именно в эту сторону будут повёрнуты игроки при телепортации");
                 });
         this.setItem(
-                2,
-                5,
-                ItemUtils.create(Material.REDSTONE_TORCH, (meta) -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Покинуть редактор");
-                    meta.setLore(List.of(ChatColor.YELLOW + "Блоки и настройки будут сохранены"));
+                3,
+                8,
+                ItemUtils.create(Material.WRITABLE_BOOK, (meta) -> {
+                    meta.setDisplayName(ChatColor.GOLD + "Переименовать уровень");
+                    meta.setLore(Arrays.asList(
+                            ChatColor.YELLOW + "Вам будет необходимо отправить",
+                            ChatColor.YELLOW + "новое название в чат"));
                 }),
                 event -> {
                     Player player = event.getPlayer();
-                    TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn())
-                            .thenAccept(success -> {
-                                if (!success) return;
-                                this.plugin.get(ActivityManager.class).setActivity(player, null);
-                            });
+                    player.closeInventory();
+
+                    PlayersInputManager manager = this.plugin.get(PlayersInputManager.class);
+                    if (manager.isInputRequested(player)) {
+                        player.sendMessage("Функция недоступна в данный момент");
+                        return;
+                    }
+
+                    player.sendMessage("У вас есть 30 сек, чтобы указать в чате новое название уровня");
+                    manager.requestChatInput(player, 20 * 30).thenAccept(newName -> {
+                        if (newName == null) {
+                            player.sendMessage("Новое название не введено");
+                            return;
+                        }
+
+                        if (newName.length() > 30) {
+                            player.sendMessage("Название не может превышать 30 символов");
+                            return;
+                        }
+
+                        String oldName = activity.getLevel().getDisplayName();
+
+                        activity.getLevel().getLevelSettings().getGameSettings().setDisplayName(newName);
+                        player.sendMessage("Название изменено с \"" + oldName + "\" на \"" + newName + "\"");
+                    });
                 });
         this.setItem(
-                2,
-                7,
+                5,
+                3,
                 ItemUtils.create(Material.NETHER_STAR, (meta) -> {
                     meta.setDisplayName(ChatColor.GOLD + "Сбросить все точки");
                     meta.setLore(Arrays.asList(
@@ -99,12 +195,13 @@ public class EditorMainMenu extends ParkourBeatInventory {
                 event -> {
                     Player player = event.getPlayer();
                     player.closeInventory();
+
                     EditTrackPointsItem.clearAllPoints(activity.getLevel());
                     player.sendMessage("Все точки сброшены");
                 });
         this.setItem(
-                2,
-                9,
+                5,
+                7,
                 ItemUtils.create(Material.BARRIER, (meta) -> {
                     meta.setDisplayName(ChatColor.GOLD + "Удалить уровень");
                     meta.setLore(Arrays.asList(
@@ -114,6 +211,7 @@ public class EditorMainMenu extends ParkourBeatInventory {
                 event -> {
                     Player player = event.getPlayer();
                     player.closeInventory();
+
                     CommandDelete.deleteLevel(
                             plugin,
                             player,
