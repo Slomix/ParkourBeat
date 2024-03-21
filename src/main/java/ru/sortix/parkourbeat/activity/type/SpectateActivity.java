@@ -4,7 +4,6 @@ import java.util.concurrent.CompletableFuture;
 import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.player.*;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.UserActivity;
@@ -41,11 +40,6 @@ public class SpectateActivity extends UserActivity {
 
     @Override
     public void on(@NonNull PlayerToggleSneakEvent event) {}
-
-    @Override
-    public void on(@NonNull PlayerInteractEvent event) {
-        event.setUseInteractedBlock(Event.Result.DENY);
-    }
 
     @Override
     public int getFallHeight() {

@@ -32,8 +32,6 @@ public abstract class UserActivity {
 
     public abstract void on(@NonNull PlayerToggleSneakEvent event);
 
-    public abstract void on(@NonNull PlayerInteractEvent event);
-
     public abstract int getFallHeight();
 
     public abstract void onPlayerFall();

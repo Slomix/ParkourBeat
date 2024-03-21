@@ -5,7 +5,6 @@ import java.util.concurrent.CompletableFuture;
 import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.player.*;
 import org.bukkit.potion.PotionEffect;
 import ru.sortix.parkourbeat.ParkourBeat;
@@ -123,11 +122,6 @@ public class PlayActivity extends UserActivity {
         if (event.isSneaking() && this.game.getCurrentState() == Game.State.RUNNING) {
             this.game.failLevel("§cВы остановились");
         }
-    }
-
-    @Override
-    public void on(@NonNull PlayerInteractEvent event) {
-        event.setUseInteractedBlock(Event.Result.DENY);
     }
 
     @Override

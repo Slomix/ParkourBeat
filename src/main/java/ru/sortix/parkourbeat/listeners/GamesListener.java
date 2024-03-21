@@ -11,9 +11,12 @@ import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
@@ -24,6 +27,7 @@ import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
+import ru.sortix.parkourbeat.activity.type.EditActivity;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
@@ -196,20 +200,50 @@ public final class GamesListener implements Listener {
     }
 
     @EventHandler
-    private void onActivityEvent(PlayerInteractEvent event) {
+    private void on(PlayerArmorStandManipulateEvent event) {
+        this.cancelIsCantModifyWorld(
+                event, event.getPlayer(), event.getRightClicked().getWorld());
+    }
+
+    @EventHandler
+    private void on(PlayerInteractAtEntityEvent event) {
+        this.cancelIsCantModifyWorld(
+                event, event.getPlayer(), event.getRightClicked().getWorld());
+    }
+
+    @EventHandler
+    private void on(BlockPlaceEvent event) {
+        this.cancelIsCantModifyWorld(event, event.getPlayer(), event.getBlock().getWorld());
+    }
+
+    @EventHandler
+    private void on(BlockBreakEvent event) {
+        this.cancelIsCantModifyWorld(event, event.getPlayer(), event.getBlock().getWorld());
+    }
+
+    private void cancelIsCantModifyWorld(@NonNull Cancellable event, @NonNull Player player, @NonNull World world) {
+        if (this.isPlayerCanModifyWorld(player, world)) return;
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    private void on(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
         if (block == null) return;
+        if (this.isPlayerCanModifyWorld(event.getPlayer(), block.getWorld())) return;
+        event.setUseInteractedBlock(Event.Result.DENY);
+    }
 
-        UserActivity activity = this.activityManager.getActivity(event.getPlayer());
+    private boolean isPlayerCanModifyWorld(@NonNull Player player, @NonNull World world) {
+        UserActivity activity = this.activityManager.getActivity(player);
         if (activity != null) {
-            if (block.getWorld() != activity.getLevel().getWorld()) {
-                return;
-            }
-            activity.on(event);
-        } else if (this.isLobby(block.getWorld())) {
-            if (!event.getPlayer().hasPermission("parkourbeat.level.edit.lobby")) {
-                event.setUseInteractedBlock(Event.Result.DENY);
-            }
+            if (world != activity.getLevel().getWorld()) return false;
+            if (!(activity instanceof EditActivity)) return false;
+            return !((EditActivity) activity).isTesting();
+        } else if (this.isLobby(world)) {
+            return player.hasPermission("parkourbeat.level.edit.lobby");
+        } else {
+            return true;
         }
     }
 

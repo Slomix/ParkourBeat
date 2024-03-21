@@ -101,11 +101,6 @@ public class EditActivity extends UserActivity {
     }
 
     @Override
-    public void on(@NonNull PlayerInteractEvent event) {
-        if (this.testingActivity != null) this.testingActivity.on(event);
-    }
-
-    @Override
     public int getFallHeight() {
         return this.getFallHeight(this.testingActivity == null);
     }
