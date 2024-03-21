@@ -60,7 +60,7 @@ public class ParkourBeat extends JavaPlugin {
         this.registerCommand(CommandTest::new, "test");
         this.registerCommand(CommandTpToWorld::new, "tptoworld");
 
-        this.registerListener(parkourBeat -> new FixesListener());
+        this.registerListener(FixesListener::new);
         this.registerListener(GamesListener::new);
         this.registerListener(WorldsListener::new);
         this.registerListener(InventoriesListener::new);
