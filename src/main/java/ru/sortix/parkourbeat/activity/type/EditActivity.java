@@ -137,7 +137,6 @@ public class EditActivity extends UserActivity {
                             "Редактор уровня \"" + this.level.getDisplayName() + "\" успешно остановлен");
 
                     this.plugin.get(LevelsManager.class).saveLevelSettingsAndBlocks(this.level);
-                    this.plugin.get(LevelsManager.class).unloadLevelAsync(this.level.getUniqueId());
                 });
     }
 

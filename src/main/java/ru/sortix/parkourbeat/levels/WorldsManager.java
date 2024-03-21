@@ -189,7 +189,7 @@ public class WorldsManager implements PluginManager, Listener {
         onPlayersTeleported.thenAcceptAsync(
                 unused -> {
                     if (world.getPlayers().isEmpty()) {
-                        this.server.unloadWorld(world, save); // call WorldUnloadEvent
+                        this.server.unloadWorld(world, save); // call WorldUnloadEvent, result must be ignored
                         return;
                     }
                     this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","

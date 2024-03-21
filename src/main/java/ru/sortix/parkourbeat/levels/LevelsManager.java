@@ -36,7 +36,8 @@ public class LevelsManager implements PluginManager {
     private final LevelSettingsManager levelsSettings;
 
     private final AvailableLevelsCollection availableLevels;
-    private final Map<UUID, Level> loadedLevels = new HashMap<>();
+    private final Map<UUID, Level> loadedLevelsById = new HashMap<>();
+    private final Map<World, Level> loadedLevelsByWorld = new HashMap<>();
     private final boolean gameRulesSupport = ClassUtils.isClassPresent("org.bukkit.GameRule");
     private int nextLevelNumber = 1;
 
@@ -103,7 +104,8 @@ public class LevelsManager implements PluginManager {
 
                     this.availableLevels.add(level.getLevelSettings().getGameSettings());
                     this.levelsSettings.addLevelSettings(levelId, levelSettings);
-                    this.loadedLevels.put(levelId, level);
+                    this.loadedLevelsById.put(levelId, level);
+                    this.loadedLevelsByWorld.put(world, level);
 
                     result.complete(level);
                 });
@@ -121,8 +123,9 @@ public class LevelsManager implements PluginManager {
     @NonNull public CompletableFuture<Level> loadLevel(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
         CompletableFuture<Level> result = new CompletableFuture<>();
 
-        if (isLevelLoaded(levelId)) {
-            result.complete(getLoadedLevel(levelId));
+        Level level = getLoadedLevel(levelId);
+        if (level != null) {
+            result.complete(level);
             return result;
         }
 
@@ -141,7 +144,8 @@ public class LevelsManager implements PluginManager {
 
                         LevelSettings levelSettings = this.levelsSettings.loadLevelSettings(levelId, gameSettings);
                         Level loadedLevel = new Level(levelSettings, world);
-                        this.loadedLevels.put(levelId, loadedLevel);
+                        this.loadedLevelsById.put(levelId, loadedLevel);
+                        this.loadedLevelsByWorld.put(world, loadedLevel);
 
                         result.complete(loadedLevel);
                     } catch (Exception e) {
@@ -171,7 +175,7 @@ public class LevelsManager implements PluginManager {
     }
 
     @NonNull public CompletableFuture<Boolean> unloadLevelAsync(@NonNull UUID levelId) {
-        if (!this.loadedLevels.containsKey(levelId)) return CompletableFuture.completedFuture(true);
+        if (!this.loadedLevelsById.containsKey(levelId)) return CompletableFuture.completedFuture(true);
 
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         LevelSettingDAO dao = this.levelsSettings.getLevelSettingDAO();
@@ -194,7 +198,8 @@ public class LevelsManager implements PluginManager {
                 return;
             }
             this.levelsSettings.unloadLevelSettings(levelId);
-            this.loadedLevels.remove(levelId);
+            this.loadedLevelsById.remove(levelId);
+            this.loadedLevelsByWorld.remove(world);
             result.complete(true);
         });
 
@@ -203,7 +208,7 @@ public class LevelsManager implements PluginManager {
 
     @NonNull public CompletableFuture<Boolean> upgradeDataAsync(
             @NonNull UUID levelId, @Nullable Consumer<LevelSettings> updater) {
-        boolean unload = !this.isLevelLoaded(levelId);
+        boolean unload = this.getLoadedLevel(levelId) == null;
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         this.loadLevel(levelId, null).thenAccept(level -> {
             LevelSettings settings;
@@ -269,12 +274,12 @@ public class LevelsManager implements PluginManager {
         }
     }
 
-    public boolean isLevelLoaded(@NonNull UUID levelId) {
-        return this.loadedLevels.containsKey(levelId);
+    @Nullable public Level getLoadedLevel(@NonNull UUID levelId) {
+        return this.loadedLevelsById.get(levelId);
     }
 
-    @Nullable public Level getLoadedLevel(@NonNull UUID levelId) {
-        return this.loadedLevels.get(levelId);
+    @Nullable public Level getLoadedLevel(@NonNull World world) {
+        return this.loadedLevelsByWorld.get(world);
     }
 
     @NonNull public List<String> getUniqueLevelNames(@NonNull String levelNamePrefix, @Nullable CommandSender owner) {
@@ -390,7 +395,7 @@ public class LevelsManager implements PluginManager {
 
     @Override
     public void disable() {
-        for (Level level : this.loadedLevels.values()) {
+        for (Level level : this.loadedLevelsById.values()) {
             if (!level.isEditing()) continue;
             this.saveLevelSettingsAndBlocks(level);
         }

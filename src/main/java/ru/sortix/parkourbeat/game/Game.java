@@ -191,16 +191,10 @@ public class Game {
         return this.levelsManager.getPlugin();
     }
 
-    public void endGame(boolean unloadLevel) {
+    public void endGame() {
         LevelSettings settings = this.level.getLevelSettings();
         this.player.setHealth(20);
         AMusic.stopSound(this.player);
-
-        if (unloadLevel) {
-            if (settings.getWorldSettings().isWorldEmpty()) {
-                this.levelsManager.unloadLevelAsync(settings.getGameSettings().getUniqueId());
-            }
-        }
 
         Plugin plugin = this.getPlugin();
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {

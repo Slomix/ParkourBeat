@@ -138,6 +138,6 @@ public class PlayActivity extends UserActivity {
     @Override
     public void endActivity() {
         this.game.failLevel("§cВы умерли");
-        this.game.endGame(!this.isEditorGame);
+        this.game.endGame();
     }
 }
