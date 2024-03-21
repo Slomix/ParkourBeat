@@ -7,6 +7,7 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.*;
+import org.bukkit.potion.PotionEffect;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
@@ -50,6 +51,10 @@ public class PlayActivity extends UserActivity {
         this.game.failLevel("§cВы умерли");
 
         this.player.setGameMode(GameMode.ADVENTURE);
+
+        for (PotionEffect effect : this.player.getActivePotionEffects()) {
+            this.player.removePotionEffect(effect.getType());
+        }
 
         this.player.getInventory().clear();
         if (this.isEditorGame) {
