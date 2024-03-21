@@ -25,7 +25,7 @@ public class Game {
     @NonNull public static CompletableFuture<Game> createAsync(
             @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId) {
         CompletableFuture<Game> result = new CompletableFuture<>();
-        final LevelsManager levelsManager = plugin.get(LevelsManager.class);
+        LevelsManager levelsManager = plugin.get(LevelsManager.class);
         levelsManager.loadLevel(levelId).thenAccept(level -> {
             if (level == null) {
                 result.complete(null);

@@ -93,6 +93,14 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
         this.setItem(
                 6, 5, RegularItems.closeInventory(), event -> event.getPlayer().closeInventory());
         this.setPreviousPageItem(6, 7);
+        if (this.editMenu) {
+            this.setItem(
+                    6,
+                    1,
+                    ItemUtils.create(
+                            Material.WRITABLE_BOOK, meta -> meta.setDisplayName(ChatColor.GOLD + "Создать уровень")),
+                    event -> new CreateLevelMenu(this.plugin).open(event.getPlayer()));
+        }
         this.setItem(
                 6,
                 9,

@@ -56,7 +56,7 @@ public abstract class PluginInventory<P extends JavaPlugin> implements Inventory
         this.clickActions.clear();
     }
 
-    public final void open(@NonNull Player player) {
+    public void open(@NonNull Player player) {
         player.openInventory(this.handle);
     }
 

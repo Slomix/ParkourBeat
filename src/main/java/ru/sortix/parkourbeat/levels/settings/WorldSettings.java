@@ -17,6 +17,7 @@ import ru.sortix.parkourbeat.location.Waypoint;
 public class WorldSettings {
 
     private final @NonNull World world;
+    private final World.Environment environment;
     private final List<Waypoint> waypoints;
     private final int minWorldHeight;
     private final DirectionChecker.Direction direction;
@@ -32,10 +33,12 @@ public class WorldSettings {
 
     public WorldSettings(
             @NonNull World world,
+            @NonNull World.Environment environment,
             @NonNull Location spawn,
             @NonNull DirectionChecker.Direction direction,
             @NonNull List<Waypoint> waypoints) {
         this.world = world;
+        this.environment = environment;
         this.spawn = spawn;
         this.waypoints = waypoints;
         this.direction = direction;

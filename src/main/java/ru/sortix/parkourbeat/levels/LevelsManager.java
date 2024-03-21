@@ -11,9 +11,12 @@ import lombok.NonNull;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.boss.DragonBattle;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EnderDragon;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.inventory.type.CreateLevelMenu;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.levels.dao.files.FileLevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
@@ -67,15 +70,12 @@ public class LevelsManager implements PluginManager {
     }
 
     @NonNull public CompletableFuture<Level> createLevel(
-            @NonNull String displayName,
-            @NonNull World.Environment environment,
-            @NonNull UUID ownerId,
-            @NonNull String ownerName) {
+            @NonNull World.Environment environment, @NonNull UUID ownerId, @NonNull String ownerName) {
         CompletableFuture<Level> result = new CompletableFuture<>();
         UUID levelId = this.getNextLevelId();
         WorldCreator worldCreator = this.levelsSettings.getLevelSettingDAO().newWorldCreator(levelId);
         worldCreator.generator(this.worldsManager.getEmptyGenerator());
-        if (false) worldCreator.environment(environment); // creates a new world not a copy
+        worldCreator.environment(environment);
 
         if (!this.defaultLevelDirectory.isDirectory()) {
             this.plugin
@@ -92,11 +92,12 @@ public class LevelsManager implements PluginManager {
                         result.complete(null);
                         return;
                     }
-                    prepareLevelWorld(world, true);
+                    this.prepareLevelWorld(world, true);
 
                     int uniqueNumber = this.nextLevelNumber++;
-                    LevelSettings levelSettings =
-                            LevelSettings.create(world, levelId, uniqueNumber, displayName, ownerId, ownerName);
+                    String displayName = "Уровень #" + uniqueNumber;
+                    LevelSettings levelSettings = LevelSettings.create(
+                            world, environment, levelId, uniqueNumber, displayName, ownerId, ownerName);
                     Level level = new Level(levelSettings, world);
                     level.setEditing(true);
 
@@ -126,6 +127,8 @@ public class LevelsManager implements PluginManager {
         }
 
         WorldCreator worldCreator = this.levelsSettings.getLevelSettingDAO().newWorldCreator(levelId);
+        worldCreator.generator(this.worldsManager.getEmptyGenerator());
+        worldCreator.environment(World.Environment.NORMAL); // TODO Load from settings
         this.worldsManager
                 .createWorldFromDefaultContainer(worldCreator, this.worldsManager.getSyncExecutor())
                 .thenAccept(world -> {
@@ -300,6 +303,16 @@ public class LevelsManager implements PluginManager {
     public void prepareLevelWorld(@NonNull World world, boolean updateGameRules) {
         world.setKeepSpawnInMemory(false);
         world.setAutoSave(false);
+
+        if (CreateLevelMenu.DISPLAY_NON_DEFAULT_WORLD_TYPES) {
+            DragonBattle battle = world.getEnderDragonBattle();
+            if (battle != null) {
+                EnderDragon dragon = battle.getEnderDragon();
+                if (dragon != null) dragon.remove();
+                battle.getBossBar().removeAll();
+                battle.setRespawnPhase(DragonBattle.RespawnPhase.NONE);
+            }
+        }
 
         if (!updateGameRules) return;
 
