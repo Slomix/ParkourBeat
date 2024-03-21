@@ -20,6 +20,6 @@ public class CommandCreate {
     @Execute
     @Permission(COMMAND_PERMISSION + ".create")
     public void onCommand(@Context Player sender) {
-        new CreateLevelMenu(this.plugin).open((Player) sender);
+        new CreateLevelMenu(this.plugin).open(sender);
     }
 }
