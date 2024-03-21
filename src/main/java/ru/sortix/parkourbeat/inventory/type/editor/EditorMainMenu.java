@@ -172,14 +172,25 @@ public class EditorMainMenu extends ParkourBeatInventory {
                             return;
                         }
 
-                        if (newName.length() > 30) {
-                            player.sendMessage("Название не может превышать 30 символов");
+                        newName = ChatColor.translateAlternateColorCodes('&', newName);
+                        String plainName = ChatColor.stripColor(newName);
+
+                        if (plainName.length() < 3) {
+                            player.sendMessage("Название должно содержать от 3 до 30 символов");
                             return;
                         }
 
-                        String oldName = activity.getLevel().getDisplayName();
+                        if (plainName.length() > 30) {
+                            player.sendMessage("Название должно содержать от 5 до 30 символов");
+                            return;
+                        }
 
+                        String oldName;
+
+                        oldName = activity.getLevel().getDisplayName();
                         activity.getLevel().getLevelSettings().getGameSettings().setDisplayName(newName);
+                        newName = activity.getLevel().getDisplayName();
+
                         player.sendMessage("Название изменено с \"" + oldName + "\" на \"" + newName + "\"");
                     });
                 });

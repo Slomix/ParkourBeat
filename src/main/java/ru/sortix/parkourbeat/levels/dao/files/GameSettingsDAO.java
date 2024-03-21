@@ -12,7 +12,7 @@ public class GameSettingsDAO {
         config.set("unique_number", gameSettings.getUniqueNumber());
         config.set("owner_id", gameSettings.getOwnerId().toString());
         config.set("owner_name", gameSettings.getOwnerName());
-        config.set("display_name", gameSettings.getDisplayName());
+        config.set("display_name", gameSettings.getRawDisplayName());
         config.set("level_name", null);
         config.set("created_at_mills", gameSettings.getCreatedAtMills());
 

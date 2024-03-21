@@ -3,6 +3,7 @@ package ru.sortix.parkourbeat.levels.settings;
 import java.util.UUID;
 import javax.annotation.Nullable;
 import lombok.*;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -23,6 +24,14 @@ public class GameSettings {
 
     private final long createdAtMills;
     private @Nullable Song song;
+
+    @NonNull public String getDisplayName() {
+        return this.displayName + ChatColor.RESET;
+    }
+
+    @NonNull public String getRawDisplayName() {
+        return this.displayName;
+    }
 
     public void setSong(@NonNull Song song) {
         this.song = song;
