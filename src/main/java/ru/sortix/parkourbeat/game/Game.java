@@ -26,7 +26,7 @@ public class Game {
             @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId) {
         CompletableFuture<Game> result = new CompletableFuture<>();
         LevelsManager levelsManager = plugin.get(LevelsManager.class);
-        levelsManager.loadLevel(levelId).thenAccept(level -> {
+        levelsManager.loadLevel(levelId, null).thenAccept(level -> {
             if (level == null) {
                 result.complete(null);
                 return;
@@ -193,8 +193,8 @@ public class Game {
 
     public void endGame(boolean unloadLevel) {
         LevelSettings settings = this.level.getLevelSettings();
-        player.setHealth(20);
-        AMusic.stopSound(player);
+        this.player.setHealth(20);
+        AMusic.stopSound(this.player);
 
         if (unloadLevel) {
             if (settings.getWorldSettings().isWorldEmpty()) {
@@ -204,11 +204,11 @@ public class Game {
 
         Plugin plugin = this.getPlugin();
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
-            player.showPlayer(plugin, onlinePlayer);
+            this.player.showPlayer(plugin, onlinePlayer);
         }
 
         this.currentState = State.READY;
-        settings.getParticleController().stopSpawnParticlesForPlayer(player);
+        settings.getParticleController().stopSpawnParticlesForPlayer(this.player);
     }
 
     public enum State {

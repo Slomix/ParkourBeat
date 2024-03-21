@@ -155,9 +155,6 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
             return;
         }
 
-        boolean levelLoaded = level != null;
-        if (!levelLoaded) player.sendMessage("Загрузка уровня...");
-
         PlayActivity.createAsync(plugin, player, settings.getUniqueId(), false).thenAccept(playActivity -> {
             if (playActivity == null) {
                 player.sendMessage("Не удалось запустить игру");
@@ -165,29 +162,31 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
             }
 
             plugin.get(ActivityManager.class).setActivity(player, playActivity);
-            if (!levelLoaded) player.sendMessage("Уровень загружен");
         });
     }
 
     public static void startSpectating(
             @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull GameSettings settings) {
-        plugin.get(LevelsManager.class).loadLevel(settings.getUniqueId()).thenAccept(level -> {
-            if (level == null) {
-                player.sendMessage("Не удалось загрузить данные уровня");
-                return;
-            }
-            if (level.getWorld() == player.getWorld()) {
-                player.sendMessage("Вы уже в этом мире");
-                return;
-            }
+        plugin.get(LevelsManager.class)
+                .loadLevel(settings.getUniqueId(), settings)
+                .thenAccept(level -> {
+                    if (level == null) {
+                        player.sendMessage("Не удалось загрузить данные уровня");
+                        return;
+                    }
+                    if (level.getWorld() == player.getWorld()) {
+                        player.sendMessage("Вы уже в этом мире");
+                        return;
+                    }
 
-            SpectateActivity.createAsync(plugin, player, level).thenAccept(spectateActivity -> {
-                TeleportUtils.teleportAsync(plugin, player, level.getSpawn()).thenAccept(success -> {
-                    if (!success) return;
-                    plugin.get(ActivityManager.class).setActivity(player, spectateActivity);
+                    SpectateActivity.createAsync(plugin, player, level).thenAccept(spectateActivity -> {
+                        TeleportUtils.teleportAsync(plugin, player, level.getSpawn())
+                                .thenAccept(success -> {
+                                    if (!success) return;
+                                    plugin.get(ActivityManager.class).setActivity(player, spectateActivity);
+                                });
+                    });
                 });
-            });
-        });
     }
 
     public static void startEditing(
@@ -197,34 +196,36 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
             return;
         }
 
-        plugin.get(LevelsManager.class).loadLevel(settings.getUniqueId()).thenAccept(level -> {
-            if (level == null) {
-                player.sendMessage("Не удалось загрузить данные уровня");
-                return;
-            }
+        plugin.get(LevelsManager.class)
+                .loadLevel(settings.getUniqueId(), settings)
+                .thenAccept(level -> {
+                    if (level == null) {
+                        player.sendMessage("Не удалось загрузить данные уровня");
+                        return;
+                    }
 
-            if (level.isEditing()) {
-                player.sendMessage("Данный уровень уже редактируется");
-                return;
-            }
+                    if (level.isEditing()) {
+                        player.sendMessage("Данный уровень уже редактируется");
+                        return;
+                    }
 
-            ActivityManager activityManager = plugin.get(ActivityManager.class);
+                    ActivityManager activityManager = plugin.get(ActivityManager.class);
 
-            Collection<Player> playersOnLevel = activityManager.getPlayersOnTheLevel(level);
-            playersOnLevel.removeIf(player1 -> settings.isOwner(player1, true, true));
+                    Collection<Player> playersOnLevel = activityManager.getPlayersOnTheLevel(level);
+                    playersOnLevel.removeIf(player1 -> settings.isOwner(player1, true, true));
 
-            if (!playersOnLevel.isEmpty()) {
-                player.sendMessage("Нельзя редактировать уровень, на котором находятся игроки");
-                return;
-            }
+                    if (!playersOnLevel.isEmpty()) {
+                        player.sendMessage("Нельзя редактировать уровень, на котором находятся игроки");
+                        return;
+                    }
 
-            EditActivity.createAsync(plugin, player, level).thenAccept(editActivity -> {
-                if (editActivity == null) {
-                    player.sendMessage("Не удалось запустить редактор уровня");
-                    return;
-                }
-                activityManager.setActivity(player, editActivity);
-            });
-        });
+                    EditActivity.createAsync(plugin, player, level).thenAccept(editActivity -> {
+                        if (editActivity == null) {
+                            player.sendMessage("Не удалось запустить редактор уровня");
+                            return;
+                        }
+                        activityManager.setActivity(player, editActivity);
+                    });
+                });
     }
 }

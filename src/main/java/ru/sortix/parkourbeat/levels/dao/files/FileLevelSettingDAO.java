@@ -50,10 +50,10 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     }
 
     @Override
-    @Nullable public LevelSettings loadLevelSettings(@NonNull UUID levelId) {
+    @Nullable public LevelSettings loadLevelSettings(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
         WorldSettings worldSettings = this.loadLevelWorldSettings(levelId);
         if (worldSettings == null) return null;
-        GameSettings gameSettings = this.loadLevelGameSettings(levelId);
+        if (gameSettings == null) gameSettings = this.loadLevelGameSettings(levelId);
         if (gameSettings == null) return null;
         return new LevelSettings(worldSettings, gameSettings);
     }

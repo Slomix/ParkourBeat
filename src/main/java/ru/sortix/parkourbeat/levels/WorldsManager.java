@@ -67,8 +67,8 @@ public class WorldsManager implements PluginManager, Listener {
             @NonNull WorldCreator worldCreator, @NonNull Executor executor) {
         File worldDir = this.getWorldDir(worldCreator);
         if (!worldDir.isDirectory()) {
-            return CompletableFuture.failedFuture(
-                    new IllegalArgumentException("Is not a directory: " + worldDir.getAbsolutePath()));
+            this.logger.severe("Unable to create world from directory (directory not found): " + worldDir);
+            return CompletableFuture.completedFuture(null);
         }
         return this.createBukkitWorld(worldCreator, executor);
     }

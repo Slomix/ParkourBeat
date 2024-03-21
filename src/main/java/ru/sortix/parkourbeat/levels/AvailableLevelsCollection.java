@@ -46,13 +46,13 @@ public class AvailableLevelsCollection implements Iterable<GameSettings> {
 
     public synchronized void remove(@NonNull GameSettings settings) {
         String uniqueName = settings.getUniqueName();
-        if (uniqueName != null) this.byUniqueName.remove(uniqueName, settings);
+        if (uniqueName != null) this.byUniqueName.remove(uniqueName);
 
         UUID uniqueId = settings.getUniqueId();
-        this.byUniqueId.remove(uniqueId, settings);
+        this.byUniqueId.remove(uniqueId);
 
         int uniqueNumber = settings.getUniqueNumber();
-        this.byUniqueNumber.remove(uniqueNumber, settings);
+        this.byUniqueNumber.remove(uniqueNumber);
     }
 
     @Nullable public GameSettings byUniqueName(@NonNull String uniqueName) {

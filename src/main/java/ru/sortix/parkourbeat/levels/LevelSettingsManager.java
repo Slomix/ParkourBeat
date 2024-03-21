@@ -3,9 +3,11 @@ package ru.sortix.parkourbeat.levels;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
+import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 public class LevelSettingsManager {
@@ -24,14 +26,14 @@ public class LevelSettingsManager {
     }
 
     public void unloadLevelSettings(@NonNull UUID levelId) {
-        levelSettings.remove(levelId);
+        this.levelSettings.remove(levelId);
     }
 
-    @NonNull public LevelSettings loadLevelSettings(@NonNull UUID levelId) {
+    @NonNull public LevelSettings loadLevelSettings(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
         LevelSettings settings = this.levelSettings.get(levelId);
         if (settings != null) return settings;
 
-        settings = this.levelSettingDAO.loadLevelSettings(levelId);
+        settings = this.levelSettingDAO.loadLevelSettings(levelId, gameSettings);
         if (settings == null) {
             throw new IllegalArgumentException("Failed to load settings for level " + levelId);
         }

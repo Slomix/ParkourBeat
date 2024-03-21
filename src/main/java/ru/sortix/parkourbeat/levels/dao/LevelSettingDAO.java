@@ -10,7 +10,7 @@ import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 public interface LevelSettingDAO {
-    @Nullable LevelSettings loadLevelSettings(@NonNull UUID levelId);
+    @Nullable LevelSettings loadLevelSettings(@NonNull UUID levelId, @Nullable GameSettings gameSettings);
 
     void saveLevelSettings(@NonNull LevelSettings settings);
 

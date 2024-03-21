@@ -118,7 +118,7 @@ public class LevelsManager implements PluginManager {
         return result;
     }
 
-    @NonNull public CompletableFuture<Level> loadLevel(@NonNull UUID levelId) {
+    @NonNull public CompletableFuture<Level> loadLevel(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
         CompletableFuture<Level> result = new CompletableFuture<>();
 
         if (isLevelLoaded(levelId)) {
@@ -139,7 +139,7 @@ public class LevelsManager implements PluginManager {
                     try {
                         this.prepareLevelWorld(world, false);
 
-                        LevelSettings levelSettings = this.levelsSettings.loadLevelSettings(levelId);
+                        LevelSettings levelSettings = this.levelsSettings.loadLevelSettings(levelId, gameSettings);
                         Level loadedLevel = new Level(levelSettings, world);
                         this.loadedLevels.put(levelId, loadedLevel);
 
@@ -205,10 +205,11 @@ public class LevelsManager implements PluginManager {
             @NonNull UUID levelId, @Nullable Consumer<LevelSettings> updater) {
         boolean unload = !this.isLevelLoaded(levelId);
         CompletableFuture<Boolean> result = new CompletableFuture<>();
-        this.loadLevel(levelId).thenAccept(level -> {
+        this.loadLevel(levelId, null).thenAccept(level -> {
             LevelSettings settings;
             try {
-                settings = this.levelsSettings.loadLevelSettings(levelId);
+                settings = this.levelsSettings.loadLevelSettings(
+                        levelId, level.getLevelSettings().getGameSettings());
             } catch (Exception e) {
                 this.plugin
                         .getLogger()
