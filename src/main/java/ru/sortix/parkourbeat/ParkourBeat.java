@@ -1,8 +1,5 @@
 package ru.sortix.parkourbeat;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.logging.Level;
 import lombok.NonNull;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
@@ -27,6 +24,10 @@ import ru.sortix.parkourbeat.location.Waypoint;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
 import ru.sortix.parkourbeat.utils.NonWorldAndYawPitchLocation;
 import ru.sortix.parkourbeat.utils.NonWorldLocation;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.logging.Level;
 
 public class ParkourBeat extends JavaPlugin {
     public static JavaPlugin getPlugin() {
@@ -74,7 +75,9 @@ public class ParkourBeat extends JavaPlugin {
             }
         }
 
-        for (PluginManager manager : new ArrayList<>(this.managers.values()).reversed()) {
+        List<PluginManager> managers = new ArrayList<>(this.managers.values());
+        Collections.reverse(managers);
+        for (PluginManager manager : managers) {
             try {
                 manager.disable();
             } catch (Exception e) {
