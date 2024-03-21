@@ -5,7 +5,6 @@ import dev.rollczi.litecommands.bukkit.LiteBukkitMessages;
 import dev.rollczi.litecommands.message.LiteMessages;
 import dev.rollczi.litecommands.schematic.SchematicFormat;
 import lombok.NonNull;
-import org.bukkit.Color;
 import org.bukkit.configuration.serialization.ConfigurationSerializable;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.HandlerList;
@@ -13,7 +12,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.commands.*;
-import ru.sortix.parkourbeat.commands.argument.ColorArgumentResolver;
 import ru.sortix.parkourbeat.commands.argument.GameSettingsArgumentResolver;
 import ru.sortix.parkourbeat.commands.handler.DefaultInvalidUsageHandler;
 import ru.sortix.parkourbeat.constant.Messages;
@@ -116,8 +114,6 @@ public class ParkourBeat extends JavaPlugin {
                         new CommandSpawn(this),
                         new CommandTest(),
                         new CommandTpToWorld(this))
-                .argument(Color.class, new ColorArgumentResolver())
-                .argument(GameSettings.class, new GameSettingsArgumentResolver(get(LevelsManager.class)))
                 .argument(GameSettings.class, new GameSettingsArgumentResolver(get(LevelsManager.class)))
                 .message(LiteBukkitMessages.PLAYER_ONLY, Messages.PLAYER_ONLY)
                 .message(LiteMessages.MISSING_PERMISSIONS, Messages.MISSING_PERMISSION)
