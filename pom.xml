@@ -100,6 +100,10 @@
             <id>glaremasters</id>
             <url>https://repo.glaremasters.me/repository/concuncan/</url>
         </repository>
+        <repository>
+            <id>panda-lang</id>
+            <url>https://repo.panda-lang.org/releases/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -119,6 +123,11 @@
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>24.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.rollczi</groupId>
+            <artifactId>litecommands-bukkit</artifactId>
+            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>me.bomb</groupId>

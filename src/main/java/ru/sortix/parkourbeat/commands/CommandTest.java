@@ -1,24 +1,18 @@
 package ru.sortix.parkourbeat.commands;
 
-import lombok.NonNull;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import ru.sortix.parkourbeat.ParkourBeat;
+import dev.rollczi.litecommands.annotations.command.Command;
+import dev.rollczi.litecommands.annotations.execute.Execute;
+import dev.rollczi.litecommands.annotations.permission.Permission;
 
-public class CommandTest extends ParkourBeatCommand {
-    public CommandTest(@NonNull ParkourBeat plugin) {
-        super(plugin);
-    }
+import static ru.sortix.parkourbeat.constant.PermissionConstants.COMMAND_PERMISSION;
 
-    @Override
-    public boolean onCommand(
-            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        if (!sender.hasPermission("parkourbeat.command.test")) {
-            sender.sendMessage("Недостаточно прав");
-            return true;
-        }
+@Command(name = "test")
+public class CommandTest {
 
-        sender.sendMessage("Nothing here");
-        return true;
+    @Execute
+    @Permission(COMMAND_PERMISSION + ".test")
+    public String onCommand() {
+        // TODO реализовать логику команды или удалить команду
+        return "Nothing here";
     }
 }

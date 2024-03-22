@@ -1,26 +1,25 @@
 package ru.sortix.parkourbeat.commands;
 
-import lombok.NonNull;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
+import dev.rollczi.litecommands.annotations.command.Command;
+import dev.rollczi.litecommands.annotations.context.Context;
+import dev.rollczi.litecommands.annotations.execute.Execute;
+import dev.rollczi.litecommands.annotations.permission.Permission;
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.inventory.type.CreateLevelMenu;
 
-public class CommandCreate extends ParkourBeatCommand {
-    public CommandCreate(@NonNull ParkourBeat plugin) {
-        super(plugin);
-    }
+import static ru.sortix.parkourbeat.constant.PermissionConstants.COMMAND_PERMISSION;
 
-    @Override
-    public boolean onCommand(
-            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("Команда только для игроков");
-            return true;
-        }
+@Command(name = "create")
+@RequiredArgsConstructor
+public class CommandCreate {
 
-        new CreateLevelMenu(this.plugin).open((Player) sender);
-        return true;
+    private final ParkourBeat plugin;
+
+    @Execute
+    @Permission(COMMAND_PERMISSION + ".create")
+    public void onCommand(@Context Player sender) {
+        new CreateLevelMenu(this.plugin).open(sender);
     }
 }

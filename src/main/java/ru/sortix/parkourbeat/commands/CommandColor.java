@@ -1,19 +1,22 @@
 package ru.sortix.parkourbeat.commands;
 
-import lombok.NonNull;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import ru.sortix.parkourbeat.ParkourBeat;
+import dev.rollczi.litecommands.annotations.command.Command;
+import dev.rollczi.litecommands.annotations.execute.Execute;
+import dev.rollczi.litecommands.annotations.permission.Permission;
+import ru.sortix.parkourbeat.constant.Messages;
 
-public class CommandColor extends ParkourBeatCommand {
-    public CommandColor(@NonNull ParkourBeat plugin) {
-        super(plugin);
-    }
+import static ru.sortix.parkourbeat.constant.PermissionConstants.COMMAND_PERMISSION;
 
-    @Override
-    public boolean onCommand(
-            @NonNull CommandSender sender, @NonNull Command command, @NonNull String label, @NonNull String[] args) {
-        sender.sendMessage("Используйте предмет \"Параметры уровня\"");
-        return true;
+/**
+ * @deprecated the player must now use a clickable item instead of a command
+ */
+@Command(name = "color")
+@Deprecated(since = "1.0-SNAPSHOT", forRemoval = true)
+public class CommandColor {
+
+    @Execute
+    @Permission(COMMAND_PERMISSION + ".color")
+    public String onExecute() {
+        return Messages.USE_LEVEL_PARAMETERS_ITEM;
     }
 }
