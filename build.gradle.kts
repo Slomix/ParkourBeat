@@ -1,5 +1,5 @@
 plugins {
-    `java`
+    java
     id("com.diffplug.spotless") version "6.25.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     id("xyz.jpenilla.run-paper") version "2.2.2"
@@ -23,6 +23,7 @@ dependencies {
     compileOnly(files("run/plugins/AMusic_v0.12.jar"))
 
     implementation("org.jetbrains:annotations:24.1.0")
+    implementation("dev.rollczi:litecommands-bukkit:3.4.0")
 
     annotationProcessor("org.projectlombok:lombok:1.18.30")
 }
@@ -40,8 +41,10 @@ java {
 tasks {
     withType<JavaCompile> {
         options.compilerArgs.add("-parameters")
+        options.encoding = "UTF-8"
     }
     runServer {
         minecraftVersion("1.16.5")
+        jvmArgs("-DPaper.IgnoreJavaVersion=true")
     }
 }

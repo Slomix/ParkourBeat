@@ -106,13 +106,11 @@ public class ParkourBeat extends JavaPlugin {
     private void registerCommands() {
         LiteBukkitFactory.builder(getName().toLowerCase(Locale.ROOT), this)
                 .commands(
-                        new CommandColor(),
                         new CommandConvertData(this),
                         new CommandCreate(this),
                         new CommandDelete(this),
                         new CommandEdit(this),
                         new CommandPlay(this),
-                        new CommandSong(),
                         new CommandSpawn(this),
                         new CommandTest(),
                         new CommandTpToWorld(this))
