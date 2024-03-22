@@ -22,7 +22,7 @@ import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.utils.ComponentUtils;
-import ru.sortix.parkourbeat.utils.TeleportUtils;
+import ru.sortix.parkourbeat.world.TeleportUtils;
 
 public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
     private final Player viewer;
@@ -129,6 +129,7 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
         } else {
             if (event.isShift()) {
                 if (this.displayTechInfo) {
+                    event.getPlayer().closeInventory();
                     //noinspection deprecation
                     this.viewer.sendMessage(ComponentUtils.createCopyTextComponent(
                             ChatColor.YELLOW + "> Скопировать UUID уровня <",
