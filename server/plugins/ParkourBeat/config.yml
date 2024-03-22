@@ -6,13 +6,16 @@ lobby:
     z: 0
     yaw: 0
     pitch: 0
+all_levels:
+  min_editable_point: "31 0 0"
+  max_editable_point: "35000 255 15"
 default_level:
-  direction: NEGATIVE_X
-  start_border: "1.0 9.0 8.0"
-  finish_border: "-9.0 9.0 8.0"
+  direction: POSITIVE_X
+  start_point: "0.0 9.0 8.0"
+  finish_point: "10.0 9.0 8.0"
   spawn_pos:
-    x: 10
+    x: -9
     y: 12
     z: 8
-    yaw: 90
+    yaw: -90
     pitch: 0

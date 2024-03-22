@@ -7,9 +7,9 @@ lobby:
     yaw: 0
     pitch: 0
 default_level:
-  direction: NEGATIVE_Z
-  start_border: "0.0 0.0 0.0"
-  finish_border: "-10.0 0.0 0.0"
+  direction: POSITIVE_X
+  start_point: "0.0 5.0 0.0"
+  finish_point: "10.0 5.0 0.0"
   spawn_pos:
     x: 0
     y: 0
