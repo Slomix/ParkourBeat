@@ -11,19 +11,16 @@
 .mtj.tmp/
 
 # Package Files #
-target/
-dependency-reduced-pom.xml
+build/
+.gradle/
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
 
 ### IntelliJ IDEA ###
+.fastRequest/
 .idea/
-.idea/modules.xml
-.idea/jarRepositories.xml
-.idea/compiler.xml
-.idea/libraries/
 *.iws
 *.iml
 *.ipr

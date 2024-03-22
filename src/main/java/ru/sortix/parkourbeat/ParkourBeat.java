@@ -72,7 +72,9 @@ public class ParkourBeat extends JavaPlugin {
             }
         }
 
-        for (PluginManager manager : new ArrayList<>(this.managers.values()).reversed()) {
+        List<PluginManager> managers = new ArrayList<>(this.managers.values());
+        Collections.reverse(managers);
+        for (PluginManager manager : managers) {
             try {
                 manager.disable();
             } catch (Exception e) {
