@@ -26,7 +26,7 @@ public class PlayActivity extends UserActivity {
         }
 
         CompletableFuture<PlayActivity> result = new CompletableFuture<>();
-        Game.createAsync(plugin, player, levelId).thenAccept(game -> {
+        Game.createAsync(plugin, player, levelId, true).thenAccept(game -> {
             if (game == null) {
                 result.complete(null);
                 return;

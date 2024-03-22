@@ -1,4 +1,4 @@
-package ru.sortix.parkourbeat.utils;
+package ru.sortix.parkourbeat.inventory;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;

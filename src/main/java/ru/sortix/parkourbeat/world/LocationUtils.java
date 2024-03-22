@@ -1,4 +1,4 @@
-package ru.sortix.parkourbeat.utils;
+package ru.sortix.parkourbeat.world;
 
 import lombok.NonNull;
 import org.bukkit.Location;

@@ -1,6 +1,6 @@
 package ru.sortix.parkourbeat.inventory.type.editor;
 
-import static ru.sortix.parkourbeat.utils.LocationUtils.isValidSpawnPoint;
+import static ru.sortix.parkourbeat.world.LocationUtils.isValidSpawnPoint;
 
 import java.util.Arrays;
 import java.util.List;
@@ -23,7 +23,7 @@ import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.Song;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
-import ru.sortix.parkourbeat.utils.TeleportUtils;
+import ru.sortix.parkourbeat.world.TeleportUtils;
 
 public class EditorMainMenu extends ParkourBeatInventory {
     private final EditActivity activity;

@@ -5,11 +5,11 @@ import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
-import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.location.Waypoint;
 
@@ -55,8 +55,14 @@ public class WorldSettings {
     }
 
     public void addStartAndFinishPoints() {
-        this.waypoints.add(new Waypoint(Settings.getStartBorder().toLocation(world), Color.LIME, 0));
-        this.waypoints.add(new Waypoint(Settings.getFinishBorder().toLocation(world), Color.LIME, 0));
+        this.waypoints.add(new Waypoint(
+                Settings.getLevelDefaultStartPoint().toLocation(this.world),
+                EditTrackPointsItem.DEFAULT_PARTICLES_COLOR,
+                0));
+        this.waypoints.add(new Waypoint(
+                Settings.getLevelDefaultFinishPoint().toLocation(this.world),
+                EditTrackPointsItem.DEFAULT_PARTICLES_COLOR,
+                0));
     }
 
     private int findMinWorldHeight() {

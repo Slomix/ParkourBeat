@@ -20,7 +20,7 @@ import ru.sortix.parkourbeat.item.editor.EditorItem;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
-import ru.sortix.parkourbeat.utils.TeleportUtils;
+import ru.sortix.parkourbeat.world.TeleportUtils;
 
 public class EditActivity extends UserActivity {
     @NonNull public static CompletableFuture<EditActivity> createAsync(
@@ -32,7 +32,7 @@ public class EditActivity extends UserActivity {
         }
 
         CompletableFuture<EditActivity> result = new CompletableFuture<>();
-        Game.createAsync(plugin, player, level.getUniqueId()).thenAccept(game -> {
+        Game.createAsync(plugin, player, level.getUniqueId(), false).thenAccept(game -> {
             if (game == null) {
                 result.complete(null);
                 return;

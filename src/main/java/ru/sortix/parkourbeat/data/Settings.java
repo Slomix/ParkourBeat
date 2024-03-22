@@ -12,48 +12,57 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
-import ru.sortix.parkourbeat.levels.WorldsManager;
+import ru.sortix.parkourbeat.utils.ConfigUtils;
+import ru.sortix.parkourbeat.world.Cuboid;
+import ru.sortix.parkourbeat.world.WorldsManager;
 
 @UtilityClass
 public class Settings {
-
-    @Getter
-    private Location lobbySpawn;
-
-    @Getter
-    private Vector startBorder;
-
-    @Getter
-    private Vector finishBorder;
-
-    @Getter
-    private Location defaultWorldSpawn;
-
-    @Getter
-    private DirectionChecker.Direction direction;
-
     private boolean isLoaded = false;
 
-    public void load(@NonNull ParkourBeat plugin) {
-        if (isLoaded) {
-            plugin.getLogger().warning("Settings already loaded!");
-            return;
-        }
-        WorldsManager worldsManager = plugin.get(WorldsManager.class);
+    // lobby options
+    private @Getter Location lobbySpawn;
+
+    // level fixed options
+    private @Getter Cuboid levelFixedEditableArea;
+
+    // level default options
+    private @Getter DirectionChecker.Direction levelDefaultDirection;
+    private @Getter Vector levelDefaultStartPoint;
+    private @Getter Vector levelDefaultFinishPoint;
+    private @Getter Location levelDefaultSpawn;
+
+    public void load(@NonNull ParkourBeat plugin, @NonNull WorldsManager worldsManager) {
+        if (isLoaded) throw new IllegalStateException("Settings already loaded");
 
         plugin.saveDefaultConfig();
 
         ConfigurationSection rootConfig = plugin.getConfig();
 
         ConfigurationSection lobbyConfig = rootConfig.getConfigurationSection("lobby");
+        if (lobbyConfig == null) {
+            throw new IllegalArgumentException("Section \"default_level\" not found");
+        }
         lobbySpawn = getLocation(lobbyConfig, "spawn_pos", worldsManager, true);
         lobbySpawn.getWorld().setSpawnLocation(lobbySpawn);
 
+        ConfigurationSection allLevelsConfig = rootConfig.getConfigurationSection("all_levels");
+        if (allLevelsConfig == null) {
+            throw new IllegalArgumentException("Section \"all_levels\" not found");
+        }
+        levelFixedEditableArea = new Cuboid(
+                ConfigUtils.parsePointXYZ(allLevelsConfig.getString("min_editable_point")),
+                ConfigUtils.parsePointXYZ(allLevelsConfig.getString("max_editable_point")));
+
         ConfigurationSection defaultLevelConfig = rootConfig.getConfigurationSection("default_level");
-        startBorder = getVector(defaultLevelConfig, "start_border");
-        finishBorder = getVector(defaultLevelConfig, "finish_border");
-        defaultWorldSpawn = getLocation(defaultLevelConfig, "spawn_pos", null, true);
-        direction = getDirection(defaultLevelConfig, "direction");
+        if (defaultLevelConfig == null) {
+            throw new IllegalArgumentException("Section \"default_level\" not found");
+        }
+
+        levelDefaultDirection = ConfigUtils.parseDirection(defaultLevelConfig, "direction");
+        levelDefaultStartPoint = ConfigUtils.parsePointXYZ(defaultLevelConfig.getString("start_point"));
+        levelDefaultFinishPoint = ConfigUtils.parsePointXYZ(defaultLevelConfig.getString("finish_point"));
+        levelDefaultSpawn = getLocation(defaultLevelConfig, "spawn_pos", null, true);
 
         isLoaded = true;
     }
@@ -67,7 +76,7 @@ public class Settings {
         return worldCreator;
     }
 
-    @NonNull private static Location getLocation(
+    @NonNull private Location getLocation(
             @NonNull ConfigurationSection config,
             @NonNull String key,
             @Nullable WorldsManager worldsManager,
@@ -101,22 +110,5 @@ public class Settings {
         }
 
         return new Location(world, x, y, z, yaw, pitch);
-    }
-
-    @NonNull private static Vector getVector(@NonNull ConfigurationSection section, @NonNull String key) {
-        String vectorString = section.getString(key);
-        String[] args = vectorString.split(" ");
-        if (args.length != 3) {
-            throw new IllegalArgumentException("Wrong vector: " + vectorString);
-        }
-        return new Vector(Double.parseDouble(args[0]), Double.parseDouble(args[1]), Double.parseDouble(args[2]));
-    }
-
-    @NonNull private static DirectionChecker.Direction getDirection(ConfigurationSection defaultLevelConfig, String direction) {
-        try {
-            return DirectionChecker.Direction.valueOf(defaultLevelConfig.getString(direction));
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid direction: " + direction);
-        }
     }
 }

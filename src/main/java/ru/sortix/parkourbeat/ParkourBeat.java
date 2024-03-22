@@ -20,16 +20,16 @@ import ru.sortix.parkourbeat.data.SongsManager;
 import ru.sortix.parkourbeat.inventory.InventoriesListener;
 import ru.sortix.parkourbeat.item.ItemsManager;
 import ru.sortix.parkourbeat.levels.LevelsManager;
-import ru.sortix.parkourbeat.levels.WorldsManager;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
 import ru.sortix.parkourbeat.listeners.FixesListener;
 import ru.sortix.parkourbeat.listeners.GamesListener;
-import ru.sortix.parkourbeat.listeners.WorldsListener;
 import ru.sortix.parkourbeat.location.Waypoint;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
 import ru.sortix.parkourbeat.utils.NonWorldAndYawPitchLocation;
 import ru.sortix.parkourbeat.utils.NonWorldLocation;
+import ru.sortix.parkourbeat.world.WorldsListener;
+import ru.sortix.parkourbeat.world.WorldsManager;
 
 import java.util.*;
 import java.util.function.Function;
@@ -51,7 +51,7 @@ public class ParkourBeat extends JavaPlugin {
         this.registerManager(ItemsManager::new);
         this.registerManager(WorldsManager::new);
         this.registerManager(ActivityManager::new);
-        Settings.load(this);
+        Settings.load(this, this.get(WorldsManager.class));
         this.registerManager(SongsManager::new);
         this.registerManager(LevelsManager::new);
         this.registerManager(PlayersInputManager::new);

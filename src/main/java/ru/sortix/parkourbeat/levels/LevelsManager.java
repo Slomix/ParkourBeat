@@ -24,6 +24,7 @@ import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
 import ru.sortix.parkourbeat.utils.StringUtils;
 import ru.sortix.parkourbeat.utils.java.ClassUtils;
+import ru.sortix.parkourbeat.world.WorldsManager;
 
 public class LevelsManager implements PluginManager {
     @Getter

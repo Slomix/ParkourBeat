@@ -1,4 +1,4 @@
-package ru.sortix.parkourbeat.listeners;
+package ru.sortix.parkourbeat.world;
 
 import java.util.logging.Logger;
 import lombok.NonNull;

@@ -6,6 +6,7 @@ import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
 @Getter
@@ -35,5 +36,10 @@ public class Level {
 
     @NonNull public Location getSpawn() {
         return this.levelSettings.getWorldSettings().getSpawn();
+    }
+
+    public boolean isLocationInside(@NonNull Location location) {
+        if (location.getWorld() != this.world) return false;
+        return Settings.getLevelFixedEditableArea().isInside(location);
     }
 }

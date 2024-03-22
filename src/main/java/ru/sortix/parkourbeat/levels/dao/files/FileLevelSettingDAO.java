@@ -63,18 +63,16 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         try {
             WorldSettings worldSettings = settings.getWorldSettings();
             GameSettings gameSettings = settings.getGameSettings();
+            UUID levelId = gameSettings.getUniqueId();
 
-            File worldSettingsFile = getFile(gameSettings.getUniqueId(), "world_settings.yml");
-            File gameSettingFile = getFile(gameSettings.getUniqueId(), "game_settings.yml");
+            FileConfiguration gameSettingsConfig = new YamlConfiguration();
+            FileConfiguration worldSettingsConfig = new YamlConfiguration();
 
-            FileConfiguration worldSettingsConfig = YamlConfiguration.loadConfiguration(worldSettingsFile);
-            FileConfiguration gameSettingsConfig = YamlConfiguration.loadConfiguration(gameSettingFile);
+            this.gameSettingsDAO.set(gameSettings, gameSettingsConfig);
+            this.worldSettingsDAO.set(worldSettings, worldSettingsConfig);
 
-            gameSettingsDAO.set(gameSettings, gameSettingsConfig);
-            worldSettingsDAO.set(worldSettings, worldSettingsConfig);
-
-            saveConfig(gameSettingsConfig, gameSettingFile);
-            saveConfig(worldSettingsConfig, worldSettingsFile);
+            saveConfig(gameSettingsConfig, getFile(levelId, "game_settings.yml"));
+            saveConfig(worldSettingsConfig, getFile(levelId, "world_settings.yml"));
         } catch (Exception e) {
             this.logger.log(
                     Level.SEVERE,
