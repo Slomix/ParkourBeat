@@ -1,6 +1,6 @@
 package ru.sortix.parkourbeat.game;
 
-import static ru.sortix.parkourbeat.utils.LocationUtils.isValidSpawnPoint;
+import static ru.sortix.parkourbeat.world.LocationUtils.isValidSpawnPoint;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -18,12 +18,12 @@ import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.Song;
-import ru.sortix.parkourbeat.utils.TeleportUtils;
+import ru.sortix.parkourbeat.world.TeleportUtils;
 
 @Getter
 public class Game {
     @NonNull public static CompletableFuture<Game> createAsync(
-            @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId) {
+            @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId, boolean preventWrongSpawn) {
         CompletableFuture<Game> result = new CompletableFuture<>();
         LevelsManager levelsManager = plugin.get(LevelsManager.class);
         levelsManager.loadLevel(levelId, null).thenAccept(level -> {
@@ -35,13 +35,18 @@ public class Game {
                 // TODO: Проверять это на этапе загрузки настроек мира и мне кажется
                 // лучше чтобы мир отгружался при result.complete(false)
                 if (!isValidSpawnPoint(level.getSpawn(), level.getLevelSettings())) {
-                    player.sendMessage("Точка спауна установлена неверно. Невозможно начать игру.");
-                    result.complete(null);
+                    if (preventWrongSpawn) {
+                        player.sendMessage("Точка спауна установлена неверно. Невозможно начать игру");
 
-                    if (level.getWorld().getPlayers().isEmpty()) {
-                        levelsManager.unloadLevelAsync(levelId);
+                        if (level.getWorld().getPlayers().isEmpty()) {
+                            levelsManager.unloadLevelAsync(levelId);
+                        }
+
+                        result.complete(null);
+                        return;
+                    } else {
+                        player.sendMessage("Точка спауна установлена неверно");
                     }
-                    return;
                 }
 
                 Game game = new Game(plugin, player, level);

@@ -8,7 +8,7 @@ import org.bukkit.event.player.*;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.UserActivity;
 import ru.sortix.parkourbeat.levels.Level;
-import ru.sortix.parkourbeat.utils.TeleportUtils;
+import ru.sortix.parkourbeat.world.TeleportUtils;
 
 public class SpectateActivity extends UserActivity {
     public static CompletableFuture<SpectateActivity> createAsync(

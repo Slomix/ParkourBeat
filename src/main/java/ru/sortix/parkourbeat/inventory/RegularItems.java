@@ -4,7 +4,6 @@ import lombok.NonNull;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import ru.sortix.parkourbeat.item.ItemUtils;
-import ru.sortix.parkourbeat.utils.Heads;
 
 @SuppressWarnings("deprecation")
 public class RegularItems {

@@ -7,7 +7,7 @@ import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.data.Settings;
-import ru.sortix.parkourbeat.utils.TeleportUtils;
+import ru.sortix.parkourbeat.world.TeleportUtils;
 
 public class CommandSpawn extends ParkourBeatCommand {
     public CommandSpawn(@NonNull ParkourBeat plugin) {

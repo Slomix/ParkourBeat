@@ -2,13 +2,13 @@ package ru.sortix.parkourbeat.utils;
 
 import java.util.Map;
 import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.util.NumberConversions;
 import org.jetbrains.annotations.NotNull;
 
+@Deprecated // TODO Use Vector
 public class NonWorldAndYawPitchLocation extends Location {
-    public NonWorldAndYawPitchLocation(World world, double x, double y, double z) {
-        super(world, x, y, z);
+    public NonWorldAndYawPitchLocation(double x, double y, double z) {
+        super(null, x, y, z);
     }
 
     @Override
@@ -21,7 +21,6 @@ public class NonWorldAndYawPitchLocation extends Location {
     @SuppressWarnings("unused")
     @NotNull public static NonWorldAndYawPitchLocation deserialize(@NotNull Map<String, Object> args) {
         return new NonWorldAndYawPitchLocation(
-                null,
                 NumberConversions.toDouble(args.get("x")),
                 NumberConversions.toDouble(args.get("y")),
                 NumberConversions.toDouble(args.get("z")));

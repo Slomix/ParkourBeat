@@ -4,13 +4,13 @@ import lombok.NonNull;
 import org.bukkit.inventory.ItemStack;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.SongsManager;
+import ru.sortix.parkourbeat.inventory.Heads;
 import ru.sortix.parkourbeat.inventory.PaginatedMenu;
 import ru.sortix.parkourbeat.inventory.RegularItems;
 import ru.sortix.parkourbeat.inventory.event.ClickEvent;
 import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.settings.Song;
-import ru.sortix.parkourbeat.utils.Heads;
 
 public class SelectSongMenu extends PaginatedMenu<ParkourBeat, Song> {
     public static final ItemStack NOTE_HEAD =

@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -31,7 +32,7 @@ import ru.sortix.parkourbeat.activity.type.EditActivity;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
-import ru.sortix.parkourbeat.utils.TeleportUtils;
+import ru.sortix.parkourbeat.world.TeleportUtils;
 
 public final class GamesListener implements Listener {
     private final ParkourBeat plugin;
@@ -201,28 +202,28 @@ public final class GamesListener implements Listener {
 
     @EventHandler
     private void on(PlayerArmorStandManipulateEvent event) {
-        this.cancelIsCantModifyWorld(
-                event, event.getPlayer(), event.getRightClicked().getWorld());
+        this.cancelIfCantModify(
+                event, event.getPlayer(), event.getRightClicked().getLocation());
     }
 
     @EventHandler
     private void on(PlayerInteractAtEntityEvent event) {
-        this.cancelIsCantModifyWorld(
-                event, event.getPlayer(), event.getRightClicked().getWorld());
+        this.cancelIfCantModify(
+                event, event.getPlayer(), event.getRightClicked().getLocation());
     }
 
     @EventHandler
     private void on(BlockPlaceEvent event) {
-        this.cancelIsCantModifyWorld(event, event.getPlayer(), event.getBlock().getWorld());
+        this.cancelIfCantModify(event, event.getPlayer(), event.getBlock().getLocation());
     }
 
     @EventHandler
     private void on(BlockBreakEvent event) {
-        this.cancelIsCantModifyWorld(event, event.getPlayer(), event.getBlock().getWorld());
+        this.cancelIfCantModify(event, event.getPlayer(), event.getBlock().getLocation());
     }
 
-    private void cancelIsCantModifyWorld(@NonNull Cancellable event, @NonNull Player player, @NonNull World world) {
-        if (this.isPlayerCanModifyWorld(player, world)) return;
+    private void cancelIfCantModify(@NonNull Cancellable event, @NonNull Player player, @NonNull Location location) {
+        if (this.isPlayerCanModify(player, location)) return;
         event.setCancelled(true);
     }
 
@@ -230,21 +231,21 @@ public final class GamesListener implements Listener {
     private void on(PlayerInteractEvent event) {
         Block block = event.getClickedBlock();
         if (block == null) return;
-        if (this.isPlayerCanModifyWorld(event.getPlayer(), block.getWorld())) return;
+        if (this.isPlayerCanModify(event.getPlayer(), block.getLocation())) return;
         event.setUseInteractedBlock(Event.Result.DENY);
     }
 
-    private boolean isPlayerCanModifyWorld(@NonNull Player player, @NonNull World world) {
+    private boolean isPlayerCanModify(@NonNull Player player, @NonNull Location location) {
         UserActivity activity = this.activityManager.getActivity(player);
-        if (activity != null) {
-            if (world != activity.getLevel().getWorld()) return false;
-            if (!(activity instanceof EditActivity)) return false;
-            return !((EditActivity) activity).isTesting();
-        } else if (this.isLobby(world)) {
-            return player.hasPermission("parkourbeat.level.edit.lobby");
-        } else {
-            return true;
+        if (activity == null) {
+            if (this.isLobby(location.getWorld())) {
+                return player.hasPermission("parkourbeat.level.edit.lobby");
+            } else {
+                return true;
+            }
         }
+        if (!(activity instanceof EditActivity) || ((EditActivity) activity).isTesting()) return false;
+        return activity.getLevel().isLocationInside(location);
     }
 
     @EventHandler

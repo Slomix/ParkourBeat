@@ -6,7 +6,6 @@ import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
-import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.location.Waypoint;
@@ -45,12 +44,8 @@ public class WorldSettingsDAO {
             throw new IllegalArgumentException("Location \"spawn\" not found");
         }
         spawn.setWorld(world);
-        DirectionChecker.Direction direction;
-        try {
-            direction = DirectionChecker.Direction.valueOf(config.getString("direction"));
-        } catch (NullPointerException e) {
-            direction = Settings.getDirection();
-        }
+
+        DirectionChecker.Direction direction = DirectionChecker.Direction.valueOf(config.getString("direction"));
 
         //noinspection unchecked
         List<Waypoint> particleSegment = (List<Waypoint>) config.getList("waypoints");

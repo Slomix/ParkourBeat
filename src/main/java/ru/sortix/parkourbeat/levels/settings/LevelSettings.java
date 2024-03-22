@@ -37,10 +37,11 @@ public class LevelSettings {
             @NonNull String displayName,
             @NonNull UUID ownerId,
             @NonNull String ownerName) {
-        Location defaultSpawn = Settings.getDefaultWorldSpawn().clone();
+        Location defaultSpawn = Settings.getLevelDefaultSpawn().clone();
         defaultSpawn.setWorld(world);
         return new LevelSettings(
-                new WorldSettings(world, environment, defaultSpawn, Settings.getDirection(), new ArrayList<>()),
+                new WorldSettings(
+                        world, environment, defaultSpawn, Settings.getLevelDefaultDirection(), new ArrayList<>()),
                 new GameSettings(
                         uniqueId, null, uniqueNumber, ownerId, ownerName, displayName, System.currentTimeMillis()));
     }

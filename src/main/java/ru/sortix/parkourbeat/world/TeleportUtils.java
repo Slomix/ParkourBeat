@@ -1,4 +1,4 @@
-package ru.sortix.parkourbeat.utils;
+package ru.sortix.parkourbeat.world;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
@@ -8,7 +8,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import ru.sortix.parkourbeat.listeners.WorldsListener;
 
 @UtilityClass
 public class TeleportUtils {

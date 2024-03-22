@@ -1,4 +1,4 @@
-package ru.sortix.parkourbeat.levels;
+package ru.sortix.parkourbeat.world;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +27,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 import ru.sortix.parkourbeat.levels.gen.EmptyChunkGenerator;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
-import ru.sortix.parkourbeat.utils.TeleportUtils;
 import ru.sortix.parkourbeat.utils.java.CopyDirVisitor;
 import ru.sortix.parkourbeat.utils.shedule.BukkitAsyncExecutor;
 import ru.sortix.parkourbeat.utils.shedule.BukkitSyncExecutor;

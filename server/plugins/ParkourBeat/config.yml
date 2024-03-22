@@ -7,7 +7,7 @@ lobby:
     yaw: 0
     pitch: 0
 all_levels:
-  min_editable_point: "31 0 0"
+  min_editable_point: "-32 0 0"
   max_editable_point: "35000 255 15"
 default_level:
   direction: POSITIVE_X
