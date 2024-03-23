@@ -94,21 +94,26 @@ public class LevelsManager implements PluginManager {
                         result.complete(null);
                         return;
                     }
-                    this.prepareLevelWorld(world, true);
+                    try {
+                        this.prepareLevelWorld(world, true);
 
-                    int uniqueNumber = this.nextLevelNumber++;
-                    String displayName = "Уровень #" + uniqueNumber;
-                    LevelSettings levelSettings = LevelSettings.create(
+                        int uniqueNumber = this.nextLevelNumber++;
+                        String displayName = "Уровень #" + uniqueNumber;
+                        LevelSettings levelSettings = LevelSettings.create(
                             world, environment, levelId, uniqueNumber, displayName, ownerId, ownerName);
-                    Level level = new Level(levelSettings, world);
-                    level.setEditing(true);
+                        Level level = new Level(levelSettings, world);
+                        level.setEditing(true);
 
-                    this.availableLevels.add(level.getLevelSettings().getGameSettings());
-                    this.levelsSettings.addLevelSettings(levelId, levelSettings);
-                    this.loadedLevelsById.put(levelId, level);
-                    this.loadedLevelsByWorld.put(world, level);
-
-                    result.complete(level);
+                        this.availableLevels.add(level.getLevelSettings().getGameSettings());
+                        this.levelsSettings.addLevelSettings(levelId, levelSettings);
+                        this.loadedLevelsById.put(levelId, level);
+                        this.loadedLevelsByWorld.put(world, level);
+                        result.complete(level);
+                    } catch (Exception e) {
+                        this.plugin.getLogger().log(java.util.logging.Level.SEVERE,
+                            "Unable to create level", e);
+                        result.complete(null);
+                    }
                 });
         return result;
     }
