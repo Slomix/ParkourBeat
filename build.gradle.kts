@@ -48,3 +48,7 @@ tasks {
         jvmArgs("-DPaper.IgnoreJavaVersion=true")
     }
 }
+
+tasks.build {
+    dependsOn("shadowJar")
+}

@@ -5,19 +5,21 @@
 - Paper 1.12.2 or 1.16.5 (other versions haven't been tested, but probably work too)
 - [AMusic 0.12](https://spigotmc.org/resources/108835)
 
-### Plugin build:
-
-- Clone project
-- Run `./gradlew shadowRun`
-- Output jar will be `build/libs/ParkourBeat-<version>-all.jar`
+# Building, testing, deployment
 
 ### Manual testing of plugin:
 
 - Clone project
-- Run `./gradlew runTask`
-- Connect to server by the address `localhost`
+- Run `./gradlew runServer`
+- Connect to server by the address `localhost:25565`
 
-### Plugin deployment:
+### Plugin build:
+
+- Clone project
+- Run `./gradlew build`
+- Output jar will be `build/libs/ParkourBeat-<version>-all.jar`
+
+### Plugin deployment on your server:
 
 - Make sure if AMusic is installed
 - Create world "pb_lobby" using [MultiVerse](https://spigotmc.org/resources/390) or simple copy world directory and name
