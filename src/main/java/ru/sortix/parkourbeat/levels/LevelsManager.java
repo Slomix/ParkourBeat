@@ -101,6 +101,7 @@ public class LevelsManager implements PluginManager {
                         String displayName = "Уровень #" + uniqueNumber;
                         LevelSettings levelSettings = LevelSettings.create(
                             world, environment, levelId, uniqueNumber, displayName, ownerId, ownerName);
+                        world.setSpawnLocation(levelSettings.getWorldSettings().getSpawn());
                         Level level = new Level(levelSettings, world);
                         level.setEditing(true);
 

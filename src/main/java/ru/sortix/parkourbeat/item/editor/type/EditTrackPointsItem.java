@@ -80,7 +80,7 @@ public class EditTrackPointsItem extends EditorItem {
             if (left) {
                 // Обработка добавления новой точки
                 Waypoint newWaypoint =
-                        new Waypoint(interactionPoint, activity.getCurrentColor(), activity.getCurrentHeight());
+                        new Waypoint(interactionPoint, activity.getCurrentHeight(), activity.getCurrentColor());
                 if (insertWaypointInOrder(waypoints, newWaypoint, directionChecker, player, level)) {
                     isChanged = true;
                 }
@@ -106,7 +106,7 @@ public class EditTrackPointsItem extends EditorItem {
     public static void clearAllPoints(@NonNull Level level) {
         WorldSettings worldSettings = level.getLevelSettings().getWorldSettings();
         worldSettings.getWaypoints().clear();
-        worldSettings.addStartAndFinishPoints();
+        worldSettings.addStartAndFinishPoints(level.getWorld());
         worldSettings.updateBorders();
         level.getLevelSettings().updateParticleLocations();
     }

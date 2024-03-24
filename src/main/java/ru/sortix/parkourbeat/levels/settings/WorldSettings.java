@@ -1,7 +1,5 @@
 package ru.sortix.parkourbeat.levels.settings;
 
-import java.util.Comparator;
-import java.util.List;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -13,10 +11,13 @@ import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.location.Waypoint;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 @Getter
 public class WorldSettings {
-
-    private final @NonNull World world;
     private final World.Environment environment;
     private final List<Waypoint> waypoints;
     private final int minWorldHeight;
@@ -26,43 +27,37 @@ public class WorldSettings {
     private Location spawn;
 
     @Setter
-    private Vector startBorder;
+    private Vector startWaypoint;
 
     @Setter
-    private Vector finishBorder;
+    private Vector finishWaypoint;
 
     public WorldSettings(
-            @NonNull World world,
-            @NonNull World.Environment environment,
-            @NonNull Location spawn,
-            @NonNull DirectionChecker.Direction direction,
-            @NonNull List<Waypoint> waypoints) {
-        this.world = world;
+        @NonNull World.Environment environment,
+        @NonNull DirectionChecker.Direction direction, @NonNull Location spawn,
+        @NonNull List<Waypoint> waypoints
+    ) {
+
         this.environment = environment;
         this.spawn = spawn;
         this.waypoints = waypoints;
         this.direction = direction;
         this.minWorldHeight = this.findMinWorldHeight();
 
-        if (waypoints.isEmpty()) {
-            this.addStartAndFinishPoints();
+        if (waypoints.size() < 2) {
+            throw new IllegalArgumentException("Unable to find start end finish points");
         }
-
-        this.startBorder = waypoints.get(0).getLocation().toVector();
-        this.finishBorder = waypoints.get(waypoints.size() - 1).getLocation().toVector();
-
-        this.world.setSpawnLocation(spawn);
+        this.startWaypoint = waypoints.get(0).getLocation().toVector();
+        this.finishWaypoint = waypoints.get(waypoints.size() - 1).getLocation().toVector();
     }
 
-    public void addStartAndFinishPoints() {
+    public void addStartAndFinishPoints(@NonNull World world) {
         this.waypoints.add(new Waypoint(
-                Settings.getLevelDefaultStartPoint().toLocation(this.world),
-                EditTrackPointsItem.DEFAULT_PARTICLES_COLOR,
-                0));
+            Settings.getLevelDefaultSettings().getStartWaypoint().toLocation(world),
+            0, EditTrackPointsItem.DEFAULT_PARTICLES_COLOR));
         this.waypoints.add(new Waypoint(
-                Settings.getLevelDefaultFinishPoint().toLocation(this.world),
-                EditTrackPointsItem.DEFAULT_PARTICLES_COLOR,
-                0));
+            Settings.getLevelDefaultSettings().getFinishWaypoint().toLocation(world),
+            0, EditTrackPointsItem.DEFAULT_PARTICLES_COLOR));
     }
 
     private int findMinWorldHeight() {
@@ -79,7 +74,7 @@ public class WorldSettings {
 
     public void sortWaypoints(@NonNull DirectionChecker directionChecker) {
         Comparator<Waypoint> comparator =
-                Comparator.comparingDouble(waypoint -> directionChecker.getCoordinate(waypoint.getLocation()));
+            Comparator.comparingDouble(waypoint -> directionChecker.getCoordinate(waypoint.getLocation()));
 
         if (directionChecker.isNegative()) comparator = comparator.reversed();
 
@@ -95,19 +90,22 @@ public class WorldSettings {
     }
 
     public void updateBorders() {
-        this.startBorder = waypoints.get(0).getLocation().toVector();
-        this.finishBorder = waypoints.get(waypoints.size() - 1).getLocation().toVector();
+        this.startWaypoint = this.waypoints.get(0).getLocation().toVector();
+        this.finishWaypoint = this.waypoints.get(this.waypoints.size() - 1).getLocation().toVector();
     }
 
-    @NonNull public Location getStartBorderLoc() {
-        return this.startBorder.toLocation(this.world);
-    }
+    @NonNull
+    public WorldSettings setWorld(@NonNull World.Environment environment, @Nullable World world) {
+        Location spawn = this.getSpawn().clone();
+        spawn.setWorld(world);
 
-    @NonNull public Location getFinishBorderLoc() {
-        return this.finishBorder.toLocation(this.world);
-    }
+        DirectionChecker.Direction direction = this.getDirection();
 
-    public boolean isWorldEmpty() {
-        return this.world.getPlayers().isEmpty();
+        List<Waypoint> waypoints = new ArrayList<>(this.getWaypoints());
+        for (Waypoint waypoint : waypoints) {
+            waypoint.getLocation().setWorld(world);
+        }
+
+        return new WorldSettings(environment, direction, spawn, waypoints);
     }
 }

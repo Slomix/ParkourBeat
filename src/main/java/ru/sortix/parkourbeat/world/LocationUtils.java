@@ -11,7 +11,7 @@ public class LocationUtils {
 
     public static boolean isValidSpawnPoint(@NonNull Location spawnLocation, @NonNull LevelSettings levelSettings) {
         DirectionChecker directionChecker = levelSettings.getDirectionChecker();
-        Location startLocation = levelSettings.getWorldSettings().getStartBorderLoc();
+        Location startLocation = levelSettings.getStartWaypointLoc();
         Block block = spawnLocation.getBlock();
 
         return !block.getRelative(BlockFace.DOWN).isPassable()

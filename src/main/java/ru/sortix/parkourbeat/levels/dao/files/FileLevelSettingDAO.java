@@ -1,15 +1,5 @@
 package ru.sortix.parkourbeat.levels.dao.files;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import lombok.NonNull;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -22,6 +12,17 @@ import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
+
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FileLevelSettingDAO implements LevelSettingDAO {
     private final Logger logger;
@@ -50,12 +51,26 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     }
 
     @Override
-    @Nullable public LevelSettings loadLevelSettings(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
-        WorldSettings worldSettings = this.loadLevelWorldSettings(levelId);
-        if (worldSettings == null) return null;
+    @Nullable
+    public LevelSettings loadLevelSettings(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
+        World world = this.server.getWorld(getBukkitWorldName(levelId));
+        if (world == null) return null;
+
+        File settingsDir = getSettingsDirectory(levelId);
+        WorldSettings worldSettings;
+        try {
+            worldSettings = this.loadLevelWorldSettings(settingsDir);
+            worldSettings = worldSettings.setWorld(worldSettings.getEnvironment(), world);
+        } catch (Exception e) {
+            this.logger.log(Level.SEVERE,
+                "Unable to load level settings of " + levelId + " from " + settingsDir, e);
+            return null;
+        }
+
         if (gameSettings == null) gameSettings = this.loadLevelGameSettings(levelId);
         if (gameSettings == null) return null;
-        return new LevelSettings(worldSettings, gameSettings);
+
+        return new LevelSettings(world, worldSettings, gameSettings);
     }
 
     @Override
@@ -69,20 +84,21 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
             FileConfiguration worldSettingsConfig = new YamlConfiguration();
 
             this.gameSettingsDAO.set(gameSettings, gameSettingsConfig);
-            this.worldSettingsDAO.set(worldSettings, worldSettingsConfig);
+            this.worldSettingsDAO.write(worldSettings, worldSettingsConfig);
 
             saveConfig(gameSettingsConfig, getFile(levelId, "game_settings.yml"));
             saveConfig(worldSettingsConfig, getFile(levelId, "world_settings.yml"));
         } catch (Exception e) {
             this.logger.log(
-                    Level.SEVERE,
-                    "Unable to save level " + settings.getGameSettings().getUniqueId(),
-                    e);
+                Level.SEVERE,
+                "Unable to save level " + settings.getGameSettings().getUniqueId(),
+                e);
         }
     }
 
     @Override
-    @Nullable public World getBukkitWorld(@NonNull UUID levelId) {
+    @Nullable
+    public World getBukkitWorld(@NonNull UUID levelId) {
         return this.server.getWorld(this.getBukkitWorldName(levelId));
     }
 
@@ -93,7 +109,8 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         deleteDirectory(worldFolder);
     }
 
-    @NonNull private File getFile(@NonNull UUID levelId, @NonNull String fileName) throws IOException {
+    @NonNull
+    private File getFile(@NonNull UUID levelId, @NonNull String fileName) throws IOException {
         File levelSettingsDir = getSettingsDirectory(levelId);
         if (!levelSettingsDir.isDirectory()) {
             //noinspection ResultOfMethodCallIgnored
@@ -108,7 +125,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     }
 
     private void saveConfig(@NonNull FileConfiguration gameSettingsConfig, @NonNull File gameSettingFile)
-            throws IOException {
+        throws IOException {
         gameSettingsConfig.save(gameSettingFile);
     }
 
@@ -123,28 +140,19 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         directory.delete();
     }
 
-    @Nullable private WorldSettings loadLevelWorldSettings(@NonNull UUID levelId) {
-        File settingsDir = getSettingsDirectory(levelId);
-
+    @Override
+    @NonNull
+    public WorldSettings loadLevelWorldSettings(@NonNull File settingsDir) {
         File worldSettingsFile = new File(settingsDir, "world_settings.yml");
         if (!worldSettingsFile.isFile()) {
-            return null;
+            throw new IllegalArgumentException("Not a file: " + worldSettingsFile);
         }
 
-        FileConfiguration worldConfig = YamlConfiguration.loadConfiguration(worldSettingsFile);
-
-        World world = this.server.getWorld(getBukkitWorldName(levelId));
-        if (world == null) return null;
-
-        try {
-            return this.worldSettingsDAO.load(worldConfig, world);
-        } catch (Exception e) {
-            this.logger.log(Level.SEVERE, "Unable to load world_settings.yml of level " + levelId, e);
-            return null;
-        }
+        return this.worldSettingsDAO.read(YamlConfiguration.loadConfiguration(worldSettingsFile));
     }
 
-    @Nullable private GameSettings loadLevelGameSettings(@NonNull UUID levelId) {
+    @Nullable
+    private GameSettings loadLevelGameSettings(@NonNull UUID levelId) {
         File settingsDir = getSettingsDirectory(levelId);
         File gameSettingsFile = new File(settingsDir, "game_settings.yml");
         if (!gameSettingsFile.isFile()) {
@@ -155,21 +163,24 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
             FileConfiguration gameConfig = YamlConfiguration.loadConfiguration(gameSettingsFile);
             return this.gameSettingsDAO.load(levelId, gameConfig);
         } catch (Exception e) {
-            this.logger.log(Level.SEVERE, "Unable to load game_settings.yml of level " + levelId, e);
+            this.logger.log(Level.SEVERE, "Unable to load game settings from " + gameSettingsFile, e);
             return null;
         }
     }
 
-    @NonNull private File getSettingsDirectory(@NonNull UUID levelId) {
+    @NonNull
+    private File getSettingsDirectory(@NonNull UUID levelId) {
         return new File(getBukkitWorldDirectory(levelId).getAbsoluteFile(), "parkourbeat");
     }
 
-    @NonNull public File getBukkitWorldDirectory(@NonNull UUID levelId) {
+    @NonNull
+    public File getBukkitWorldDirectory(@NonNull UUID levelId) {
         return new File(this.levelsDirRelativeDir, levelId.toString());
     }
 
     @Override
-    @NonNull public WorldCreator newWorldCreator(@NonNull UUID levelId) {
+    @NonNull
+    public WorldCreator newWorldCreator(@NonNull UUID levelId) {
         return new WorldCreator(this.getBukkitWorldName(levelId));
     }
 
@@ -182,15 +193,17 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         }
     }
 
-    @NonNull private String getBukkitWorldName(@NonNull UUID levelId) {
+    @NonNull
+    private String getBukkitWorldName(@NonNull UUID levelId) {
         return this.worldsContainerPath
-                .relativize(this.getBukkitWorldDirectory(levelId).toPath())
-                .toFile()
-                .getPath()
-                .replace("\\", "/"); // fix Windows issues
+            .relativize(this.getBukkitWorldDirectory(levelId).toPath())
+            .toFile()
+            .getPath()
+            .replace("\\", "/"); // fix Windows issues
     }
 
-    @NonNull public Collection<GameSettings> loadAllAvailableLevelGameSettingsSync() {
+    @NonNull
+    public Collection<GameSettings> loadAllAvailableLevelGameSettingsSync() {
         List<GameSettings> result = new ArrayList<>();
 
         if (!this.levelsDirRelativeDir.isDirectory()) {
@@ -201,7 +214,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         File[] files = this.levelsDirRelativeDir.listFiles();
         if (files == null) {
             this.logger.warning(
-                    "Unable to get levels directory content: " + this.levelsDirRelativeDir.getAbsolutePath());
+                "Unable to get levels directory content: " + this.levelsDirRelativeDir.getAbsolutePath());
             return result;
         }
 

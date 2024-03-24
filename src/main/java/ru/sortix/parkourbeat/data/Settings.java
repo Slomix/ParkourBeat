@@ -9,12 +9,15 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.ParkourBeat;
-import ru.sortix.parkourbeat.levels.DirectionChecker;
+import ru.sortix.parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
+import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.utils.ConfigUtils;
 import ru.sortix.parkourbeat.world.Cuboid;
 import ru.sortix.parkourbeat.world.WorldsManager;
+
+import java.io.File;
 
 @UtilityClass
 public class Settings {
@@ -26,13 +29,10 @@ public class Settings {
     // level fixed options
     private @Getter Cuboid levelFixedEditableArea;
 
-    // level default options
-    private @Getter DirectionChecker.Direction levelDefaultDirection;
-    private @Getter Vector levelDefaultStartPoint;
-    private @Getter Vector levelDefaultFinishPoint;
-    private @Getter Location levelDefaultSpawn;
+    // level default settings
+    private @Getter WorldSettings levelDefaultSettings;
 
-    public void load(@NonNull ParkourBeat plugin, @NonNull WorldsManager worldsManager) {
+    public void load(@NonNull ParkourBeat plugin, @NonNull WorldsManager worldsManager, @NonNull LevelsManager levelsManager) {
         if (isLoaded) throw new IllegalStateException("Settings already loaded");
 
         plugin.saveDefaultConfig();
@@ -51,18 +51,16 @@ public class Settings {
             throw new IllegalArgumentException("Section \"all_levels\" not found");
         }
         levelFixedEditableArea = new Cuboid(
-                ConfigUtils.parsePointXYZ(allLevelsConfig.getString("min_editable_point")),
-                ConfigUtils.parsePointXYZ(allLevelsConfig.getString("max_editable_point")));
+                ConfigUtils.parseVector(allLevelsConfig.getString("min_editable_point")),
+                ConfigUtils.parseVector(allLevelsConfig.getString("max_editable_point")));
 
-        ConfigurationSection defaultLevelConfig = rootConfig.getConfigurationSection("default_level");
-        if (defaultLevelConfig == null) {
-            throw new IllegalArgumentException("Section \"default_level\" not found");
+        LevelSettingDAO levelSettingDAO = levelsManager.getLevelsSettings().getLevelSettingDAO();
+        File settingsDir = new File(new File(plugin.getDataFolder(), "pb_default_level"), "parkourbeat");
+        try {
+            levelDefaultSettings = levelSettingDAO.loadLevelWorldSettings(settingsDir);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to load default level settings from " + settingsDir, e);
         }
-
-        levelDefaultDirection = ConfigUtils.parseDirection(defaultLevelConfig, "direction");
-        levelDefaultStartPoint = ConfigUtils.parsePointXYZ(defaultLevelConfig.getString("start_point"));
-        levelDefaultFinishPoint = ConfigUtils.parsePointXYZ(defaultLevelConfig.getString("finish_point"));
-        levelDefaultSpawn = getLocation(defaultLevelConfig, "spawn_pos", null, true);
 
         isLoaded = true;
     }

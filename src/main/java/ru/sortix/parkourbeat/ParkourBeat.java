@@ -51,10 +51,11 @@ public class ParkourBeat extends JavaPlugin {
         this.registerManager(ItemsManager::new);
         this.registerManager(WorldsManager::new);
         this.registerManager(ActivityManager::new);
-        Settings.load(this, this.get(WorldsManager.class));
         this.registerManager(SongsManager::new);
         this.registerManager(LevelsManager::new);
         this.registerManager(PlayersInputManager::new);
+
+        Settings.load(this, this.get(WorldsManager.class), this.get(LevelsManager.class));
 
         this.registerCommands();
 

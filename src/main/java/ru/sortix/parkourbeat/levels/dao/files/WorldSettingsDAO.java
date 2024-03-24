@@ -1,61 +1,50 @@
 package ru.sortix.parkourbeat.levels.dao.files;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.ConfigurationSection;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import ru.sortix.parkourbeat.location.Waypoint;
+import ru.sortix.parkourbeat.utils.ConfigUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class WorldSettingsDAO {
-    public void set(@NonNull WorldSettings worldSettings, @NonNull FileConfiguration config) {
-        Location spawn = worldSettings.getSpawn().clone();
-        spawn.setWorld(null);
-        config.set("environment", worldSettings.getEnvironment().name());
-        config.set("spawn", spawn);
-        config.set("start_border", worldSettings.getStartBorder());
-        config.set("finish_border", worldSettings.getFinishBorder());
-        config.set("direction", worldSettings.getDirection().name());
-        config.set(
-                "waypoints",
-                worldSettings.getWaypoints().stream()
-                        .map(waypoint -> {
-                            Location loc = waypoint.getLocation();
-                            return new Waypoint(
-                                    new Location(null, loc.getX(), loc.getY(), loc.getZ()),
-                                    waypoint.getColor(),
-                                    waypoint.getHeight());
-                        })
-                        .collect(Collectors.toList()));
+    public void write(@NonNull WorldSettings worldSettings, @NonNull ConfigurationSection section) {
+
+        section.set("environment", ConfigUtils.serializeEnum(worldSettings.getEnvironment()));
+
+        section.set("direction", ConfigUtils.serializeEnum(worldSettings.getDirection()));
+
+        section.set("spawn", ConfigUtils.serializeLocation(false, worldSettings.getSpawn()));
+
+        section.set(
+            "waypoints",
+            worldSettings.getWaypoints().stream()
+                .map(ConfigUtils::serializeWaypoint)
+                .collect(Collectors.toList()));
     }
 
-    @NonNull public WorldSettings load(@NonNull FileConfiguration config, @NonNull World world) {
-        String environmentName = config.getString("environment");
-        if (environmentName == null) {
-            throw new IllegalArgumentException("String \"environment\" not found");
-        }
-        World.Environment environment = World.Environment.valueOf(environmentName);
+    @NonNull
+    public WorldSettings read(@NonNull ConfigurationSection section) {
 
-        Location spawn = config.getSerializable("spawn", Location.class);
-        if (spawn == null) {
-            throw new IllegalArgumentException("Location \"spawn\" not found");
-        }
-        spawn.setWorld(world);
+        World.Environment environment
+            = ConfigUtils.parseEnum(World.Environment.class, section, "environment");
 
-        DirectionChecker.Direction direction = DirectionChecker.Direction.valueOf(config.getString("direction"));
+        DirectionChecker.Direction direction
+            = ConfigUtils.parseEnum(DirectionChecker.Direction.class, section, "direction");
 
-        //noinspection unchecked
-        List<Waypoint> particleSegment = (List<Waypoint>) config.getList("waypoints");
-        if (particleSegment == null) {
-            throw new IllegalArgumentException("List of Waypoints \"waypoints\" not found");
-        }
-        for (Waypoint waypoint : particleSegment) {
-            waypoint.getLocation().setWorld(world);
+        Location spawn = ConfigUtils.parseLocation(false, section.getString("spawn"));
+
+        List<Waypoint> waypoints = new ArrayList<>();
+        for (String waypoint : section.getStringList("waypoints")) {
+            waypoints.add(ConfigUtils.parseWaypoints(waypoint));
         }
 
-        return new WorldSettings(world, environment, spawn, direction, particleSegment);
+        return new WorldSettings(environment, direction, spawn, waypoints);
     }
 }

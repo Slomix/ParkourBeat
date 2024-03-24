@@ -1,6 +1,5 @@
 package ru.sortix.parkourbeat.levels;
 
-import java.util.UUID;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +7,8 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
+
+import java.util.UUID;
 
 @Getter
 @RequiredArgsConstructor
@@ -26,11 +27,13 @@ public class Level {
         return ((Level) other).getUniqueId().equals(this.getUniqueId());
     }
 
-    @NonNull public String getDisplayName() {
+    @NonNull
+    public String getDisplayName() {
         return this.levelSettings.getGameSettings().getDisplayName();
     }
 
-    @NonNull public UUID getUniqueId() {
+    @NonNull
+    public UUID getUniqueId() {
         return this.levelSettings.getGameSettings().getUniqueId();
     }
 

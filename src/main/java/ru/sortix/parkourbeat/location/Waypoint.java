@@ -3,6 +3,7 @@ package ru.sortix.parkourbeat.location;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.Getter;
+import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -19,7 +20,7 @@ public class Waypoint implements ConfigurationSerializable {
     @Setter
     private double height;
 
-    public Waypoint(Location location, Color color, double height) {
+    public Waypoint(@NonNull Location location, double height, @NonNull Color color) {
         this.location = location;
         this.color = color;
         this.height = height;
@@ -30,15 +31,16 @@ public class Waypoint implements ConfigurationSerializable {
         Location location = (Location) map.get("location");
         Color color = (Color) map.get("color");
         double height = (double) map.get("height");
-        return new Waypoint(location, color, height);
+        return new Waypoint(location, height, color);
     }
 
     @Override
+    @NonNull
     public Map<String, Object> serialize() {
         Map<String, Object> map = new HashMap<>();
-        map.put("location", location);
-        map.put("color", color);
-        map.put("height", height);
+        map.put("location", this.location);
+        map.put("color", this.color);
+        map.put("height", this.height);
         return map;
     }
 }

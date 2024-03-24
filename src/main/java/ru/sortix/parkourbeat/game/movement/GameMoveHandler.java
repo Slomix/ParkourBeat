@@ -20,7 +20,9 @@ public class GameMoveHandler {
     private static final int NOT_SPRINT_DAMAGE_PERIOD_TICKS = 1;
 
     private final Game game;
-    private final Location startBorder, finishBorder;
+    private final Location startWaypoint;
+    private final Location finishWaypoint;
+    private final Vector startToFinishVector;
 
     @Getter
     private final MovementAccuracyChecker accuracyChecker;
@@ -30,12 +32,14 @@ public class GameMoveHandler {
     public GameMoveHandler(Game game) {
         this.game = game;
 
-        WorldSettings worldSettings = game.getLevel().getLevelSettings().getWorldSettings();
+        LevelSettings settings = game.getLevel().getLevelSettings();
+        WorldSettings worldSettings = settings.getWorldSettings();
         this.accuracyChecker = new MovementAccuracyChecker(
-                worldSettings.getWaypoints(), game.getLevel().getLevelSettings().getDirectionChecker());
+                worldSettings.getWaypoints(), settings.getDirectionChecker());
 
-        startBorder = worldSettings.getStartBorderLoc();
-        finishBorder = worldSettings.getFinishBorderLoc();
+        this.startWaypoint = settings.getStartWaypointLoc();
+        this.finishWaypoint = settings.getFinishWaypointLoc();
+        this.startToFinishVector = this.finishWaypoint.toVector().subtract(this.startWaypoint.toVector());
     }
 
     public void onPreparingState(PlayerMoveEvent event) {
@@ -44,7 +48,7 @@ public class GameMoveHandler {
 
     public void onReadyState(@NonNull Player player) {
         LevelSettings settings = game.getLevel().getLevelSettings();
-        if (settings.getDirectionChecker().isCorrectDirection(startBorder, player.getLocation())) {
+        if (settings.getDirectionChecker().isCorrectDirection(startWaypoint, player.getLocation())) {
             game.start();
             if ((task == null || task.isCancelled()) && !player.isSprinting()) {
                 startDamageTask(player, "§cНе переставайте бежать", "§cВы остановились");
@@ -54,7 +58,7 @@ public class GameMoveHandler {
 
     public void onRunningState(@NonNull Player player, @NonNull Location from, @NonNull Location to) {
         LevelSettings settings = this.game.getLevel().getLevelSettings();
-        if (settings.getDirectionChecker().isCorrectDirection(this.finishBorder, player.getLocation())) {
+        if (settings.getDirectionChecker().isCorrectDirection(this.finishWaypoint, player.getLocation())) {
             this.game.completeLevel();
             return;
         }
