@@ -86,10 +86,9 @@ public class GameMoveHandler {
     }
 
     private boolean isLookingAtFinish(Player player) {
-        Vector playerDir = player.getLocation().getDirection();
-        Vector targetDir = finishBorder.toVector().subtract(startBorder.toVector());
-        double angle = playerDir.angle(targetDir);
-        return Math.toDegrees(angle) < 100;
+        Vector playerVector = player.getLocation().getDirection();
+        double angleDegrees = Math.toDegrees(playerVector.angle(this.startToFinishVector));
+        return angleDegrees < 100;
     }
 
     private void startDamageTask(Player player, String reason, String stopReason) {
