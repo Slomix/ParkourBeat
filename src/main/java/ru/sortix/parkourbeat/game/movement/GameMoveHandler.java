@@ -35,7 +35,7 @@ public class GameMoveHandler {
         LevelSettings settings = game.getLevel().getLevelSettings();
         WorldSettings worldSettings = settings.getWorldSettings();
         this.accuracyChecker = new MovementAccuracyChecker(
-                worldSettings.getWaypoints(), settings.getDirectionChecker());
+            worldSettings.getWaypoints(), settings.getDirectionChecker());
 
         this.startWaypoint = settings.getStartWaypointLoc();
         this.finishWaypoint = settings.getFinishWaypointLoc();
@@ -122,7 +122,8 @@ public class GameMoveHandler {
         }.runTaskTimer(this.getPlugin(), 0, 2);
     }
 
-    @NonNull public Plugin getPlugin() {
+    @NonNull
+    public Plugin getPlugin() {
         return this.game.getPlugin();
     }
 }

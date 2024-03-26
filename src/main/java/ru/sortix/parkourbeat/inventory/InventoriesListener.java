@@ -1,6 +1,5 @@
 package ru.sortix.parkourbeat.inventory;
 
-import java.util.function.BiConsumer;
 import lombok.NonNull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,13 +13,15 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import ru.sortix.parkourbeat.ParkourBeat;
 
+import java.util.function.BiConsumer;
+
 public class InventoriesListener implements Listener {
     private static final BiConsumer<PluginInventory<?>, InventoryClickEvent> handlerInventoryClickEvent =
-            PluginInventory::handle;
+        PluginInventory::handle;
     private static final BiConsumer<PluginInventory<?>, InventoryDragEvent> handlerInventoryDragEvent =
-            PluginInventory::handle;
+        PluginInventory::handle;
     private static final BiConsumer<PluginInventory<?>, InventoryCloseEvent> handlerInventoryCloseEvent =
-            PluginInventory::handle;
+        PluginInventory::handle;
 
     private final Plugin plugin;
 
@@ -44,7 +45,7 @@ public class InventoriesListener implements Listener {
     }
 
     private <E extends InventoryEvent> void handleEvent(
-            @NonNull E event, @NonNull BiConsumer<PluginInventory<?>, E> handler) {
+        @NonNull E event, @NonNull BiConsumer<PluginInventory<?>, E> handler) {
         Inventory inventory = event.getInventory();
         if (!(inventory.getHolder() instanceof PluginInventory<?>)) return;
         handler.accept((PluginInventory<?>) inventory.getHolder(), event);

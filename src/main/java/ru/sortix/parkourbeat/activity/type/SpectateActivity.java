@@ -1,23 +1,27 @@
 package ru.sortix.parkourbeat.activity.type;
 
-import java.util.concurrent.CompletableFuture;
 import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.UserActivity;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
-public class SpectateActivity extends UserActivity {
-    public static CompletableFuture<SpectateActivity> createAsync(
-            @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
-        return CompletableFuture.completedFuture(new SpectateActivity(plugin, player, level));
-    }
+import java.util.concurrent.CompletableFuture;
 
+public class SpectateActivity extends UserActivity {
     private SpectateActivity(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         super(plugin, player, level);
+    }
+
+    public static CompletableFuture<SpectateActivity> createAsync(
+        @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
+        return CompletableFuture.completedFuture(new SpectateActivity(plugin, player, level));
     }
 
     @Override
@@ -27,19 +31,24 @@ public class SpectateActivity extends UserActivity {
     }
 
     @Override
-    public void on(@NonNull PlayerResourcePackStatusEvent event) {}
+    public void on(@NonNull PlayerResourcePackStatusEvent event) {
+    }
 
     @Override
-    public void on(@NonNull PlayerMoveEvent event) {}
+    public void on(@NonNull PlayerMoveEvent event) {
+    }
 
     @Override
-    public void onTick() {}
+    public void onTick() {
+    }
 
     @Override
-    public void on(@NonNull PlayerToggleSprintEvent event) {}
+    public void on(@NonNull PlayerToggleSprintEvent event) {
+    }
 
     @Override
-    public void on(@NonNull PlayerToggleSneakEvent event) {}
+    public void on(@NonNull PlayerToggleSneakEvent event) {
+    }
 
     @Override
     public int getFallHeight() {

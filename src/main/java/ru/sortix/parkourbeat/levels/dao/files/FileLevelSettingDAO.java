@@ -50,6 +50,17 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         this.worldSettingsDAO = new WorldSettingsDAO();
     }
 
+    private static void deleteDirectory(@NonNull File directory) {
+        File[] allContents = directory.listFiles();
+        if (allContents != null) {
+            for (File file : allContents) {
+                deleteDirectory(file);
+            }
+        }
+        //noinspection ResultOfMethodCallIgnored
+        directory.delete();
+    }
+
     @Override
     @Nullable
     public LevelSettings loadLevelSettings(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
@@ -127,17 +138,6 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     private void saveConfig(@NonNull FileConfiguration gameSettingsConfig, @NonNull File gameSettingFile)
         throws IOException {
         gameSettingsConfig.save(gameSettingFile);
-    }
-
-    private static void deleteDirectory(@NonNull File directory) {
-        File[] allContents = directory.listFiles();
-        if (allContents != null) {
-            for (File file : allContents) {
-                deleteDirectory(file);
-            }
-        }
-        //noinspection ResultOfMethodCallIgnored
-        directory.delete();
     }
 
     @Override

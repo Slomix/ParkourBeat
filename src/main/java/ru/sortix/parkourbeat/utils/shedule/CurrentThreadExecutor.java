@@ -1,7 +1,8 @@
 package ru.sortix.parkourbeat.utils.shedule;
 
-import java.util.concurrent.Executor;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.Executor;
 
 public class CurrentThreadExecutor implements Executor {
     @Override

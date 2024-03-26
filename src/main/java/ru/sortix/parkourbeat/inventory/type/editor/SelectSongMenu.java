@@ -14,7 +14,7 @@ import ru.sortix.parkourbeat.levels.settings.Song;
 
 public class SelectSongMenu extends PaginatedMenu<ParkourBeat, Song> {
     public static final ItemStack NOTE_HEAD =
-            Heads.getHeadByHash("f22e40b4bfbcc0433044d86d67685f0567025904271d0a74996afbe3f9be2c0f");
+        Heads.getHeadByHash("f22e40b4bfbcc0433044d86d67685f0567025904271d0a74996afbe3f9be2c0f");
 
     private final Level level;
 
@@ -34,8 +34,8 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, Song> {
     protected void onPageDisplayed() {
         this.setNextPageItem(6, 3);
         this.setItem(6, 5, RegularItems.closeInventory(), clickEvent -> clickEvent
-                .getPlayer()
-                .closeInventory());
+            .getPlayer()
+            .closeInventory());
         this.setPreviousPageItem(6, 7);
     }
 

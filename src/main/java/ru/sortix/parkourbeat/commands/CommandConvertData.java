@@ -48,7 +48,7 @@ public class CommandConvertData {
         levelsManager.upgradeDataAsync(gameSettings.getUniqueId(), null).thenAccept(successResult -> {
             if (Boolean.TRUE.equals(successResult)) {
                 sender.sendMessage(
-                        String.format(Messages.SUCCESSFUL_LEVEL_DATA_CONVERSION, gameSettings.getDisplayName()));
+                    String.format(Messages.SUCCESSFUL_LEVEL_DATA_CONVERSION, gameSettings.getDisplayName()));
             } else {
                 sender.sendMessage(String.format(Messages.FAILED_LEVEL_DATA_CONVERSION, gameSettings.getDisplayName()));
             }
@@ -65,16 +65,16 @@ public class CommandConvertData {
 
         for (GameSettings settings : allSettings) {
             futures.add(
-                    levelsManager.upgradeDataAsync(settings.getUniqueId(), null).thenAccept(successResult -> {
-                        if (Boolean.TRUE.equals(successResult)) {
-                            success.getAndIncrement();
-                        } else {
-                            failed.getAndIncrement();
-                        }
-                    }));
+                levelsManager.upgradeDataAsync(settings.getUniqueId(), null).thenAccept(successResult -> {
+                    if (Boolean.TRUE.equals(successResult)) {
+                        success.getAndIncrement();
+                    } else {
+                        failed.getAndIncrement();
+                    }
+                }));
         }
         FutureUtils.mergeOneByOne(futures)
-                .thenAccept(unused -> sender.sendMessage(
-                        String.format(Messages.GLOBAL_DATA_CONVERSION_REPORT, success.get(), failed.get())));
+            .thenAccept(unused -> sender.sendMessage(
+                String.format(Messages.GLOBAL_DATA_CONVERSION_REPORT, success.get(), failed.get())));
     }
 }

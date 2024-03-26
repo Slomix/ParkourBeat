@@ -1,5 +1,12 @@
 package ru.sortix.parkourbeat.data;
 
+import lombok.NonNull;
+import me.bomb.amusic.AMusic;
+import org.bukkit.plugin.java.JavaPlugin;
+import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.levels.settings.Song;
+import ru.sortix.parkourbeat.lifecycle.PluginManager;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,12 +16,6 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-import lombok.NonNull;
-import me.bomb.amusic.AMusic;
-import org.bukkit.plugin.java.JavaPlugin;
-import ru.sortix.parkourbeat.ParkourBeat;
-import ru.sortix.parkourbeat.levels.settings.Song;
-import ru.sortix.parkourbeat.lifecycle.PluginManager;
 
 public class SongsManager implements PluginManager {
     private final Logger logger;
@@ -45,10 +46,12 @@ public class SongsManager implements PluginManager {
         }
     }
 
-    @NonNull public Collection<Song> getAllSongs() {
+    @NonNull
+    public Collection<Song> getAllSongs() {
         return this.allSongs.values();
     }
 
     @Override
-    public void disable() {}
+    public void disable() {
+    }
 }

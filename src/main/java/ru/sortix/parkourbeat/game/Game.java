@@ -1,9 +1,5 @@
 package ru.sortix.parkourbeat.game;
 
-import static ru.sortix.parkourbeat.world.LocationUtils.isValidSpawnPoint;
-
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import lombok.Getter;
 import lombok.NonNull;
 import me.bomb.amusic.AMusic;
@@ -20,10 +16,28 @@ import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.Song;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
+import static ru.sortix.parkourbeat.world.LocationUtils.isValidSpawnPoint;
+
 @Getter
 public class Game {
-    @NonNull public static CompletableFuture<Game> createAsync(
-            @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId, boolean preventWrongSpawn) {
+    private final @NonNull LevelsManager levelsManager;
+    private final @NonNull Player player;
+    private final @NonNull Level level;
+    private final @NonNull GameMoveHandler gameMoveHandler;
+    private State currentState = State.PREPARING;
+    private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
+        this.levelsManager = plugin.get(LevelsManager.class);
+        this.player = player;
+        this.level = level;
+        this.gameMoveHandler = new GameMoveHandler(this);
+    }
+
+    @NonNull
+    public static CompletableFuture<Game> createAsync(
+        @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId, boolean preventWrongSpawn) {
         CompletableFuture<Game> result = new CompletableFuture<>();
         LevelsManager levelsManager = plugin.get(LevelsManager.class);
         levelsManager.loadLevel(levelId, null).thenAccept(level -> {
@@ -72,7 +86,7 @@ public class Game {
 
             if (!particleController.isLoaded()) {
                 particleController.loadParticleLocations(
-                        settings.getWorldSettings().getWaypoints());
+                    settings.getWorldSettings().getWaypoints());
             }
 
             player.setGameMode(GameMode.ADVENTURE);
@@ -85,8 +99,8 @@ public class Game {
                 if (!requiredPlaylist.equals(currentPlayList)) {
                     ready = false;
                     plugin.getServer()
-                            .getScheduler()
-                            .runTaskLater(plugin, () -> game.setPlaylist(requiredPlaylist), 20L);
+                        .getScheduler()
+                        .runTaskLater(plugin, () -> game.setPlaylist(requiredPlaylist), 20L);
                 }
             }
             if (ready) {
@@ -95,30 +109,17 @@ public class Game {
         });
     }
 
-    private final @NonNull LevelsManager levelsManager;
-    private final @NonNull Player player;
-    private final @NonNull Level level;
-    private final @NonNull GameMoveHandler gameMoveHandler;
-    private State currentState = State.PREPARING;
-
-    private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
-        this.levelsManager = plugin.get(LevelsManager.class);
-        this.player = player;
-        this.level = level;
-        this.gameMoveHandler = new GameMoveHandler(this);
-    }
-
     private void setPlaylist(@NonNull String requiredPlaylist) {
         try {
             AMusic.loadPack(this.player, requiredPlaylist, false);
         } catch (Throwable t) {
             this.levelsManager
-                    .getPlugin()
-                    .getLogger()
-                    .log(
-                            java.util.logging.Level.SEVERE,
-                            "Не удалось загрузить плейлист " + requiredPlaylist + " игроку " + this.player.getName(),
-                            t);
+                .getPlugin()
+                .getLogger()
+                .log(
+                    java.util.logging.Level.SEVERE,
+                    "Не удалось загрузить плейлист " + requiredPlaylist + " игроку " + this.player.getName(),
+                    t);
             this.player.sendMessage("Не удалось создать ресурспак с указанной песней");
             this.currentState = State.READY;
         }
@@ -166,33 +167,34 @@ public class Game {
     private void stopGame(@NonNull String title, boolean levelComplete) {
         Plugin plugin = this.getPlugin();
         TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn())
-                .thenAccept(success -> {
-                    if (!success) return;
-                    if (this.currentState != State.RUNNING) return;
+            .thenAccept(success -> {
+                if (!success) return;
+                if (this.currentState != State.RUNNING) return;
 
-                    this.player.setHealth(20);
-                    this.player.setGameMode(GameMode.ADVENTURE);
-                    this.player.sendTitle(title, null, 10, 10, 10);
+                this.player.setHealth(20);
+                this.player.setGameMode(GameMode.ADVENTURE);
+                this.player.sendTitle(title, null, 10, 10, 10);
 
-                    AMusic.stopSound(this.player);
-                    if (levelComplete) {
-                        this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
-                        this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 0.5f, 1);
-                    } else {
-                        this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
-                    }
-                    this.level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(this.player);
-                    this.gameMoveHandler.getAccuracyChecker().reset();
+                AMusic.stopSound(this.player);
+                if (levelComplete) {
+                    this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
+                    this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 0.5f, 1);
+                } else {
+                    this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
+                }
+                this.level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(this.player);
+                this.gameMoveHandler.getAccuracyChecker().reset();
 
-                    for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
-                        this.player.showPlayer(plugin, onlinePlayer);
-                    }
+                for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+                    this.player.showPlayer(plugin, onlinePlayer);
+                }
 
-                    this.currentState = State.READY;
-                });
+                this.currentState = State.READY;
+            });
     }
 
-    @NonNull public ParkourBeat getPlugin() {
+    @NonNull
+    public ParkourBeat getPlugin() {
         return this.levelsManager.getPlugin();
     }
 

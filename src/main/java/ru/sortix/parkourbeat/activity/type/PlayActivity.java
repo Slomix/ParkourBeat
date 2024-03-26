@@ -1,11 +1,12 @@
 package ru.sortix.parkourbeat.activity.type;
 
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import lombok.NonNull;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerResourcePackStatusEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.potion.PotionEffect;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
@@ -15,13 +16,25 @@ import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
 import ru.sortix.parkourbeat.item.ItemsManager;
 import ru.sortix.parkourbeat.item.editor.type.TestGameItem;
 
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+
 public class PlayActivity extends UserActivity {
-    @NonNull public static CompletableFuture<PlayActivity> createAsync(
-            @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId, boolean isEditorGame) {
+    private final @NonNull Game game;
+    private final boolean isEditorGame;
+    private PlayActivity(@NonNull Game game, boolean isEditorGame) {
+        super(game.getPlugin(), game.getPlayer(), game.getLevel());
+        this.game = game;
+        this.isEditorGame = isEditorGame;
+    }
+
+    @NonNull
+    public static CompletableFuture<PlayActivity> createAsync(
+        @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId, boolean isEditorGame) {
         UserActivity activity = plugin.get(ActivityManager.class).getActivity(player);
         if (activity instanceof PlayActivity
-                && activity.getLevel().getUniqueId().equals(levelId)
-                && ((PlayActivity) activity).isEditorGame == isEditorGame) {
+            && activity.getLevel().getUniqueId().equals(levelId)
+            && ((PlayActivity) activity).isEditorGame == isEditorGame) {
             return CompletableFuture.completedFuture((PlayActivity) activity);
         }
 
@@ -34,15 +47,6 @@ public class PlayActivity extends UserActivity {
             result.complete(new PlayActivity(game, isEditorGame));
         });
         return result;
-    }
-
-    private final @NonNull Game game;
-    private final boolean isEditorGame;
-
-    private PlayActivity(@NonNull Game game, boolean isEditorGame) {
-        super(game.getPlugin(), game.getPlayer(), game.getLevel());
-        this.game = game;
-        this.isEditorGame = isEditorGame;
     }
 
     @Override
@@ -66,20 +70,20 @@ public class PlayActivity extends UserActivity {
         switch (event.getStatus()) {
             case ACCEPTED: {
                 this.player.sendMessage(
-                        "Началась загрузка мелодии. " + " После окончания загрузки вы сможете начать игру");
+                    "Началась загрузка мелодии. " + " После окончания загрузки вы сможете начать игру");
                 return;
             }
             case FAILED_DOWNLOAD: {
                 this.player.sendMessage("Ошибка загрузки мелодии."
-                        + " Вам доступна игра без ресурс-пака, "
-                        + "однако мы рекомендуем всё же установить пакет ресурсов для более комфортной игры");
+                    + " Вам доступна игра без ресурс-пака, "
+                    + "однако мы рекомендуем всё же установить пакет ресурсов для более комфортной игры");
                 this.game.setCurrentState(Game.State.READY);
                 return;
             }
             case DECLINED: {
                 this.player.sendMessage("Вы отказались от загрузки мелодии. "
-                        + "Если вы захотите вновь загрузить ресурс-пак - убедитесь, "
-                        + "что в настройках сервера у вас разрешено принятие пакетов ресурсов");
+                    + "Если вы захотите вновь загрузить ресурс-пак - убедитесь, "
+                    + "что в настройках сервера у вас разрешено принятие пакетов ресурсов");
                 this.game.setCurrentState(Game.State.READY);
                 return;
             }
@@ -108,7 +112,8 @@ public class PlayActivity extends UserActivity {
     }
 
     @Override
-    public void onTick() {}
+    public void onTick() {
+    }
 
     @Override
     public void on(@NonNull PlayerToggleSprintEvent event) {

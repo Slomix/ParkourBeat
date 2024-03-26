@@ -1,11 +1,6 @@
 package ru.sortix.parkourbeat.levels;
 
 import com.google.common.collect.Lists;
-import java.io.File;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
-import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.GameRule;
@@ -25,6 +20,12 @@ import ru.sortix.parkourbeat.lifecycle.PluginManager;
 import ru.sortix.parkourbeat.utils.StringUtils;
 import ru.sortix.parkourbeat.utils.java.ClassUtils;
 import ru.sortix.parkourbeat.world.WorldsManager;
+
+import javax.annotation.Nullable;
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 public class LevelsManager implements PluginManager {
     @Getter
@@ -48,7 +49,7 @@ public class LevelsManager implements PluginManager {
         this.defaultLevelDirectory = new File(this.plugin.getDataFolder(), "pb_default_level");
         if (!this.defaultLevelDirectory.isDirectory()) {
             throw new IllegalStateException(
-                    "Default level directory not found: " + this.defaultLevelDirectory.getAbsolutePath());
+                "Default level directory not found: " + this.defaultLevelDirectory.getAbsolutePath());
         }
         this.levelsSettings = new LevelSettingsManager(new FileLevelSettingDAO(this));
         this.availableLevels = new AvailableLevelsCollection(this.plugin.getLogger());
@@ -57,7 +58,7 @@ public class LevelsManager implements PluginManager {
 
     private void loadAvailableLevelNames() {
         for (GameSettings gameSettings :
-                this.levelsSettings.getLevelSettingDAO().loadAllAvailableLevelGameSettingsSync()) {
+            this.levelsSettings.getLevelSettingDAO().loadAllAvailableLevelGameSettingsSync()) {
             this.availableLevels.add(gameSettings);
         }
         for (GameSettings gameSettings : this.availableLevels) {
@@ -67,12 +68,14 @@ public class LevelsManager implements PluginManager {
         }
     }
 
-    @NonNull public Collection<GameSettings> getAvailableLevelsSettings() {
+    @NonNull
+    public Collection<GameSettings> getAvailableLevelsSettings() {
         return Collections.unmodifiableCollection(Lists.newArrayList(this.availableLevels.iterator()));
     }
 
-    @NonNull public CompletableFuture<Level> createLevel(
-            @NonNull World.Environment environment, @NonNull UUID ownerId, @NonNull String ownerName) {
+    @NonNull
+    public CompletableFuture<Level> createLevel(
+        @NonNull World.Environment environment, @NonNull UUID ownerId, @NonNull String ownerName) {
         CompletableFuture<Level> result = new CompletableFuture<>();
         UUID levelId = this.getNextLevelId();
         WorldCreator worldCreator = this.levelsSettings.getLevelSettingDAO().newWorldCreator(levelId);
@@ -81,45 +84,46 @@ public class LevelsManager implements PluginManager {
 
         if (!this.defaultLevelDirectory.isDirectory()) {
             this.plugin
-                    .getLogger()
-                    .severe("Default level directory not found: " + this.defaultLevelDirectory.getAbsolutePath());
+                .getLogger()
+                .severe("Default level directory not found: " + this.defaultLevelDirectory.getAbsolutePath());
             result.complete(null);
             return result;
         }
 
         this.worldsManager
-                .createWorldFromCustomDirectory(worldCreator, this.defaultLevelDirectory)
-                .thenAccept(world -> {
-                    if (world == null) {
-                        result.complete(null);
-                        return;
-                    }
-                    try {
-                        this.prepareLevelWorld(world, true);
+            .createWorldFromCustomDirectory(worldCreator, this.defaultLevelDirectory)
+            .thenAccept(world -> {
+                if (world == null) {
+                    result.complete(null);
+                    return;
+                }
+                try {
+                    this.prepareLevelWorld(world, true);
 
-                        int uniqueNumber = this.nextLevelNumber++;
-                        String displayName = "Уровень #" + uniqueNumber;
-                        LevelSettings levelSettings = LevelSettings.create(
-                            world, environment, levelId, uniqueNumber, displayName, ownerId, ownerName);
-                        world.setSpawnLocation(levelSettings.getWorldSettings().getSpawn());
-                        Level level = new Level(levelSettings, world);
-                        level.setEditing(true);
+                    int uniqueNumber = this.nextLevelNumber++;
+                    String displayName = "Уровень #" + uniqueNumber;
+                    LevelSettings levelSettings = LevelSettings.create(
+                        world, environment, levelId, uniqueNumber, displayName, ownerId, ownerName);
+                    world.setSpawnLocation(levelSettings.getWorldSettings().getSpawn());
+                    Level level = new Level(levelSettings, world);
+                    level.setEditing(true);
 
-                        this.availableLevels.add(level.getLevelSettings().getGameSettings());
-                        this.levelsSettings.addLevelSettings(levelId, levelSettings);
-                        this.loadedLevelsById.put(levelId, level);
-                        this.loadedLevelsByWorld.put(world, level);
-                        result.complete(level);
-                    } catch (Exception e) {
-                        this.plugin.getLogger().log(java.util.logging.Level.SEVERE,
-                            "Unable to create level", e);
-                        result.complete(null);
-                    }
-                });
+                    this.availableLevels.add(level.getLevelSettings().getGameSettings());
+                    this.levelsSettings.addLevelSettings(levelId, levelSettings);
+                    this.loadedLevelsById.put(levelId, level);
+                    this.loadedLevelsByWorld.put(world, level);
+                    result.complete(level);
+                } catch (Exception e) {
+                    this.plugin.getLogger().log(java.util.logging.Level.SEVERE,
+                        "Unable to create level", e);
+                    result.complete(null);
+                }
+            });
         return result;
     }
 
-    @NonNull private UUID getNextLevelId() {
+    @NonNull
+    private UUID getNextLevelId() {
         UUID result;
         do {
             result = UUID.randomUUID();
@@ -127,7 +131,8 @@ public class LevelsManager implements PluginManager {
         return result;
     }
 
-    @NonNull public CompletableFuture<Level> loadLevel(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
+    @NonNull
+    public CompletableFuture<Level> loadLevel(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
         CompletableFuture<Level> result = new CompletableFuture<>();
 
         Level level = getLoadedLevel(levelId);
@@ -140,32 +145,33 @@ public class LevelsManager implements PluginManager {
         worldCreator.generator(this.worldsManager.getEmptyGenerator());
         worldCreator.environment(World.Environment.NORMAL); // TODO Load from settings
         this.worldsManager
-                .createWorldFromDefaultContainer(worldCreator, this.worldsManager.getSyncExecutor())
-                .thenAccept(world -> {
-                    if (world == null) {
-                        result.complete(null);
-                        return;
-                    }
-                    try {
-                        this.prepareLevelWorld(world, false);
+            .createWorldFromDefaultContainer(worldCreator, this.worldsManager.getSyncExecutor())
+            .thenAccept(world -> {
+                if (world == null) {
+                    result.complete(null);
+                    return;
+                }
+                try {
+                    this.prepareLevelWorld(world, false);
 
-                        LevelSettings levelSettings = this.levelsSettings.loadLevelSettings(levelId, gameSettings);
-                        Level loadedLevel = new Level(levelSettings, world);
-                        this.loadedLevelsById.put(levelId, loadedLevel);
-                        this.loadedLevelsByWorld.put(world, loadedLevel);
+                    LevelSettings levelSettings = this.levelsSettings.loadLevelSettings(levelId, gameSettings);
+                    Level loadedLevel = new Level(levelSettings, world);
+                    this.loadedLevelsById.put(levelId, loadedLevel);
+                    this.loadedLevelsByWorld.put(world, loadedLevel);
 
-                        result.complete(loadedLevel);
-                    } catch (Exception e) {
-                        this.plugin
-                                .getLogger()
-                                .log(java.util.logging.Level.SEVERE, "Не удалось загрузить уровень " + levelId, e);
-                        result.complete(null);
-                    }
-                });
+                    result.complete(loadedLevel);
+                } catch (Exception e) {
+                    this.plugin
+                        .getLogger()
+                        .log(java.util.logging.Level.SEVERE, "Не удалось загрузить уровень " + levelId, e);
+                    result.complete(null);
+                }
+            });
         return result;
     }
 
-    @NonNull public CompletableFuture<Boolean> deleteLevelAsync(@NonNull GameSettings settings) {
+    @NonNull
+    public CompletableFuture<Boolean> deleteLevelAsync(@NonNull GameSettings settings) {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         UUID levelId = settings.getUniqueId();
         this.unloadLevelAsync(levelId).thenAccept(success -> {
@@ -181,7 +187,8 @@ public class LevelsManager implements PluginManager {
         return result;
     }
 
-    @NonNull public CompletableFuture<Boolean> unloadLevelAsync(@NonNull UUID levelId) {
+    @NonNull
+    public CompletableFuture<Boolean> unloadLevelAsync(@NonNull UUID levelId) {
         if (!this.loadedLevelsById.containsKey(levelId)) return CompletableFuture.completedFuture(true);
 
         CompletableFuture<Boolean> result = new CompletableFuture<>();
@@ -194,9 +201,9 @@ public class LevelsManager implements PluginManager {
         } else {
             worldUnloading = new CompletableFuture<>();
             this.plugin
-                    .get(WorldsManager.class)
-                    .unloadBukkitWorld(world, false, Settings.getLobbySpawn())
-                    .thenAccept(worldUnloading::complete);
+                .get(WorldsManager.class)
+                .unloadBukkitWorld(world, false, Settings.getLobbySpawn())
+                .thenAccept(worldUnloading::complete);
         }
 
         worldUnloading.thenAccept(success -> {
@@ -213,22 +220,23 @@ public class LevelsManager implements PluginManager {
         return result;
     }
 
-    @NonNull public CompletableFuture<Boolean> upgradeDataAsync(
-            @NonNull UUID levelId, @Nullable Consumer<LevelSettings> updater) {
+    @NonNull
+    public CompletableFuture<Boolean> upgradeDataAsync(
+        @NonNull UUID levelId, @Nullable Consumer<LevelSettings> updater) {
         boolean unload = this.getLoadedLevel(levelId) == null;
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         this.loadLevel(levelId, null).thenAccept(level -> {
             LevelSettings settings;
             try {
                 settings = this.levelsSettings.loadLevelSettings(
-                        levelId, level.getLevelSettings().getGameSettings());
+                    levelId, level.getLevelSettings().getGameSettings());
             } catch (Exception e) {
                 this.plugin
-                        .getLogger()
-                        .log(
-                                java.util.logging.Level.SEVERE,
-                                "Не удалось загрузить данные уровня " + levelId + " для конвертации",
-                                e);
+                    .getLogger()
+                    .log(
+                        java.util.logging.Level.SEVERE,
+                        "Не удалось загрузить данные уровня " + levelId + " для конвертации",
+                        e);
                 result.complete(false);
                 return;
             }
@@ -238,11 +246,11 @@ public class LevelsManager implements PluginManager {
                     updater.accept(settings);
                 } catch (Exception e) {
                     this.plugin
-                            .getLogger()
-                            .log(
-                                    java.util.logging.Level.SEVERE,
-                                    "Не удалось произвести конвертацию уровня " + levelId,
-                                    e);
+                        .getLogger()
+                        .log(
+                            java.util.logging.Level.SEVERE,
+                            "Не удалось произвести конвертацию уровня " + levelId,
+                            e);
                     success = false;
                 }
             }
@@ -250,11 +258,11 @@ public class LevelsManager implements PluginManager {
                 this.levelsSettings.saveWorldSettings(levelId);
             } catch (Exception e) {
                 this.plugin
-                        .getLogger()
-                        .log(
-                                java.util.logging.Level.SEVERE,
-                                "Не удалось сохранить данные уровня " + levelId + " после конвертации",
-                                e);
+                    .getLogger()
+                    .log(
+                        java.util.logging.Level.SEVERE,
+                        "Не удалось сохранить данные уровня " + levelId + " после конвертации",
+                        e);
                 success = false;
             }
             if (unload) {
@@ -273,23 +281,26 @@ public class LevelsManager implements PluginManager {
             level.getWorld().save();
         } catch (Exception e) {
             this.plugin
-                    .getLogger()
-                    .log(
-                            java.util.logging.Level.SEVERE,
-                            "Unable to save world " + level.getWorld().getName(),
-                            e);
+                .getLogger()
+                .log(
+                    java.util.logging.Level.SEVERE,
+                    "Unable to save world " + level.getWorld().getName(),
+                    e);
         }
     }
 
-    @Nullable public Level getLoadedLevel(@NonNull UUID levelId) {
+    @Nullable
+    public Level getLoadedLevel(@NonNull UUID levelId) {
         return this.loadedLevelsById.get(levelId);
     }
 
-    @Nullable public Level getLoadedLevel(@NonNull World world) {
+    @Nullable
+    public Level getLoadedLevel(@NonNull World world) {
         return this.loadedLevelsByWorld.get(world);
     }
 
-    @NonNull public List<String> getUniqueLevelNames(@NonNull String levelNamePrefix, @Nullable CommandSender owner, boolean bypassForAdmins) {
+    @NonNull
+    public List<String> getUniqueLevelNames(@NonNull String levelNamePrefix, @Nullable CommandSender owner, boolean bypassForAdmins) {
         levelNamePrefix = levelNamePrefix.toLowerCase();
 
         List<String> result = new ArrayList<>();
@@ -388,7 +399,8 @@ public class LevelsManager implements PluginManager {
         world.setGameRule((GameRule<Integer>) byName, newValue);
     }
 
-    @Nullable public GameSettings findLevel(@NonNull String levelUniqueNameOrIdOrNumber) {
+    @Nullable
+    public GameSettings findLevel(@NonNull String levelUniqueNameOrIdOrNumber) {
         UUID levelId = StringUtils.parseUUID(levelUniqueNameOrIdOrNumber);
         if (levelId != null) {
             return this.availableLevels.byUniqueId(levelId);

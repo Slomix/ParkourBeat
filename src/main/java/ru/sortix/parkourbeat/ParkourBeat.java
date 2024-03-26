@@ -32,11 +32,11 @@ import java.util.function.Function;
 import java.util.logging.Level;
 
 public class ParkourBeat extends JavaPlugin {
+    private final Map<Class<?>, PluginManager> managers = new LinkedHashMap<>();
+
     public static JavaPlugin getPlugin() {
         return JavaPlugin.getPlugin(ParkourBeat.class);
     }
-
-    private final Map<Class<?>, PluginManager> managers = new LinkedHashMap<>();
 
     @Override
     public void onEnable() {

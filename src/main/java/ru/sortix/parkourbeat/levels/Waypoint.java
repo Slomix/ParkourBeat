@@ -8,9 +8,9 @@ import org.bukkit.Location;
 
 @Getter
 public class Waypoint {
+    private final Color color;
     @Setter
     private Location location;
-    private final Color color;
     @Setter
     private double height;
 

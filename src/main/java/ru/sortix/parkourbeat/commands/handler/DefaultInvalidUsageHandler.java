@@ -12,9 +12,9 @@ public class DefaultInvalidUsageHandler implements InvalidUsageHandler<CommandSe
 
     @Override
     public void handle(
-            Invocation<CommandSender> invocation,
-            InvalidUsage<CommandSender> commandSenderInvalidUsage,
-            ResultHandlerChain<CommandSender> resultHandlerChain) {
+        Invocation<CommandSender> invocation,
+        InvalidUsage<CommandSender> commandSenderInvalidUsage,
+        ResultHandlerChain<CommandSender> resultHandlerChain) {
         CommandSender sender = invocation.sender();
         Schematic schematic = commandSenderInvalidUsage.getSchematic();
 

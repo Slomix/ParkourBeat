@@ -3,7 +3,7 @@ playlists:
     size: 813177
     name: music3.zip
     sounds:
-    - ParkourBeat - Tutorial
+      - ParkourBeat - Tutorial
     length:
-    - 66
+      - 66
     sha1: 602BEA384F224D118EC6422D0728E3E154703DE6

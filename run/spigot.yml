@@ -35,7 +35,7 @@ settings:
 advancements:
   disable-saving: false
   disabled:
-  - minecraft:story/disabled
+    - minecraft:story/disabled
 players:
   disable-saving: false
 commands:
@@ -44,12 +44,12 @@ commands:
   tab-complete: 0
   send-namespaced: true
   replace-commands:
-  - setblock
-  - summon
-  - testforblock
-  - tellraw
+    - setblock
+    - summon
+    - testforblock
+    - tellraw
   spam-exclusions:
-  - /skill
+    - /skill
 messages:
   whitelist: You are not whitelisted on this server!
   unknown-command: Unknown command. Type "/help" for help.
@@ -59,7 +59,7 @@ messages:
   restart: Server is restarting
 stats:
   disable-saving: false
-  forced-stats: {}
+  forced-stats: { }
 world-settings:
   default:
     verbose: false

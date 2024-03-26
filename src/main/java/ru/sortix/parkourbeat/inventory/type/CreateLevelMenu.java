@@ -21,30 +21,30 @@ public class CreateLevelMenu extends ParkourBeatInventory {
         super(plugin, 3, "Выберите небо");
         if (DISPLAY_NON_DEFAULT_WORLD_TYPES) {
             this.setItem(
-                    2,
-                    3,
-                    ItemUtils.create(
-                            Material.NETHERRACK, meta -> meta.setDisplayName(ChatColor.RED + "Небо Нижнего мира")),
-                    event -> this.createLevel(event.getPlayer(), World.Environment.NETHER));
+                2,
+                3,
+                ItemUtils.create(
+                    Material.NETHERRACK, meta -> meta.setDisplayName(ChatColor.RED + "Небо Нижнего мира")),
+                event -> this.createLevel(event.getPlayer(), World.Environment.NETHER));
         }
         this.setItem(
-                2,
-                5,
-                ItemUtils.create(Material.GRASS_BLOCK, meta -> meta.setDisplayName(ChatColor.AQUA + "Обычное небо")),
-                event -> this.createLevel(event.getPlayer(), World.Environment.NORMAL));
+            2,
+            5,
+            ItemUtils.create(Material.GRASS_BLOCK, meta -> meta.setDisplayName(ChatColor.AQUA + "Обычное небо")),
+            event -> this.createLevel(event.getPlayer(), World.Environment.NORMAL));
         if (DISPLAY_NON_DEFAULT_WORLD_TYPES) {
             this.setItem(
-                    2,
-                    7,
-                    ItemUtils.create(
-                            Material.END_STONE, meta -> meta.setDisplayName(ChatColor.DARK_PURPLE + "Небо Края")),
-                    event -> this.createLevel(event.getPlayer(), World.Environment.THE_END));
+                2,
+                7,
+                ItemUtils.create(
+                    Material.END_STONE, meta -> meta.setDisplayName(ChatColor.DARK_PURPLE + "Небо Края")),
+                event -> this.createLevel(event.getPlayer(), World.Environment.THE_END));
         }
         this.setItem(
-                3,
-                9,
-                ItemUtils.create(Material.BARRIER, meta -> meta.setDisplayName(ChatColor.RED + "Отмена")),
-                event -> event.getPlayer().closeInventory());
+            3,
+            9,
+            ItemUtils.create(Material.BARRIER, meta -> meta.setDisplayName(ChatColor.RED + "Отмена")),
+            event -> event.getPlayer().closeInventory());
     }
 
     @Override
@@ -59,22 +59,22 @@ public class CreateLevelMenu extends ParkourBeatInventory {
     private void createLevel(@NonNull Player owner, @NonNull World.Environment environment) {
         this.plugin.get(ActivityManager.class).setActivity(owner, null);
         this.plugin
-                .get(LevelsManager.class)
-                .createLevel(environment, owner.getUniqueId(), owner.getName())
-                .thenAccept(level -> {
-                    if (level == null) {
-                        owner.sendMessage("Не удалось создать уровень");
+            .get(LevelsManager.class)
+            .createLevel(environment, owner.getUniqueId(), owner.getName())
+            .thenAccept(level -> {
+                if (level == null) {
+                    owner.sendMessage("Не удалось создать уровень");
+                    return;
+                }
+                EditActivity.createAsync(this.plugin, owner, level).thenAccept(editActivity -> {
+                    if (editActivity == null) {
+                        owner.sendMessage("Уровень \"" + level.getDisplayName() + "\""
+                            + " создан, однако не удалось запустить редактор уровня");
                         return;
                     }
-                    EditActivity.createAsync(this.plugin, owner, level).thenAccept(editActivity -> {
-                        if (editActivity == null) {
-                            owner.sendMessage("Уровень \"" + level.getDisplayName() + "\""
-                                    + " создан, однако не удалось запустить редактор уровня");
-                            return;
-                        }
-                        this.plugin.get(ActivityManager.class).setActivity(owner, editActivity);
-                        owner.sendMessage("Уровень \"" + level.getDisplayName() + "\" создан");
-                    });
+                    this.plugin.get(ActivityManager.class).setActivity(owner, editActivity);
+                    owner.sendMessage("Уровень \"" + level.getDisplayName() + "\" создан");
                 });
+            });
     }
 }

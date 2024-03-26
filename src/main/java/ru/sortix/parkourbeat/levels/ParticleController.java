@@ -1,8 +1,5 @@
 package ru.sortix.parkourbeat.levels;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import lombok.NonNull;
 import lombok.Setter;
 import org.bukkit.Color;
@@ -15,6 +12,10 @@ import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.utils.java.ParticleUtils;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
+
 public class ParticleController {
     private static final double SEGMENT_LENGTH = 0.25;
     private static final double MAX_PARTICLES_VIEW_DISTANCE_SQUARED = Math.pow(10, 2);
@@ -23,16 +24,14 @@ public class ParticleController {
     private final ConcurrentLinkedQueue<Location> particleLocations = new ConcurrentLinkedQueue<>();
     private final Map<Double, Color> colorsChangeLocations = new LinkedHashMap<>();
     private final Set<Player> particleViewers = ConcurrentHashMap.newKeySet();
-
+    private final World world;
     @Setter
     private DirectionChecker directionChecker;
-
-    private final World world;
     private BukkitTask particleTask = null;
     private boolean isLoaded = false;
 
     public ParticleController(
-            @NonNull Plugin plugin, @NonNull World world, @NonNull DirectionChecker directionChecker) {
+        @NonNull Plugin plugin, @NonNull World world, @NonNull DirectionChecker directionChecker) {
         this.plugin = plugin;
         this.world = world;
         this.directionChecker = directionChecker;
@@ -57,7 +56,7 @@ public class ParticleController {
             Vector interpolated = cubicBezierInterpolation(startVector, control1, control2, endVector, ratio);
 
             Location location =
-                    new Location(start.getWorld(), interpolated.getX(), interpolated.getY(), interpolated.getZ());
+                new Location(start.getWorld(), interpolated.getX(), interpolated.getY(), interpolated.getZ());
             path.add(location);
         }
 
@@ -106,7 +105,7 @@ public class ParticleController {
             Waypoint nextPoint = waypoints.get(i + 1);
             if (!currentPoint.getColor().equals(previousColor)) {
                 colorsChangeLocations.put(
-                        directionChecker.getCoordinate(currentPoint.getLocation()), currentPoint.getColor());
+                    directionChecker.getCoordinate(currentPoint.getLocation()), currentPoint.getColor());
                 previousColor = currentPoint.getColor();
             }
 
@@ -116,38 +115,38 @@ public class ParticleController {
                 particleLocations.addAll(straightPath);
             } else {
                 List<Location> curvedPath =
-                        createCurvedPath(currentPoint.getLocation(), nextPoint.getLocation(), height);
+                    createCurvedPath(currentPoint.getLocation(), nextPoint.getLocation(), height);
                 particleLocations.addAll(curvedPath);
             }
         }
         this.particleTask = this.plugin
-                .getServer()
-                .getScheduler()
-                .runTaskTimerAsynchronously(
-                        this.plugin,
-                        () -> {
-                            this.particleViewers.forEach((player) -> {
-                                if (player == null || !player.isOnline()) {
-                                    throw new IllegalStateException("Player is not online!");
-                                } else if (player.getWorld() != this.world) {
-                                    throw new IllegalStateException("Player is not in world "
-                                            + this.world.getName()
-                                            + "!\nPlayer world: "
-                                            + player.getWorld());
-                                } else {
-                                    updatePlayerParticles(player);
-                                }
-                            });
-                        },
-                        0,
-                        5);
+            .getServer()
+            .getScheduler()
+            .runTaskTimerAsynchronously(
+                this.plugin,
+                () -> {
+                    this.particleViewers.forEach((player) -> {
+                        if (player == null || !player.isOnline()) {
+                            throw new IllegalStateException("Player is not online!");
+                        } else if (player.getWorld() != this.world) {
+                            throw new IllegalStateException("Player is not in world "
+                                + this.world.getName()
+                                + "!\nPlayer world: "
+                                + player.getWorld());
+                        } else {
+                            updatePlayerParticles(player);
+                        }
+                    });
+                },
+                0,
+                5);
         this.isLoaded = true;
     }
 
     public void startSpawnParticles(@NonNull Player player) {
         if (player.getWorld() != this.world) {
             throw new IllegalStateException(
-                    "Player is not in world " + this.world.getName() + "!\nPlayer world: " + player.getWorld());
+                "Player is not in world " + this.world.getName() + "!\nPlayer world: " + player.getWorld());
         }
         if (this.particleTask == null || this.particleTask.isCancelled()) {
             throw new IllegalStateException("Particle task is not running!");
@@ -177,7 +176,8 @@ public class ParticleController {
         return isLoaded;
     }
 
-    @NonNull private Color getCurrentColor(@NonNull Location location) {
+    @NonNull
+    private Color getCurrentColor(@NonNull Location location) {
         Color lastColor = null;
         for (Map.Entry<Double, Color> entry : colorsChangeLocations.entrySet()) {
             if (lastColor == null || directionChecker.isAheadDirection(location, entry.getKey())) {

@@ -18,6 +18,6 @@ public class FixesListener implements Listener {
         if (!(event.getSender() instanceof Player)) return;
         event.setCancelled(true);
         this.plugin.getServer().getScheduler().runTask(this.plugin, () -> ((Player) event.getSender())
-                .banPlayer("Использование стороннего ПО"));
+            .banPlayer("Использование стороннего ПО"));
     }
 }

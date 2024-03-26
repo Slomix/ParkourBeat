@@ -1,21 +1,21 @@
 package ru.sortix.parkourbeat.game.movement;
 
-import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.Waypoint;
 
+import java.util.List;
+
 public class MovementAccuracyChecker {
 
+    private static final double MAX_ALLOW_OFFSET = 0.1;
     private final List<Waypoint> waypoints;
     private final DirectionChecker directionChecker;
     private double accuracy;
     private int currentSegment;
     private int totalSteps;
     private double totalOffset;
-
-    private static final double MAX_ALLOW_OFFSET = 0.1;
 
     public MovementAccuracyChecker(List<Waypoint> waypoints, DirectionChecker directionChecker) {
         this.waypoints = waypoints;
@@ -38,8 +38,8 @@ public class MovementAccuracyChecker {
         }
 
         Location point1 = previousLocation != null
-                ? previousLocation
-                : waypoints.get(currentSegment).getLocation();
+            ? previousLocation
+            : waypoints.get(currentSegment).getLocation();
         Location point2 = waypoints.get(currentSegment + 1).getLocation();
 
         double distanceToLine = calculateDistanceToLine(newLocation, point1, point2);
@@ -68,9 +68,9 @@ public class MovementAccuracyChecker {
     /**
      * Calculates the distance from a point to a line defined by two other points.
      *
-     * @param  point        the location of the point
-     * @param  linePoint1   the first location defining the line
-     * @param  linePoint2   the second location defining the line
+     * @param point      the location of the point
+     * @param linePoint1 the first location defining the line
+     * @param linePoint2 the second location defining the line
      * @return the distance from the point to the line
      */
     private double calculateDistanceToLine(Location point, Location linePoint1, Location linePoint2) {

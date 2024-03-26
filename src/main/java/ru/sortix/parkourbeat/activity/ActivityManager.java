@@ -1,7 +1,5 @@
 package ru.sortix.parkourbeat.activity;
 
-import java.util.*;
-import javax.annotation.Nullable;
 import lombok.NonNull;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -11,6 +9,9 @@ import org.bukkit.scheduler.BukkitTask;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
+
+import javax.annotation.Nullable;
+import java.util.*;
 
 public class ActivityManager implements PluginManager {
     private final ParkourBeat plugin;
@@ -24,15 +25,15 @@ public class ActivityManager implements PluginManager {
         Server server = this.plugin.getServer();
         server.getPluginManager().registerEvents(this.listener, this.plugin);
         this.movementController = server.getScheduler()
-                .runTaskTimer(
-                        this.plugin,
-                        () -> {
-                            for (UserActivity activity : this.activities.values()) {
-                                activity.onTick();
-                            }
-                        },
-                        1L,
-                        1L);
+            .runTaskTimer(
+                this.plugin,
+                () -> {
+                    for (UserActivity activity : this.activities.values()) {
+                        activity.onTick();
+                    }
+                },
+                1L,
+                1L);
     }
 
     @Override
@@ -44,7 +45,8 @@ public class ActivityManager implements PluginManager {
         }
     }
 
-    @Nullable public UserActivity getActivity(@NonNull Player player) {
+    @Nullable
+    public UserActivity getActivity(@NonNull Player player) {
         return this.activities.get(player);
     }
 
@@ -68,7 +70,8 @@ public class ActivityManager implements PluginManager {
         this.setActivity(player, null);
     }
 
-    @NonNull public Collection<Player> getPlayersOnTheLevel(@NonNull Level level) {
+    @NonNull
+    public Collection<Player> getPlayersOnTheLevel(@NonNull Level level) {
         Collection<Player> result = new ArrayList<>();
         for (Player player : level.getWorld().getPlayers()) {
             UserActivity activity = this.getActivity(player);

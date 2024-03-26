@@ -1,6 +1,5 @@
 package ru.sortix.parkourbeat.data;
 
-import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.experimental.UtilityClass;
@@ -17,6 +16,7 @@ import ru.sortix.parkourbeat.utils.ConfigUtils;
 import ru.sortix.parkourbeat.world.Cuboid;
 import ru.sortix.parkourbeat.world.WorldsManager;
 
+import javax.annotation.Nullable;
 import java.io.File;
 
 @UtilityClass
@@ -51,8 +51,8 @@ public class Settings {
             throw new IllegalArgumentException("Section \"all_levels\" not found");
         }
         levelFixedEditableArea = new Cuboid(
-                ConfigUtils.parseVector(allLevelsConfig.getString("min_editable_point")),
-                ConfigUtils.parseVector(allLevelsConfig.getString("max_editable_point")));
+            ConfigUtils.parseVector(allLevelsConfig.getString("min_editable_point")),
+            ConfigUtils.parseVector(allLevelsConfig.getString("max_editable_point")));
 
         LevelSettingDAO levelSettingDAO = levelsManager.getLevelsSettings().getLevelSettingDAO();
         File settingsDir = new File(new File(plugin.getDataFolder(), "pb_default_level"), "parkourbeat");
@@ -65,7 +65,8 @@ public class Settings {
         isLoaded = true;
     }
 
-    @NonNull private WorldCreator newWorldCreator(@NonNull String worldName) {
+    @NonNull
+    private WorldCreator newWorldCreator(@NonNull String worldName) {
         WorldCreator worldCreator = new WorldCreator(worldName);
         worldCreator.seed(0L);
         worldCreator.environment(World.Environment.NORMAL);
@@ -74,11 +75,12 @@ public class Settings {
         return worldCreator;
     }
 
-    @NonNull private Location getLocation(
-            @NonNull ConfigurationSection config,
-            @NonNull String key,
-            @Nullable WorldsManager worldsManager,
-            boolean parseYawPitch) {
+    @NonNull
+    private Location getLocation(
+        @NonNull ConfigurationSection config,
+        @NonNull String key,
+        @Nullable WorldsManager worldsManager,
+        boolean parseYawPitch) {
         ConfigurationSection section = config.getConfigurationSection(key);
         double x = section.getDouble("x", 0);
         double y = section.getDouble("y", 0);
@@ -97,8 +99,8 @@ public class Settings {
             try {
                 WorldCreator worldCreator = newWorldCreator(worldName);
                 world = worldsManager
-                        .createWorldFromDefaultContainer(worldCreator, worldsManager.getCurrentThreadExecutor())
-                        .join();
+                    .createWorldFromDefaultContainer(worldCreator, worldsManager.getCurrentThreadExecutor())
+                    .join();
                 if (world == null) {
                     throw new IllegalArgumentException("Unable to create bukkit world from default container");
                 }

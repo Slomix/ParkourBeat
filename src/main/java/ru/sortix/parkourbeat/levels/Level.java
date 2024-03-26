@@ -37,7 +37,8 @@ public class Level {
         return this.levelSettings.getGameSettings().getUniqueId();
     }
 
-    @NonNull public Location getSpawn() {
+    @NonNull
+    public Location getSpawn() {
         return this.levelSettings.getWorldSettings().getSpawn();
     }
 

@@ -1,6 +1,5 @@
 package ru.sortix.parkourbeat.world;
 
-import java.util.logging.Logger;
 import lombok.NonNull;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -11,6 +10,8 @@ import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
+
+import java.util.logging.Logger;
 
 public class WorldsListener implements Listener {
     public static int CHUNKS_LOADED = 0;

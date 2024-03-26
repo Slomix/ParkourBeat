@@ -14,8 +14,8 @@ import ru.sortix.parkourbeat.world.TeleportUtils;
 import static ru.sortix.parkourbeat.constant.PermissionConstants.COMMAND_PERMISSION;
 
 @Command(
-        name = "spawn",
-        aliases = {"lobby", "hub"})
+    name = "spawn",
+    aliases = {"lobby", "hub"})
 @RequiredArgsConstructor
 public class CommandSpawn {
 

@@ -1,14 +1,15 @@
 package ru.sortix.parkourbeat.levels;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import javax.annotation.Nullable;
 import lombok.Getter;
 import lombok.NonNull;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
+
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class LevelSettingsManager {
     private final Map<UUID, LevelSettings> levelSettings = new HashMap<>();
@@ -29,7 +30,8 @@ public class LevelSettingsManager {
         this.levelSettings.remove(levelId);
     }
 
-    @NonNull public LevelSettings loadLevelSettings(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
+    @NonNull
+    public LevelSettings loadLevelSettings(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
         LevelSettings settings = this.levelSettings.get(levelId);
         if (settings != null) return settings;
 
@@ -46,7 +48,7 @@ public class LevelSettingsManager {
         LevelSettings settings = this.levelSettings.get(levelId);
         if (settings == null) {
             throw new IllegalStateException(
-                    "Failed to save settings for level " + levelId + ": " + "Settings not found");
+                "Failed to save settings for level " + levelId + ": " + "Settings not found");
         }
         this.levelSettingDAO.saveLevelSettings(settings);
     }

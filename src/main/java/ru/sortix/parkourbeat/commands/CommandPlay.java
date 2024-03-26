@@ -16,8 +16,8 @@ import java.util.Optional;
 import static ru.sortix.parkourbeat.constant.PermissionConstants.COMMAND_PERMISSION;
 
 @Command(
-        name = "play",
-        aliases = {"levels", "level", "lvl"})
+    name = "play",
+    aliases = {"levels", "level", "lvl"})
 @RequiredArgsConstructor
 public class CommandPlay {
 

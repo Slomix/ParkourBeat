@@ -15,8 +15,8 @@ public class LocationUtils {
         Block block = spawnLocation.getBlock();
 
         return !block.getRelative(BlockFace.DOWN).isPassable()
-                && block.isPassable()
-                && block.getRelative(BlockFace.UP).isPassable()
-                && directionChecker.isCorrectDirection(spawnLocation, startLocation);
+            && block.isPassable()
+            && block.getRelative(BlockFace.UP).isPassable()
+            && directionChecker.isCorrectDirection(spawnLocation, startLocation);
     }
 }

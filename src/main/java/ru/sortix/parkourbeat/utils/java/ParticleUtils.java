@@ -12,10 +12,10 @@ public class ParticleUtils {
     private final boolean dustOptionsSupport = ClassUtils.isClassPresent("org.bukkit.Particle$DustOptions");
 
     public void displayRedstoneParticles(
-            @NonNull Player player,
-            @NonNull Color color,
-            @NonNull Iterable<Location> locations,
-            double maxDistanceSquared) {
+        @NonNull Player player,
+        @NonNull Color color,
+        @NonNull Iterable<Location> locations,
+        double maxDistanceSquared) {
         Location playerLoc = player.getLocation();
 
         if (color.getRed() == 0) color = color.setRed(1);

@@ -1,10 +1,11 @@
 package ru.sortix.parkourbeat.utils.shedule;
 
-import java.util.concurrent.Executor;
 import lombok.NonNull;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitScheduler;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.concurrent.Executor;
 
 public class BukkitAsyncExecutor implements Executor {
     private final Plugin plugin;

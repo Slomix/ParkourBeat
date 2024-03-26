@@ -1,10 +1,5 @@
 package ru.sortix.parkourbeat.inventory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-import java.util.logging.Level;
-import javax.annotation.Nullable;
 import lombok.NonNull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -17,6 +12,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.inventory.event.ClickEvent;
+
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.logging.Level;
 
 public abstract class PluginInventory<P extends JavaPlugin> implements InventoryHolder {
     protected final @NonNull P plugin;
@@ -70,13 +71,13 @@ public abstract class PluginInventory<P extends JavaPlugin> implements Inventory
             action.accept(clickEvent);
         } catch (Exception e) {
             this.plugin
-                    .getLogger()
-                    .log(
-                            Level.SEVERE,
-                            "Unable to handle action of player "
-                                    + event.getWhoClicked().getName() + " in inventory "
-                                    + this.getClass().getName() + " with raw slot index " + event.getRawSlot(),
-                            e);
+                .getLogger()
+                .log(
+                    Level.SEVERE,
+                    "Unable to handle action of player "
+                        + event.getWhoClicked().getName() + " in inventory "
+                        + this.getClass().getName() + " with raw slot index " + event.getRawSlot(),
+                    e);
         }
     }
 
@@ -88,7 +89,8 @@ public abstract class PluginInventory<P extends JavaPlugin> implements Inventory
         this.onClose((Player) event.getPlayer());
     }
 
-    protected void onClose(@NonNull Player player) {}
+    protected void onClose(@NonNull Player player) {
+    }
 
     @Override
     public final @NotNull Inventory getInventory() {

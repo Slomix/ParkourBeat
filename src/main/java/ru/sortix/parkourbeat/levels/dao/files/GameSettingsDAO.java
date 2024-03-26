@@ -1,10 +1,11 @@
 package ru.sortix.parkourbeat.levels.dao.files;
 
-import java.util.UUID;
 import lombok.NonNull;
 import org.bukkit.configuration.file.FileConfiguration;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.Song;
+
+import java.util.UUID;
 
 public class GameSettingsDAO {
     public void set(@NonNull GameSettings gameSettings, @NonNull FileConfiguration config) {
@@ -23,7 +24,8 @@ public class GameSettingsDAO {
         }
     }
 
-    @NonNull public GameSettings load(@NonNull UUID uniqueId, @NonNull FileConfiguration config) {
+    @NonNull
+    public GameSettings load(@NonNull UUID uniqueId, @NonNull FileConfiguration config) {
         String uniqueName = config.getString("unique_name", null);
 
         int uniqueNumber = config.getInt("unique_number", -1);
@@ -63,6 +65,6 @@ public class GameSettingsDAO {
         }
 
         return new GameSettings(
-                uniqueId, uniqueName, uniqueNumber, ownerId, ownerName, displayName, createdAtMills, song);
+            uniqueId, uniqueName, uniqueNumber, ownerId, ownerName, displayName, createdAtMills, song);
     }
 }

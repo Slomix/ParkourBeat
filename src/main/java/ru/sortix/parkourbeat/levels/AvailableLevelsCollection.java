@@ -1,12 +1,13 @@
 package ru.sortix.parkourbeat.levels;
 
-import java.util.*;
-import java.util.logging.Logger;
-import javax.annotation.Nullable;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
+
+import javax.annotation.Nullable;
+import java.util.*;
+import java.util.logging.Logger;
 
 @RequiredArgsConstructor
 public class AvailableLevelsCollection implements Iterable<GameSettings> {
@@ -55,24 +56,29 @@ public class AvailableLevelsCollection implements Iterable<GameSettings> {
         this.byUniqueNumber.remove(uniqueNumber);
     }
 
-    @Nullable public GameSettings byUniqueName(@NonNull String uniqueName) {
+    @Nullable
+    public GameSettings byUniqueName(@NonNull String uniqueName) {
         return this.byUniqueName.get(uniqueName);
     }
 
-    @Nullable public GameSettings byUniqueId(@NonNull UUID uniqueId) {
+    @Nullable
+    public GameSettings byUniqueId(@NonNull UUID uniqueId) {
         return this.byUniqueId.get(uniqueId);
     }
 
-    @Nullable public GameSettings byUniqueNumber(int uniqueNumber) {
+    @Nullable
+    public GameSettings byUniqueNumber(int uniqueNumber) {
         return this.byUniqueNumber.get(uniqueNumber);
     }
 
-    @NotNull @Override
+    @NotNull
+    @Override
     public Iterator<GameSettings> iterator() {
         return this.byUniqueId.values().iterator();
     }
 
-    @NonNull public Collection<GameSettings> withUniqueNames() {
+    @NonNull
+    public Collection<GameSettings> withUniqueNames() {
         return this.byUniqueId.values();
     }
 }

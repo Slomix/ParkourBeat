@@ -1,14 +1,5 @@
 package ru.sortix.parkourbeat.world;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
 import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.Location;
@@ -31,6 +22,16 @@ import ru.sortix.parkourbeat.utils.java.CopyDirVisitor;
 import ru.sortix.parkourbeat.utils.shedule.BukkitAsyncExecutor;
 import ru.sortix.parkourbeat.utils.shedule.BukkitSyncExecutor;
 import ru.sortix.parkourbeat.utils.shedule.CurrentThreadExecutor;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class WorldsManager implements PluginManager, Listener {
     private final Plugin plugin;
@@ -62,8 +63,20 @@ public class WorldsManager implements PluginManager, Listener {
         this.server.getPluginManager().registerEvents(this, plugin);
     }
 
-    @NonNull public CompletableFuture<World> createWorldFromDefaultContainer(
-            @NonNull WorldCreator worldCreator, @NonNull Executor executor) {
+    @NonNull
+    private static Set<Plugin> getHandlingPlugins(@NonNull HandlerList eventHandlerList) {
+        Set<Plugin> plugins = new HashSet<>();
+        for (RegisteredListener registeredListener : eventHandlerList.getRegisteredListeners()) {
+            Plugin plugin = registeredListener.getPlugin();
+            if (!plugin.isEnabled()) continue;
+            plugins.add(plugin);
+        }
+        return plugins;
+    }
+
+    @NonNull
+    public CompletableFuture<World> createWorldFromDefaultContainer(
+        @NonNull WorldCreator worldCreator, @NonNull Executor executor) {
         File worldDir = this.getWorldDir(worldCreator);
         if (!worldDir.isDirectory()) {
             this.logger.severe("Unable to create world from directory (directory not found): " + worldDir);
@@ -72,8 +85,9 @@ public class WorldsManager implements PluginManager, Listener {
         return this.createBukkitWorld(worldCreator, executor);
     }
 
-    @NonNull public CompletableFuture<World> createWorldFromCustomDirectory(
-            @NonNull WorldCreator worldCreator, @NonNull File worldDir) {
+    @NonNull
+    public CompletableFuture<World> createWorldFromCustomDirectory(
+        @NonNull WorldCreator worldCreator, @NonNull File worldDir) {
         CompletableFuture<World> result = new CompletableFuture<>();
 
         File realWorldDir = this.getWorldDir(worldCreator);
@@ -88,67 +102,71 @@ public class WorldsManager implements PluginManager, Listener {
         return result;
     }
 
-    @NonNull private CompletableFuture<Boolean> copyWorldData(@NonNull File source, @NonNull File target) {
+    @NonNull
+    private CompletableFuture<Boolean> copyWorldData(@NonNull File source, @NonNull File target) {
         return CompletableFuture.supplyAsync(
-                () -> {
-                    try {
-                        if (target.exists()) throw new IOException("Target directory already exist");
-                        CopyDirVisitor visitor = new CopyDirVisitor(this.logger, source.toPath(), target.toPath());
-                        Files.walkFileTree(source.toPath(), visitor);
-                        return !visitor.isFailed();
-                    } catch (IOException e) {
-                        this.logger.log(Level.SEVERE, "Unable to copy world data from " + source + " to " + target, e);
-                        return false;
-                    }
-                },
-                this.asyncExecutor);
+            () -> {
+                try {
+                    if (target.exists()) throw new IOException("Target directory already exist");
+                    CopyDirVisitor visitor = new CopyDirVisitor(this.logger, source.toPath(), target.toPath());
+                    Files.walkFileTree(source.toPath(), visitor);
+                    return !visitor.isFailed();
+                } catch (IOException e) {
+                    this.logger.log(Level.SEVERE, "Unable to copy world data from " + source + " to " + target, e);
+                    return false;
+                }
+            },
+            this.asyncExecutor);
     }
 
-    @NonNull private CompletableFuture<World> createBukkitWorld(@NonNull WorldCreator worldCreator, @NonNull Executor executor) {
+    @NonNull
+    private CompletableFuture<World> createBukkitWorld(@NonNull WorldCreator worldCreator, @NonNull Executor executor) {
         return CompletableFuture.supplyAsync(
-                () -> {
-                    World world = this.server.getWorld(worldCreator.name());
+            () -> {
+                World world = this.server.getWorld(worldCreator.name());
+                if (world != null) return world;
+
+                try {
+                    world = this.server.createWorld(worldCreator);
                     if (world != null) return world;
-
-                    try {
-                        world = this.server.createWorld(worldCreator);
-                        if (world != null) return world;
-                        throw new IllegalArgumentException("Bukkit API result is null");
-                    } catch (Exception e) {
-                        this.logger.log(
-                                Level.SEVERE,
-                                "Unable to create world \""
-                                        + worldCreator.name()
-                                        + "\""
-                                        + " from directory "
-                                        + this.getWorldDir(worldCreator).getAbsolutePath(),
-                                e);
-                    }
-                    return null;
-                },
-                executor);
+                    throw new IllegalArgumentException("Bukkit API result is null");
+                } catch (Exception e) {
+                    this.logger.log(
+                        Level.SEVERE,
+                        "Unable to create world \""
+                            + worldCreator.name()
+                            + "\""
+                            + " from directory "
+                            + this.getWorldDir(worldCreator).getAbsolutePath(),
+                        e);
+                }
+                return null;
+            },
+            executor);
     }
 
-    @NonNull private File getWorldDir(@NonNull WorldCreator worldCreator) {
+    @NonNull
+    private File getWorldDir(@NonNull WorldCreator worldCreator) {
         if (false) {
             // Incorrect impl from CraftBukkit
             return new File(this.server.getWorldContainer(), worldCreator.name());
         }
         // Correct impl from NMS
         return this.server
-                .getWorldContainer()
-                .toPath()
-                .resolve(worldCreator.name())
-                .toFile();
+            .getWorldContainer()
+            .toPath()
+            .resolve(worldCreator.name())
+            .toFile();
     }
 
-    @NonNull public CompletableFuture<Boolean> unloadBukkitWorld(
-            @NonNull World world, boolean save, @NonNull Location fallbackLocation) {
+    @NonNull
+    public CompletableFuture<Boolean> unloadBukkitWorld(
+        @NonNull World world, boolean save, @NonNull Location fallbackLocation) {
 
         if (world == this.server.getWorlds().iterator().next()) {
             // world is default
             this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
-                    + " т.к. он является основным миром сервера");
+                + " т.к. он является основным миром сервера");
             return CompletableFuture.completedFuture(false);
         }
 
@@ -160,8 +178,8 @@ public class WorldsManager implements PluginManager, Listener {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         boolean unloadingStarted = this.unloadingWorldsFutures.containsKey(world);
         this.unloadingWorldsFutures
-                .computeIfAbsent(world, world1 -> new ArrayList<>())
-                .add(result);
+            .computeIfAbsent(world, world1 -> new ArrayList<>())
+            .add(result);
 
         if (!unloadingStarted) {
             this.startWorldUnloading(world, save, fallbackLocation);
@@ -186,16 +204,16 @@ public class WorldsManager implements PluginManager, Listener {
         }
 
         onPlayersTeleported.thenAcceptAsync(
-                unused -> {
-                    if (world.getPlayers().isEmpty()) {
-                        this.server.unloadWorld(world, save); // call WorldUnloadEvent, result must be ignored
-                        return;
-                    }
-                    this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
-                            + " т.к. не удалось освободить его от игроков");
-                    this.unloadingWorldsFutures.remove(world).forEach(future -> future.complete(false));
-                },
-                this.syncExecutor);
+            unused -> {
+                if (world.getPlayers().isEmpty()) {
+                    this.server.unloadWorld(world, save); // call WorldUnloadEvent, result must be ignored
+                    return;
+                }
+                this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
+                    + " т.к. не удалось освободить его от игроков");
+                this.unloadingWorldsFutures.remove(world).forEach(future -> future.complete(false));
+            },
+            this.syncExecutor);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -205,25 +223,15 @@ public class WorldsManager implements PluginManager, Listener {
         boolean eventAllowed = !event.isCancelled();
         if (!eventAllowed) {
             this.logger.severe("Не удалось отгрузить мир \"" + event.getWorld().getName() + "\", "
-                    + "т.к. один из указанных плагинов отменил отгрузку мира в " + WorldUnloadEvent.class.getName()
-                    + ": "
-                    + getHandlingPlugins(WorldUnloadEvent.getHandlerList()).stream()
-                            .map(Plugin::getName)
-                            .collect(Collectors.joining(", ")));
+                + "т.к. один из указанных плагинов отменил отгрузку мира в " + WorldUnloadEvent.class.getName()
+                + ": "
+                + getHandlingPlugins(WorldUnloadEvent.getHandlerList()).stream()
+                .map(Plugin::getName)
+                .collect(Collectors.joining(", ")));
         }
         for (CompletableFuture<Boolean> completableFuture : consumers) {
             completableFuture.complete(eventAllowed);
         }
-    }
-
-    @NonNull private static Set<Plugin> getHandlingPlugins(@NonNull HandlerList eventHandlerList) {
-        Set<Plugin> plugins = new HashSet<>();
-        for (RegisteredListener registeredListener : eventHandlerList.getRegisteredListeners()) {
-            Plugin plugin = registeredListener.getPlugin();
-            if (!plugin.isEnabled()) continue;
-            plugins.add(plugin);
-        }
-        return plugins;
     }
 
     @EventHandler(ignoreCancelled = true)

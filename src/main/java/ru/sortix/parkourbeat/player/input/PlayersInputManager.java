@@ -1,8 +1,5 @@
 package ru.sortix.parkourbeat.player.input;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
@@ -18,6 +15,10 @@ import ru.sortix.parkourbeat.player.input.type.ChatInput;
 import ru.sortix.parkourbeat.player.input.type.PlayerInput;
 import ru.sortix.parkourbeat.player.input.type.PlayerInputType;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 public class PlayersInputManager implements PluginManager, Listener {
     private final ParkourBeat plugin;
     private final Map<Player, InputRequest> requestedPlayers = new HashMap<>();
@@ -31,13 +32,15 @@ public class PlayersInputManager implements PluginManager, Listener {
         return this.requestedPlayers.containsKey(player);
     }
 
-    @NonNull public CompletableFuture<String> requestChatInput(@NonNull Player player, int timeoutTicks) {
+    @NonNull
+    public CompletableFuture<String> requestChatInput(@NonNull Player player, int timeoutTicks) {
         return this.requestInput(PlayerInputType.CHAT, player, timeoutTicks)
-                .thenApply(playerInput -> playerInput == null ? null : ((ChatInput) playerInput).getMessage());
+            .thenApply(playerInput -> playerInput == null ? null : ((ChatInput) playerInput).getMessage());
     }
 
-    @NonNull private CompletableFuture<PlayerInput> requestInput(
-            @NonNull PlayerInputType type, @NonNull Player player, int timeoutTicks) {
+    @NonNull
+    private CompletableFuture<PlayerInput> requestInput(
+        @NonNull PlayerInputType type, @NonNull Player player, int timeoutTicks) {
         if (this.requestedPlayers.containsKey(player)) {
             throw new IllegalStateException("Already waiting input from player " + player.getName());
         }
@@ -45,17 +48,17 @@ public class PlayersInputManager implements PluginManager, Listener {
         CompletableFuture<PlayerInput> future = new CompletableFuture<>();
         this.requestedPlayers.put(player, new InputRequest(type, future));
         this.plugin
-                .getServer()
-                .getScheduler()
-                .runTaskLaterAsynchronously(
-                        this.plugin,
-                        () -> {
-                            if (!future.isDone()) {
-                                this.requestedPlayers.remove(player);
-                                future.complete(null);
-                            }
-                        },
-                        timeoutTicks);
+            .getServer()
+            .getScheduler()
+            .runTaskLaterAsynchronously(
+                this.plugin,
+                () -> {
+                    if (!future.isDone()) {
+                        this.requestedPlayers.remove(player);
+                        future.complete(null);
+                    }
+                },
+                timeoutTicks);
         return future;
     }
 

@@ -13,6 +13,24 @@ import java.util.UUID;
 
 @Getter
 public class LevelSettings {
+    private final WorldSettings worldSettings;
+    private final GameSettings gameSettings;
+    private final ParticleController particleController;
+    private final DirectionChecker directionChecker;
+    private final Location startWaypoint;
+    private final Location finishWaypoint;
+    public LevelSettings(@NonNull World world, @NonNull WorldSettings worldSettings, @NonNull GameSettings gameSettings) {
+        this.worldSettings = worldSettings;
+        this.gameSettings = gameSettings;
+        this.directionChecker = new DirectionChecker(worldSettings.getDirection());
+        this.particleController =
+            new ParticleController(ParkourBeat.getPlugin(), world, this.directionChecker);
+        this.startWaypoint = worldSettings.getStartWaypoint().toLocation(world);
+        this.finishWaypoint = worldSettings.getFinishWaypoint().toLocation(world);
+        // optional check is list sorted
+        this.worldSettings.sortWaypoints(this.directionChecker);
+    }
+
     @NonNull
     public static LevelSettings create(
         @NonNull World world,
@@ -28,25 +46,6 @@ public class LevelSettings {
             Settings.getLevelDefaultSettings().setWorld(environment, world),
             new GameSettings(
                 uniqueId, null, uniqueNumber, ownerId, ownerName, displayName, System.currentTimeMillis()));
-    }
-
-    private final WorldSettings worldSettings;
-    private final GameSettings gameSettings;
-    private final ParticleController particleController;
-    private final DirectionChecker directionChecker;
-    private final Location startWaypoint;
-    private final Location finishWaypoint;
-
-    public LevelSettings(@NonNull World world, @NonNull WorldSettings worldSettings, @NonNull GameSettings gameSettings) {
-        this.worldSettings = worldSettings;
-        this.gameSettings = gameSettings;
-        this.directionChecker = new DirectionChecker(worldSettings.getDirection());
-        this.particleController =
-            new ParticleController(ParkourBeat.getPlugin(), world, this.directionChecker);
-        this.startWaypoint = worldSettings.getStartWaypoint().toLocation(world);
-        this.finishWaypoint = worldSettings.getFinishWaypoint().toLocation(world);
-        // optional check is list sorted
-        this.worldSettings.sortWaypoints(this.directionChecker);
     }
 
     public void updateParticleLocations() {

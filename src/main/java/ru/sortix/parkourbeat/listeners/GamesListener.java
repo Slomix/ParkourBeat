@@ -2,7 +2,6 @@ package ru.sortix.parkourbeat.listeners;
 
 import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import java.util.function.Consumer;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -34,16 +33,40 @@ import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
+import java.util.function.Consumer;
+
 public final class GamesListener implements Listener {
     private final ParkourBeat plugin;
     private final ActivityManager activityManager;
     private final LevelSettingDAO levelSettingDAO;
+    private final Consumer<Player> onPlayerTeleportToLobby = player -> {
+        player.setHealth(20);
+        player.setFoodLevel(20);
+        player.setSaturation(5.0F);
+        player.setExhaustion(0.0F);
+        player.setFireTicks(-40);
+        player.setGameMode(GameMode.ADVENTURE);
+        player.getInventory().clear();
+    };
+    private final ChatRenderer.ViewerUnaware viewerUnaware = new ChatRenderer.ViewerUnaware() {
+        @Override
+        public @NotNull Component render(
+            @NotNull Player source, @NotNull Component sourceDisplayName, @NotNull Component message) {
+            int lvl = 0;
+            TextColor nameColor =
+                source.hasPermission("parkourbeat.chat.admin") ? NamedTextColor.RED : NamedTextColor.WHITE;
+            return Component.text("#" + lvl + " ", NamedTextColor.GRAY)
+                .append(sourceDisplayName.color(nameColor))
+                .append(Component.text(" -> ", NamedTextColor.WHITE))
+                .append(message.color(NamedTextColor.WHITE));
+        }
+    };
 
     public GamesListener(@NonNull ParkourBeat plugin) {
         this.plugin = plugin;
         this.activityManager = plugin.get(ActivityManager.class);
         this.levelSettingDAO =
-                plugin.get(LevelsManager.class).getLevelsSettings().getLevelSettingDAO();
+            plugin.get(LevelsManager.class).getLevelsSettings().getLevelSettingDAO();
 
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             if (this.teleportToSpawnIfInLevelWorld(player)) {
@@ -70,7 +93,7 @@ public final class GamesListener implements Listener {
             event.getPlayer().sendMessage("Запускаем новую активность (" + to.getName() + ")");
         } else {
             event.getPlayer()
-                    .sendMessage("Миры " + from.getName() + " и " + to.getName() + " не относятся к активностям");
+                .sendMessage("Миры " + from.getName() + " и " + to.getName() + " не относятся к активностям");
         }
     }
 
@@ -113,23 +136,13 @@ public final class GamesListener implements Listener {
         }
     }
 
-    private final Consumer<Player> onPlayerTeleportToLobby = player -> {
-        player.setHealth(20);
-        player.setFoodLevel(20);
-        player.setSaturation(5.0F);
-        player.setExhaustion(0.0F);
-        player.setFireTicks(-40);
-        player.setGameMode(GameMode.ADVENTURE);
-        player.getInventory().clear();
-    };
-
     private boolean teleportToSpawnIfInLevelWorld(@NonNull Player player) {
         if (!this.levelSettingDAO.isLevelWorld(player.getWorld())) return false;
         TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn())
-                .thenAccept(success -> {
-                    if (!success) return;
-                    this.onPlayerTeleportToLobby.accept(player);
-                });
+            .thenAccept(success -> {
+                if (!success) return;
+                this.onPlayerTeleportToLobby.accept(player);
+            });
         return true;
     }
 
@@ -203,13 +216,13 @@ public final class GamesListener implements Listener {
     @EventHandler
     private void on(PlayerArmorStandManipulateEvent event) {
         this.cancelIfCantModify(
-                event, event.getPlayer(), event.getRightClicked().getLocation());
+            event, event.getPlayer(), event.getRightClicked().getLocation());
     }
 
     @EventHandler
     private void on(PlayerInteractAtEntityEvent event) {
         this.cancelIfCantModify(
-                event, event.getPlayer(), event.getRightClicked().getLocation());
+            event, event.getPlayer(), event.getRightClicked().getLocation());
     }
 
     @EventHandler
@@ -276,20 +289,6 @@ public final class GamesListener implements Listener {
     private boolean isNotInLobbyOrLevel(@NonNull Player player) {
         return this.activityManager.getActivity(player) == null && !this.isLobby(player.getWorld());
     }
-
-    private final ChatRenderer.ViewerUnaware viewerUnaware = new ChatRenderer.ViewerUnaware() {
-        @Override
-        public @NotNull Component render(
-                @NotNull Player source, @NotNull Component sourceDisplayName, @NotNull Component message) {
-            int lvl = 0;
-            TextColor nameColor =
-                    source.hasPermission("parkourbeat.chat.admin") ? NamedTextColor.RED : NamedTextColor.WHITE;
-            return Component.text("#" + lvl + " ", NamedTextColor.GRAY)
-                    .append(sourceDisplayName.color(nameColor))
-                    .append(Component.text(" -> ", NamedTextColor.WHITE))
-                    .append(message.color(NamedTextColor.WHITE));
-        }
-    };
 
     @EventHandler
     private void on(AsyncChatEvent event) {

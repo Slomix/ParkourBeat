@@ -1,9 +1,5 @@
 package ru.sortix.parkourbeat.inventory.type.editor;
 
-import static ru.sortix.parkourbeat.world.LocationUtils.isValidSpawnPoint;
-
-import java.util.Arrays;
-import java.util.List;
 import lombok.NonNull;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -25,6 +21,11 @@ import ru.sortix.parkourbeat.levels.settings.Song;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
+import java.util.Arrays;
+import java.util.List;
+
+import static ru.sortix.parkourbeat.world.LocationUtils.isValidSpawnPoint;
+
 public class EditorMainMenu extends ParkourBeatInventory {
     private final EditActivity activity;
 
@@ -33,92 +34,92 @@ public class EditorMainMenu extends ParkourBeatInventory {
         super(plugin, 5, "Параметры уровня");
         this.activity = activity;
         this.setItem(
-                1,
-                5,
-                ItemUtils.create(Material.REDSTONE_TORCH, (meta) -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Покинуть редактор");
-                    meta.setLore(List.of(ChatColor.YELLOW + "Блоки и настройки будут сохранены"));
-                }),
-                this::leaveEditor);
+            1,
+            5,
+            ItemUtils.create(Material.REDSTONE_TORCH, (meta) -> {
+                meta.setDisplayName(ChatColor.GOLD + "Покинуть редактор");
+                meta.setLore(List.of(ChatColor.YELLOW + "Блоки и настройки будут сохранены"));
+            }),
+            this::leaveEditor);
         this.setItem(
-                3,
-                2,
-                ItemUtils.create(Material.FIREWORK_STAR, (meta) -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Цвет частиц");
-                    meta.setLore(Arrays.asList(
-                            ChatColor.YELLOW + "Изменяет цвет частиц после",
-                            ChatColor.YELLOW + "достижения определённой позиции.",
-                            ChatColor.YELLOW + "Вам потребуется указать в чате",
-                            ChatColor.YELLOW + "HEX-цвет. Например: #FFCC66"));
-                }),
-                this::selectParticlesColor);
+            3,
+            2,
+            ItemUtils.create(Material.FIREWORK_STAR, (meta) -> {
+                meta.setDisplayName(ChatColor.GOLD + "Цвет частиц");
+                meta.setLore(Arrays.asList(
+                    ChatColor.YELLOW + "Изменяет цвет частиц после",
+                    ChatColor.YELLOW + "достижения определённой позиции.",
+                    ChatColor.YELLOW + "Вам потребуется указать в чате",
+                    ChatColor.YELLOW + "HEX-цвет. Например: #FFCC66"));
+            }),
+            this::selectParticlesColor);
         this.setItem(
-                3,
-                4,
-                ItemUtils.modifyMeta(SelectSongMenu.NOTE_HEAD.clone(), meta -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Выбрать музыку");
-                    meta.setLore(List.of());
-                    Song song = activity.getLevel()
-                            .getLevelSettings()
-                            .getGameSettings()
-                            .getSong();
-                    meta.setLore(Arrays.asList(
-                            ChatColor.YELLOW + "Трек, который будет запускаться",
-                            ChatColor.YELLOW + "Текущая композиция:",
-                            ChatColor.YELLOW + (song == null ? "отсутствует" : song.getSongName())));
-                }),
-                this::selectLevelSong);
+            3,
+            4,
+            ItemUtils.modifyMeta(SelectSongMenu.NOTE_HEAD.clone(), meta -> {
+                meta.setDisplayName(ChatColor.GOLD + "Выбрать музыку");
+                meta.setLore(List.of());
+                Song song = activity.getLevel()
+                    .getLevelSettings()
+                    .getGameSettings()
+                    .getSong();
+                meta.setLore(Arrays.asList(
+                    ChatColor.YELLOW + "Трек, который будет запускаться",
+                    ChatColor.YELLOW + "Текущая композиция:",
+                    ChatColor.YELLOW + (song == null ? "отсутствует" : song.getSongName())));
+            }),
+            this::selectLevelSong);
         this.setItem(
-                3,
-                6,
-                ItemUtils.create(Material.ENDER_PEARL, (meta) -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Точка спауна");
-                    meta.setLore(Arrays.asList(
-                            ChatColor.YELLOW + "Устанавливает точку спауна на уровне ваших ног.",
-                            ChatColor.YELLOW + "Направление взгляда игроков будет точно таким же,",
-                            ChatColor.YELLOW + "как при установке точки спауна"));
-                }),
-                this::setSpawnPoint);
+            3,
+            6,
+            ItemUtils.create(Material.ENDER_PEARL, (meta) -> {
+                meta.setDisplayName(ChatColor.GOLD + "Точка спауна");
+                meta.setLore(Arrays.asList(
+                    ChatColor.YELLOW + "Устанавливает точку спауна на уровне ваших ног.",
+                    ChatColor.YELLOW + "Направление взгляда игроков будет точно таким же,",
+                    ChatColor.YELLOW + "как при установке точки спауна"));
+            }),
+            this::setSpawnPoint);
         this.setItem(
-                3,
-                8,
-                ItemUtils.create(Material.WRITABLE_BOOK, (meta) -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Переименовать уровень");
-                    meta.setLore(Arrays.asList(
-                            ChatColor.YELLOW + "Вам будет необходимо отправить",
-                            ChatColor.YELLOW + "новое название в чат"));
-                }),
-                this::renameLevel);
+            3,
+            8,
+            ItemUtils.create(Material.WRITABLE_BOOK, (meta) -> {
+                meta.setDisplayName(ChatColor.GOLD + "Переименовать уровень");
+                meta.setLore(Arrays.asList(
+                    ChatColor.YELLOW + "Вам будет необходимо отправить",
+                    ChatColor.YELLOW + "новое название в чат"));
+            }),
+            this::renameLevel);
         this.setItem(
-                5,
-                3,
-                ItemUtils.create(Material.NETHER_STAR, (meta) -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Сбросить все точки");
-                    meta.setLore(Arrays.asList(
-                            ChatColor.RED + "" + ChatColor.BOLD + "Все установленные точки трека",
-                            ChatColor.RED + "" + ChatColor.BOLD + "будут БЕЗВОЗВРАТНО удалены"));
-                }),
-                this::resetAllTrackPoints);
+            5,
+            3,
+            ItemUtils.create(Material.NETHER_STAR, (meta) -> {
+                meta.setDisplayName(ChatColor.GOLD + "Сбросить все точки");
+                meta.setLore(Arrays.asList(
+                    ChatColor.RED + "" + ChatColor.BOLD + "Все установленные точки трека",
+                    ChatColor.RED + "" + ChatColor.BOLD + "будут БЕЗВОЗВРАТНО удалены"));
+            }),
+            this::resetAllTrackPoints);
         this.setItem(
-                5,
-                7,
-                ItemUtils.create(Material.BARRIER, (meta) -> {
-                    meta.setDisplayName(ChatColor.GOLD + "Удалить уровень");
-                    meta.setLore(Arrays.asList(
-                            ChatColor.RED + "" + ChatColor.BOLD + "Уровень будет удалён",
-                            ChatColor.RED + "" + ChatColor.BOLD + "БЕЗ возможности восстановления"));
-                }),
-                this::deleteLevel);
+            5,
+            7,
+            ItemUtils.create(Material.BARRIER, (meta) -> {
+                meta.setDisplayName(ChatColor.GOLD + "Удалить уровень");
+                meta.setLore(Arrays.asList(
+                    ChatColor.RED + "" + ChatColor.BOLD + "Уровень будет удалён",
+                    ChatColor.RED + "" + ChatColor.BOLD + "БЕЗ возможности восстановления"));
+            }),
+            this::deleteLevel);
     }
 
     private void leaveEditor(@NonNull ClickEvent event) {
         Player player = event.getPlayer();
 
         TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn())
-                .thenAccept(success -> {
-                    if (!success) return;
-                    this.plugin.get(ActivityManager.class).setActivity(player, null);
-                });
+            .thenAccept(success -> {
+                if (!success) return;
+                this.plugin.get(ActivityManager.class).setActivity(player, null);
+            });
     }
 
     private void selectParticlesColor(@NonNull ClickEvent event) {
@@ -133,9 +134,9 @@ public class EditorMainMenu extends ParkourBeatInventory {
 
         player.sendMessage("У вас есть 30 сек, чтобы указать в чате HEX-цвет. Например: #FFCC66");
         TextComponent msg1 = new TextComponent(
-                "Подобрать цвет можно " + ChatColor.UNDERLINE + "тут" + ChatColor.RESET + " (кликабельно)");
+            "Подобрать цвет можно " + ChatColor.UNDERLINE + "тут" + ChatColor.RESET + " (кликабельно)");
         msg1.setClickEvent(new net.md_5.bungee.api.chat.ClickEvent(
-                net.md_5.bungee.api.chat.ClickEvent.Action.OPEN_URL, "https://google.com/search?q=hex+палитра"));
+            net.md_5.bungee.api.chat.ClickEvent.Action.OPEN_URL, "https://google.com/search?q=hex+палитра"));
         //noinspection deprecation
         player.sendMessage(msg1);
 
@@ -185,8 +186,8 @@ public class EditorMainMenu extends ParkourBeatInventory {
         levelSettings.getWorldSettings().setSpawn(playerLocation);
 
         player.sendMessage("Точка спауна установлена на уровне ваших ног. "
-                + "Убедитесь, что направление взгляда выбрано корректно! "
-                + "Именно в эту сторону будут повёрнуты игроки при телепортации");
+            + "Убедитесь, что направление взгляда выбрано корректно! "
+            + "Именно в эту сторону будут повёрнуты игроки при телепортации");
     }
 
     private void renameLevel(@NonNull ClickEvent event) {
@@ -242,6 +243,6 @@ public class EditorMainMenu extends ParkourBeatInventory {
         player.closeInventory();
 
         CommandDelete.deleteLevel(
-                this.plugin, player, this.activity.getLevel().getLevelSettings().getGameSettings());
+            this.plugin, player, this.activity.getLevel().getLevelSettings().getGameSettings());
     }
 }

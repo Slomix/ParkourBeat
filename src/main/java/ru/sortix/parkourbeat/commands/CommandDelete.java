@@ -24,6 +24,31 @@ public class CommandDelete {
 
     private final ParkourBeat plugin;
 
+    public static void deleteLevel(
+        @NonNull ParkourBeat plugin, @NonNull CommandSender sender, @NonNull GameSettings settings) {
+        LevelsManager levelsManager = plugin.get(LevelsManager.class);
+        ActivityManager activityManager = plugin.get(ActivityManager.class);
+
+        Level loadedLevel = levelsManager.getLoadedLevel(settings.getUniqueId());
+        if (loadedLevel != null) {
+            for (Player player : loadedLevel.getWorld().getPlayers()) {
+                if (player != sender) {
+                    player.sendMessage(
+                        String.format(Messages.LEVEL_DELETION_ALREADY_DELETED, settings.getDisplayName()));
+                }
+                activityManager.setActivity(player, null);
+            }
+        }
+
+        levelsManager.deleteLevelAsync(settings).thenAccept(successResult -> {
+            if (Boolean.TRUE.equals(successResult)) {
+                sender.sendMessage(String.format(Messages.SUCCESSFUL_LEVEL_DELETION, settings.getDisplayName()));
+            } else {
+                sender.sendMessage(String.format(Messages.FAILED_LEVEL_DELETION, settings.getDisplayName()));
+            }
+        });
+    }
+
     @Execute
     @Permission(COMMAND_PERMISSION + ".delete")
     public String onCommand(@Context CommandSender sender, @Arg("settings-console-owning") GameSettings gameSettings) {
@@ -37,30 +62,5 @@ public class CommandDelete {
 
         deleteLevel(this.plugin, sender, gameSettings);
         return null;
-    }
-
-    public static void deleteLevel(
-            @NonNull ParkourBeat plugin, @NonNull CommandSender sender, @NonNull GameSettings settings) {
-        LevelsManager levelsManager = plugin.get(LevelsManager.class);
-        ActivityManager activityManager = plugin.get(ActivityManager.class);
-
-        Level loadedLevel = levelsManager.getLoadedLevel(settings.getUniqueId());
-        if (loadedLevel != null) {
-            for (Player player : loadedLevel.getWorld().getPlayers()) {
-                if (player != sender) {
-                    player.sendMessage(
-                            String.format(Messages.LEVEL_DELETION_ALREADY_DELETED, settings.getDisplayName()));
-                }
-                activityManager.setActivity(player, null);
-            }
-        }
-
-        levelsManager.deleteLevelAsync(settings).thenAccept(successResult -> {
-            if (Boolean.TRUE.equals(successResult)) {
-                sender.sendMessage(String.format(Messages.SUCCESSFUL_LEVEL_DELETION, settings.getDisplayName()));
-            } else {
-                sender.sendMessage(String.format(Messages.FAILED_LEVEL_DELETION, settings.getDisplayName()));
-            }
-        });
     }
 }

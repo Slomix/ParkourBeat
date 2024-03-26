@@ -1,8 +1,5 @@
 package ru.sortix.parkourbeat.item;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
 import lombok.NonNull;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -19,6 +16,10 @@ import ru.sortix.parkourbeat.item.editor.type.EditorMenuItem;
 import ru.sortix.parkourbeat.item.editor.type.TestGameItem;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
 public class ItemsManager implements PluginManager, Listener {
     private final Logger logger;
     private final Map<ItemStack, UsableItem> allItems;
@@ -29,7 +30,7 @@ public class ItemsManager implements PluginManager, Listener {
         this.allItems = new HashMap<>();
 
         this.registerItems(
-                new TestGameItem(plugin, 0), new EditorMenuItem(plugin, 1), new EditTrackPointsItem(plugin, 2));
+            new TestGameItem(plugin, 0), new EditorMenuItem(plugin, 1), new EditTrackPointsItem(plugin, 2));
 
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
     }
