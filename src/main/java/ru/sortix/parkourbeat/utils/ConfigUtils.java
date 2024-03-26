@@ -13,6 +13,7 @@ import ru.sortix.parkourbeat.levels.Waypoint;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 
+@SuppressWarnings("unused")
 @UtilityClass
 public class ConfigUtils {
     @NonNull
@@ -73,12 +74,12 @@ public class ConfigUtils {
     public String serializeWaypoint(@NonNull Waypoint object) {
         Location loc = object.getLocation();
         return loc.getX() + " " + loc.getY() + " " + loc.getZ()
-            + " " + object.getHeight() + " "
-            + "#" + Integer.toString(object.getColor().asRGB(), 16);
+            + " " + object.getHeight()
+            + " " + serializeBukkitHexColor(object.getColor());
     }
 
     @NonNull
-    public Waypoint parseWaypoints(@NonNull String input) {
+    public Waypoint parseWaypoint(@NonNull String input) {
         String[] args = input.split(" ");
         if (args.length != 5) {
             throw new IllegalArgumentException("Wrong waypoint args amount");
@@ -89,8 +90,21 @@ public class ConfigUtils {
             Double.parseDouble(args[2])
         ),
             Double.parseDouble(args[3]),
-            Color.fromRGB(Integer.parseInt(args[4].substring("#".length()), 16))
+            parseBukkitHexColor(args[4])
         );
+    }
+
+    @NonNull
+    public String serializeBukkitHexColor(@NonNull Color object) {
+        return "#" + String.format("%06X", object.asRGB());
+    }
+
+    @NonNull
+    public Color parseBukkitHexColor(@NonNull String input) {
+        if (input.length() != 7 || input.charAt(0) != '#') {
+            throw new IllegalArgumentException("Wrong HEX-color format: " + input);
+        }
+        return Color.fromRGB(Integer.parseInt(input.substring(1), 16));
     }
 
     @NonNull

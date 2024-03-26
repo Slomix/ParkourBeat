@@ -42,7 +42,7 @@ public class WorldSettingsDAO {
 
         List<Waypoint> waypoints = new ArrayList<>();
         for (String waypoint : section.getStringList("waypoints")) {
-            waypoints.add(ConfigUtils.parseWaypoints(waypoint));
+            waypoints.add(ConfigUtils.parseWaypoint(waypoint));
         }
 
         return new WorldSettings(environment, direction, spawn, waypoints);
