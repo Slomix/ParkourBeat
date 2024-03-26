@@ -6,8 +6,6 @@ import dev.rollczi.litecommands.bukkit.LiteBukkitMessages;
 import dev.rollczi.litecommands.message.LiteMessages;
 import dev.rollczi.litecommands.schematic.SchematicFormat;
 import lombok.NonNull;
-import org.bukkit.configuration.serialization.ConfigurationSerializable;
-import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,10 +23,7 @@ import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
 import ru.sortix.parkourbeat.listeners.FixesListener;
 import ru.sortix.parkourbeat.listeners.GamesListener;
-import ru.sortix.parkourbeat.location.Waypoint;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
-import ru.sortix.parkourbeat.utils.NonWorldAndYawPitchLocation;
-import ru.sortix.parkourbeat.utils.NonWorldLocation;
 import ru.sortix.parkourbeat.world.WorldsListener;
 import ru.sortix.parkourbeat.world.WorldsManager;
 
@@ -45,10 +40,6 @@ public class ParkourBeat extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        for (Class<? extends ConfigurationSerializable> clazz : this.getConfigSerializableClasses()) {
-            ConfigurationSerialization.registerClass(clazz);
-        }
-
         this.registerManager(ItemsManager::new);
         this.registerManager(WorldsManager::new);
         this.registerManager(ActivityManager::new);
@@ -68,12 +59,6 @@ public class ParkourBeat extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        if (false) {
-            for (Class<? extends ConfigurationSerializable> clazz : this.getConfigSerializableClasses()) {
-                ConfigurationSerialization.unregisterClass(clazz);
-            }
-        }
-
         List<PluginManager> managers = new ArrayList<>(this.managers.values());
         Collections.reverse(managers);
         for (PluginManager manager : managers) {
@@ -81,10 +66,10 @@ public class ParkourBeat extends JavaPlugin {
                 manager.disable();
             } catch (Exception e) {
                 this.getLogger()
-                        .log(
-                                Level.SEVERE,
-                                "Unable to unload manager " + manager.getClass().getName(),
-                                e);
+                    .log(
+                        Level.SEVERE,
+                        "Unable to unload manager " + manager.getClass().getName(),
+                        e);
             }
         }
         this.managers.clear();
@@ -131,11 +116,8 @@ public class ParkourBeat extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(listener, this);
     }
 
-    @NonNull private Collection<Class<? extends ConfigurationSerializable>> getConfigSerializableClasses() {
-        return Arrays.asList(NonWorldAndYawPitchLocation.class, NonWorldLocation.class, Waypoint.class);
-    }
-
-    @NonNull public <M extends PluginManager> M get(@NonNull Class<M> managerClass) {
+    @NonNull
+    public <M extends PluginManager> M get(@NonNull Class<M> managerClass) {
         Object manager = this.managers.get(managerClass);
         if (manager == null) {
             throw new IllegalArgumentException("Manager with class " + managerClass.getName() + " not found");
@@ -144,7 +126,7 @@ public class ParkourBeat extends JavaPlugin {
             return managerClass.cast(manager);
         } catch (ClassCastException ex) {
             throw new IllegalArgumentException(
-                    "Manager " + manager.getClass().getName() + " isn't " + managerClass.getName());
+                "Manager " + manager.getClass().getName() + " isn't " + managerClass.getName());
         }
     }
 }

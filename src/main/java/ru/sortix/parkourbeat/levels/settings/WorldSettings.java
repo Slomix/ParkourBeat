@@ -9,7 +9,7 @@ import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
-import ru.sortix.parkourbeat.location.Waypoint;
+import ru.sortix.parkourbeat.levels.Waypoint;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;

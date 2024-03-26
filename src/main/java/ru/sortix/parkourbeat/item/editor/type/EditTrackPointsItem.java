@@ -16,7 +16,7 @@ import ru.sortix.parkourbeat.item.editor.EditorItem;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
-import ru.sortix.parkourbeat.location.Waypoint;
+import ru.sortix.parkourbeat.levels.Waypoint;
 
 public class EditTrackPointsItem extends EditorItem {
     public static final Color DEFAULT_PARTICLES_COLOR = Color.LIME;

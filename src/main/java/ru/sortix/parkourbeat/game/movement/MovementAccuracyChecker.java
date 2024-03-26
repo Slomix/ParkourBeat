@@ -4,7 +4,7 @@ import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
-import ru.sortix.parkourbeat.location.Waypoint;
+import ru.sortix.parkourbeat.levels.Waypoint;
 
 public class MovementAccuracyChecker {
 

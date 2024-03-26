@@ -8,7 +8,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.util.Vector;
-import ru.sortix.parkourbeat.location.Waypoint;
+import ru.sortix.parkourbeat.levels.Waypoint;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
