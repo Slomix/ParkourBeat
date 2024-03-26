@@ -64,8 +64,8 @@ public class Game {
                 }
 
                 Game game = new Game(plugin, player, level);
-                prepareGame(plugin, game);
-                result.complete(game);
+                prepareGame(plugin, game)
+                    .thenAccept(success -> result.complete(success ? game : null));
             } catch (Exception e) {
                 plugin.getLogger().log(java.util.logging.Level.SEVERE, "Unable to prepare game", e);
                 result.complete(null);
@@ -74,13 +74,17 @@ public class Game {
         return result;
     }
 
-    private static void prepareGame(@NonNull ParkourBeat plugin, @NonNull Game game) {
+    @NonNull
+    private static CompletableFuture<Boolean> prepareGame(@NonNull ParkourBeat plugin, @NonNull Game game) {
+        CompletableFuture<Boolean> result = new CompletableFuture<>();
         Player player = game.getPlayer();
-        Level level = game.level;
-        LevelSettings settings = level.getLevelSettings();
+        LevelSettings settings = game.level.getLevelSettings();
 
-        TeleportUtils.teleportAsync(plugin, player, level.getSpawn()).thenAccept(success -> {
-            if (!success) return;
+        TeleportUtils.teleportAsync(plugin, player, game.level.getSpawn()).thenAccept(success -> {
+            if (!success) {
+                result.complete(false);
+                return;
+            }
 
             ParticleController particleController = settings.getParticleController();
 
@@ -106,7 +110,14 @@ public class Game {
             if (ready) {
                 game.currentState = State.READY;
             }
+            result.complete(true);
         });
+        return result;
+    }
+
+    @NonNull
+    public ParkourBeat getPlugin() {
+        return this.levelsManager.getPlugin();
     }
 
     private void setPlaylist(@NonNull String requiredPlaylist) {
@@ -156,60 +167,57 @@ public class Game {
         this.currentState = currentState;
     }
 
-    public void failLevel(@NonNull String reason) {
-        this.stopGame(reason, false);
+    public @NonNull CompletableFuture<Void> failLevel(@NonNull String reason) {
+        return this.stopGame(reason, false);
     }
 
-    public void completeLevel() {
-        this.stopGame("§aВы прошли уровень", true);
+    public @NonNull CompletableFuture<Void> completeLevel() {
+        return this.stopGame("§aВы прошли уровень", true);
     }
 
-    private void stopGame(@NonNull String title, boolean levelComplete) {
-        Plugin plugin = this.getPlugin();
+    private @NonNull CompletableFuture<Void> stopGame(@NonNull String title, boolean levelComplete) {
+        return
         TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn())
             .thenAccept(success -> {
                 if (!success) return;
+                this.resetRunningLevelGame(title, levelComplete);
+                this.forceStopLevelGame();
+                this.currentState = State.READY;
+            });
+    }
+
+    private void resetRunningLevelGame(@NonNull String title, boolean levelComplete) {
                 if (this.currentState != State.RUNNING) return;
 
-                this.player.setHealth(20);
-                this.player.setGameMode(GameMode.ADVENTURE);
+
                 this.player.sendTitle(title, null, 10, 10, 10);
 
-                AMusic.stopSound(this.player);
+
                 if (levelComplete) {
                     this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
                     this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 0.5f, 1);
                 } else {
                     this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
                 }
-                this.level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(this.player);
+
                 this.gameMoveHandler.getAccuracyChecker().reset();
 
-                for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
-                    this.player.showPlayer(plugin, onlinePlayer);
-                }
 
-                this.currentState = State.READY;
-            });
     }
 
-    @NonNull
-    public ParkourBeat getPlugin() {
-        return this.levelsManager.getPlugin();
-    }
-
-    public void endGame() {
-        LevelSettings settings = this.level.getLevelSettings();
+    public void forceStopLevelGame() {
         this.player.setHealth(20);
+        this.player.setGameMode(GameMode.ADVENTURE);
         AMusic.stopSound(this.player);
+
+        this.level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(this.player);
 
         Plugin plugin = this.getPlugin();
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             this.player.showPlayer(plugin, onlinePlayer);
         }
 
-        this.currentState = State.READY;
-        settings.getParticleController().stopSpawnParticlesForPlayer(this.player);
+        this.currentState = State.PREPARING;
     }
 
     public enum State {

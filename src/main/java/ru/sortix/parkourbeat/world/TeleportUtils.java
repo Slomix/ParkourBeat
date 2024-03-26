@@ -29,6 +29,7 @@ public class TeleportUtils {
         Location sourceLoc = player.getLocation();
         WorldsListener.CHUNKS_LOADED = 0;
         long startedAtMills = System.currentTimeMillis();
+        player.setFallDistance(0f);
         boolean success = player.teleport(location);
         long durationMills = System.currentTimeMillis() - startedAtMills;
         if (WorldsListener.CHUNKS_LOADED > 0 && ASYNC_TELEPORT_SUPPORTED) {
@@ -51,9 +52,9 @@ public class TeleportUtils {
     @NonNull
     public CompletableFuture<Boolean> teleportAsync(
         @NonNull Plugin plugin, @NonNull Player player, @NonNull Location location) {
-        player.setFallDistance(0f);
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         if (ASYNC_TELEPORT_SUPPORTED) {
+            player.setFallDistance(0f);
             player.teleportAsync(location).thenAccept(success -> {
                 if (!success) {
                     player.sendMessage("Телепортация отменена");

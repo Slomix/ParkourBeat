@@ -25,9 +25,10 @@ public class SpectateActivity extends UserActivity {
     }
 
     @Override
-    public void startActivity() {
+    public @NonNull CompletableFuture<Void> startActivity() {
         this.player.setGameMode(GameMode.SPECTATOR);
         this.player.sendMessage("Вы наблюдаете за уровнем \"" + this.level.getDisplayName() + "\"");
+        return CompletableFuture.completedFuture(null);
     }
 
     @Override
@@ -61,7 +62,8 @@ public class SpectateActivity extends UserActivity {
     }
 
     @Override
-    public void endActivity() {
+    public @NonNull CompletableFuture<Void> endActivity() {
         this.player.setGameMode(GameMode.ADVENTURE);
+        return CompletableFuture.completedFuture(null);
     }
 }

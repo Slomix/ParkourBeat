@@ -63,9 +63,9 @@ public class EditActivity extends UserActivity {
     }
 
     @Override
-    public void startActivity() {
+    public @NonNull CompletableFuture<Void> startActivity() {
         if (this.testingActivity != null) {
-            this.testingActivity.startActivity();
+            return this.testingActivity.startActivity();
         } else {
             this.player.setGameMode(GameMode.CREATIVE);
             this.player.setFlying(true);
@@ -74,6 +74,7 @@ public class EditActivity extends UserActivity {
             this.plugin.get(ItemsManager.class).putAllItems(this.player, EditorItem.class);
 
             this.level.getLevelSettings().getParticleController().startSpawnParticles(this.player);
+            return CompletableFuture.completedFuture(null);
         }
     }
 
@@ -117,15 +118,22 @@ public class EditActivity extends UserActivity {
     }
 
     @Override
-    public void endActivity() {
-        if (this.testingActivity != null) this.testingActivity.endActivity();
+    public @NonNull CompletableFuture<Void> endActivity() {
+        CompletableFuture<Void> cf;
+        if (this.testingActivity != null) cf = this.testingActivity.endActivity();
+        else cf = CompletableFuture.completedFuture(null);
 
-        this.player.setGameMode(GameMode.ADVENTURE);
-        this.player.getInventory().clear();
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        cf.thenAccept(unused -> {
+            this.player.setGameMode(GameMode.ADVENTURE);
+            this.player.getInventory().clear();
 
-        TeleportUtils.teleportAsync(this.plugin, this.player, Settings.getLobbySpawn())
+            TeleportUtils.teleportAsync(this.plugin, this.player, Settings.getLobbySpawn())
             .thenAccept(success -> {
-                if (!success) return;
+                if (!success) {
+                    result.complete(null);
+                    return;
+                }
 
                 this.level.getLevelSettings().getParticleController().stopSpawnParticles();
                 this.level.setEditing(false);
@@ -134,7 +142,10 @@ public class EditActivity extends UserActivity {
                     "Редактор уровня \"" + this.level.getDisplayName() + "\" успешно остановлен");
 
                 this.plugin.get(LevelsManager.class).saveLevelSettingsAndBlocks(this.level);
+                result.complete(null);
             });
+        });
+        return result;
     }
 
     public void startTesting() {

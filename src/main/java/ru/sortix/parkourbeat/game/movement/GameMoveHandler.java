@@ -47,10 +47,10 @@ public class GameMoveHandler {
     }
 
     public void onReadyState(@NonNull Player player) {
-        LevelSettings settings = game.getLevel().getLevelSettings();
-        if (settings.getDirectionChecker().isCorrectDirection(startWaypoint, player.getLocation())) {
-            game.start();
-            if ((task == null || task.isCancelled()) && !player.isSprinting()) {
+        LevelSettings settings = this.game.getLevel().getLevelSettings();
+        if (settings.getDirectionChecker().isCorrectDirection(this.startWaypoint, player.getLocation())) {
+            this.game.start();
+            if ((this.task == null || this.task.isCancelled()) && !player.isSprinting()) {
                 startDamageTask(player, "§cНе переставайте бежать", "§cВы остановились");
             }
         }

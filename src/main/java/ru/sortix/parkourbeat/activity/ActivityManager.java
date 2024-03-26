@@ -12,6 +12,7 @@ import ru.sortix.parkourbeat.lifecycle.PluginManager;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class ActivityManager implements PluginManager {
     private final ParkourBeat plugin;
@@ -50,17 +51,24 @@ public class ActivityManager implements PluginManager {
         return this.activities.get(player);
     }
 
-    public void setActivity(@NonNull Player player, @Nullable UserActivity activity) {
-        UserActivity previousActivity;
-        if (activity == null) {
-            previousActivity = this.activities.remove(player);
-        } else {
-            previousActivity = this.activities.put(player, activity);
-        }
-        if (previousActivity == activity) return;
+    @NonNull
+    public CompletableFuture<Void> setActivity(@NonNull Player player, @Nullable UserActivity activity) {
+        UserActivity previousActivity = this.activities.get(player);
 
-        if (previousActivity != null) previousActivity.endActivity();
-        if (activity != null) activity.startActivity();
+        if (previousActivity == activity) return CompletableFuture.completedFuture(null);
+
+        CompletableFuture<Void> result = new CompletableFuture<>();
+        CompletableFuture<Void> endActivity = previousActivity == null ? CompletableFuture.completedFuture(null) : previousActivity.endActivity();
+        endActivity.thenAccept(unused -> {
+            if (activity == null) {
+                this.activities.remove(player);
+                result.complete(null);
+            } else {
+                this.activities.put(player, activity);
+                activity.startActivity().thenAccept(unused1 -> result.complete(null));
+            }
+        });
+        return result;
     }
 
     protected void updateActivityWorld(@NonNull Player player, @NonNull World newWorld) {
