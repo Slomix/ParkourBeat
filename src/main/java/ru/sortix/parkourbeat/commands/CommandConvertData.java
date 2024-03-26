@@ -34,7 +34,7 @@ public class CommandConvertData {
 
     @Execute
     @Permission(COMMAND_PERMISSION + ".convertdata")
-    public void onCommand(@Context CommandSender sender, @Arg("level") Optional<GameSettings> gameSettingsOpt) {
+    public void onCommand(@Context CommandSender sender, @Arg("settings-console-owning") Optional<GameSettings> gameSettingsOpt) {
         this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
             if (gameSettingsOpt.isPresent()) {
                 upgradeDataOnLevel(sender, gameSettingsOpt.get());
