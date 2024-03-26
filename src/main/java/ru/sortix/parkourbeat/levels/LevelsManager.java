@@ -289,7 +289,7 @@ public class LevelsManager implements PluginManager {
         return this.loadedLevelsByWorld.get(world);
     }
 
-    @NonNull public List<String> getUniqueLevelNames(@NonNull String levelNamePrefix, @Nullable CommandSender owner) {
+    @NonNull public List<String> getUniqueLevelNames(@NonNull String levelNamePrefix, @Nullable CommandSender owner, boolean bypassForAdmins) {
         levelNamePrefix = levelNamePrefix.toLowerCase();
 
         List<String> result = new ArrayList<>();
@@ -303,7 +303,7 @@ public class LevelsManager implements PluginManager {
             }
         } else {
             for (GameSettings gameSettings : this.availableLevels.withUniqueNames()) {
-                if (!gameSettings.isOwner(owner, false, false)) continue;
+                if (!gameSettings.isOwner(owner, bypassForAdmins, false)) continue;
                 uniqueName = gameSettings.getUniqueName();
                 if (uniqueName == null || !uniqueName.startsWith(levelNamePrefix)) continue;
                 result.add(uniqueName);

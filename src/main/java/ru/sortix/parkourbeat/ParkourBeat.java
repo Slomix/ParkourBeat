@@ -1,5 +1,6 @@
 package ru.sortix.parkourbeat;
 
+import dev.rollczi.litecommands.argument.ArgumentKey;
 import dev.rollczi.litecommands.bukkit.LiteBukkitFactory;
 import dev.rollczi.litecommands.bukkit.LiteBukkitMessages;
 import dev.rollczi.litecommands.message.LiteMessages;
@@ -106,21 +107,23 @@ public class ParkourBeat extends JavaPlugin {
     @SuppressWarnings("UnstableApiUsage")
     private void registerCommands() {
         LiteBukkitFactory.builder(getName().toLowerCase(Locale.ROOT), this)
-                .commands(
-                        new CommandConvertData(this),
-                        new CommandCreate(this),
-                        new CommandDelete(this),
-                        new CommandEdit(this),
-                        new CommandPlay(this),
-                        new CommandSpawn(this),
-                        new CommandTest(),
-                        new CommandTpToWorld(this))
-                .argument(GameSettings.class, new GameSettingsArgumentResolver(get(LevelsManager.class)))
-                .message(LiteBukkitMessages.PLAYER_ONLY, Messages.PLAYER_ONLY)
-                .message(LiteMessages.MISSING_PERMISSIONS, Messages.MISSING_PERMISSION)
-                .invalidUsage(new DefaultInvalidUsageHandler())
-                .schematicGenerator(SchematicFormat.angleBrackets())
-                .build();
+            .commands(
+                new CommandConvertData(this),
+                new CommandCreate(this),
+                new CommandDelete(this),
+                new CommandEdit(this),
+                new CommandPlay(this),
+                new CommandSpawn(this),
+                new CommandTest(),
+                new CommandTpToWorld(this))
+            .argument(GameSettings.class, ArgumentKey.of("settings-console-owning"), new GameSettingsArgumentResolver(get(LevelsManager.class), false, true, true))
+            .argument(GameSettings.class, ArgumentKey.of("settings-players-owning"), new GameSettingsArgumentResolver(get(LevelsManager.class), true, false, true))
+            .argument(GameSettings.class, ArgumentKey.of("settings-players-all"), new GameSettingsArgumentResolver(get(LevelsManager.class), true, false, false))
+            .message(LiteBukkitMessages.PLAYER_ONLY, Messages.PLAYER_ONLY)
+            .message(LiteMessages.MISSING_PERMISSIONS, Messages.MISSING_PERMISSION)
+            .invalidUsage(new DefaultInvalidUsageHandler())
+            .schematicGenerator(SchematicFormat.angleBrackets())
+            .build();
     }
 
     private void registerListener(@NonNull Function<ParkourBeat, Listener> listenerConstructor) {

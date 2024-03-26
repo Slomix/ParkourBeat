@@ -26,7 +26,7 @@ public class CommandDelete {
 
     @Execute
     @Permission(COMMAND_PERMISSION + ".delete")
-    public String onCommand(@Context CommandSender sender, @Arg("level") GameSettings gameSettings) {
+    public String onCommand(@Context CommandSender sender, @Arg("settings-console-owning") GameSettings gameSettings) {
         if (sender instanceof Player) {
             return Messages.USE_LEVEL_PARAMETERS_ITEM;
         }
