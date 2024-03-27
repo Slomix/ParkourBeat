@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.GameRule;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.boss.DragonBattle;
@@ -434,9 +435,13 @@ public class LevelsManager implements PluginManager {
         if (!this.particlesRenderingTask.isCancelled()) {
             this.particlesRenderingTask.cancel();
         }
-        for (Level level : this.loadedLevelsById.values()) {
-            if (!level.isEditing()) continue;
-            this.saveLevelSettingsAndBlocks(level);
+
+        Location spawn = Settings.getLobbySpawn();
+        for (Map.Entry<World, Level> entry : this.loadedLevelsByWorld.entrySet()) {
+            World world = entry.getKey();
+            Level level = entry.getValue();
+            this.levelsSettings.saveWorldSettings(level.getUniqueId());
+            this.worldsManager.unloadBukkitWorld(world, level.isEditing(), spawn);
         }
     }
 

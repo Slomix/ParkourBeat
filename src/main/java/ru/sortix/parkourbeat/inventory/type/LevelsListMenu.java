@@ -10,7 +10,6 @@ import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
 import ru.sortix.parkourbeat.activity.type.EditActivity;
 import ru.sortix.parkourbeat.activity.type.PlayActivity;
-import ru.sortix.parkourbeat.activity.type.SpectateActivity;
 import ru.sortix.parkourbeat.inventory.PaginatedMenu;
 import ru.sortix.parkourbeat.inventory.RegularItems;
 import ru.sortix.parkourbeat.inventory.event.ClickEvent;
@@ -47,19 +46,24 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
             return;
         }
 
-        UserActivity activity = plugin.get(ActivityManager.class).getActivity(player);
-        if (activity instanceof PlayActivity && activity.getLevel() == level) {
+        UserActivity previousActivity = plugin.get(ActivityManager.class).getActivity(player);
+        if (previousActivity instanceof PlayActivity && previousActivity.getLevel() == level) {
             player.sendMessage("Вы уже на этом уровне!");
             return;
         }
 
         PlayActivity.createAsync(plugin, player, settings.getUniqueId(), false).thenAccept(playActivity -> {
             if (playActivity == null) {
-                player.sendMessage("Не удалось запустить игру");
+                player.sendMessage("Не удалось подготовить игру");
                 return;
             }
 
-            plugin.get(ActivityManager.class).setActivity(player, playActivity);
+            plugin.get(ActivityManager.class).switchActivity(player, playActivity, playActivity.getLevel().getSpawn())
+                .thenAccept(success -> {
+                    if (!success) {
+                        player.sendMessage("Не удалось телепортировать вас на уровень");
+                    }
+                });
         });
     }
 
@@ -76,14 +80,7 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
                     player.sendMessage("Вы уже в этом мире");
                     return;
                 }
-
-                SpectateActivity.createAsync(plugin, player, level).thenAccept(spectateActivity -> {
-                    TeleportUtils.teleportAsync(plugin, player, level.getSpawn())
-                        .thenAccept(success -> {
-                            if (!success) return;
-                            plugin.get(ActivityManager.class).setActivity(player, spectateActivity);
-                        });
-                });
+                TeleportUtils.teleportAsync(plugin, player, level.getSpawn());
             });
     }
 
@@ -122,7 +119,10 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
                         player.sendMessage("Не удалось запустить редактор уровня");
                         return;
                     }
-                    activityManager.setActivity(player, editActivity);
+                    activityManager.switchActivity(player, editActivity, level.getSpawn()).thenAccept(success -> {
+                        if (success) return;
+                        player.sendMessage("Не удалось телепортироваться в мир уровня");
+                    });
                 });
             });
     }

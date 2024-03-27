@@ -57,7 +57,6 @@ public class CreateLevelMenu extends ParkourBeatInventory {
     }
 
     private void createLevel(@NonNull Player owner, @NonNull World.Environment environment) {
-        this.plugin.get(ActivityManager.class).setActivity(owner, null);
         this.plugin
             .get(LevelsManager.class)
             .createLevel(environment, owner.getUniqueId(), owner.getName())
@@ -72,8 +71,13 @@ public class CreateLevelMenu extends ParkourBeatInventory {
                             + " создан, однако не удалось запустить редактор уровня");
                         return;
                     }
-                    this.plugin.get(ActivityManager.class).setActivity(owner, editActivity);
-                    owner.sendMessage("Уровень \"" + level.getDisplayName() + "\" создан");
+                    this.plugin.get(ActivityManager.class).switchActivity(owner, editActivity, level.getSpawn()).thenAccept(success -> {
+                        if (success) {
+                            owner.sendMessage("Уровень \"" + level.getDisplayName() + "\" создан");
+                        } else {
+                            owner.sendMessage("Не удалось телепортировать вас на новый уровень");
+                        }
+                    });
                 });
             });
     }

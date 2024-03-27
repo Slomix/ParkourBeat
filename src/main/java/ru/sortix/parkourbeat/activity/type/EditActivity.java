@@ -14,7 +14,6 @@ import org.bukkit.inventory.ItemStack;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
-import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.item.ItemsManager;
 import ru.sortix.parkourbeat.item.editor.EditorItem;
@@ -29,14 +28,18 @@ import java.util.concurrent.CompletableFuture;
 public class EditActivity extends UserActivity {
     @Getter
     @Setter
-    private Color currentColor = EditTrackPointsItem.DEFAULT_PARTICLES_COLOR;
+    private @NonNull Color currentColor = EditTrackPointsItem.DEFAULT_PARTICLES_COLOR;
     @Getter
     @Setter
     private double currentHeight = 0;
     private @Nullable PlayActivity testingActivity = null;
-    private ItemStack[] creativeInventoryContents = null;
+    private @Nullable ItemStack[] creativeInventoryContents = null;
+
     private EditActivity(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         super(plugin, player, level);
+        this.player.sendMessage("Редактор уровня \"" + this.level.getDisplayName() + "\" успешно запущен");
+        this.level.getLevelSettings().updateParticleLocations();
+        this.level.setEditing(true);
     }
 
     @NonNull
@@ -54,18 +57,15 @@ public class EditActivity extends UserActivity {
                 result.complete(null);
                 return;
             }
-            EditActivity editActivity = new EditActivity(plugin, player, level);
-            editActivity.start().thenAccept(success1 -> {
-                result.complete(success1 ? editActivity : null);
-            });
+            result.complete(new EditActivity(plugin, player, level));
         });
         return result;
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> startActivity() {
+    public void startActivity() {
         if (this.testingActivity != null) {
-            return this.testingActivity.startActivity();
+            this.testingActivity.startActivity();
         } else {
             this.player.setGameMode(GameMode.CREATIVE);
             this.player.setFlying(true);
@@ -74,7 +74,6 @@ public class EditActivity extends UserActivity {
             this.plugin.get(ItemsManager.class).putAllItems(this.player, EditorItem.class);
 
             this.level.getLevelSettings().getParticleController().startSpawnParticles(this.player);
-            return CompletableFuture.completedFuture(null);
         }
     }
 
@@ -118,34 +117,19 @@ public class EditActivity extends UserActivity {
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> endActivity() {
-        CompletableFuture<Void> cf;
-        if (this.testingActivity != null) cf = this.testingActivity.endActivity();
-        else cf = CompletableFuture.completedFuture(null);
+    public void endActivity() {
+        if (this.testingActivity != null) this.testingActivity.endActivity();
 
-        CompletableFuture<Void> result = new CompletableFuture<>();
-        cf.thenAccept(unused -> {
-            this.player.setGameMode(GameMode.ADVENTURE);
-            this.player.getInventory().clear();
+        this.player.setGameMode(GameMode.ADVENTURE);
+        this.player.getInventory().clear();
 
-            TeleportUtils.teleportAsync(this.plugin, this.player, Settings.getLobbySpawn())
-            .thenAccept(success -> {
-                if (!success) {
-                    result.complete(null);
-                    return;
-                }
+        this.level.getLevelSettings().getParticleController().stopSpawnParticles();
+        this.level.setEditing(false);
 
-                this.level.getLevelSettings().getParticleController().stopSpawnParticles();
-                this.level.setEditing(false);
+        this.player.sendMessage(
+            "Редактор уровня \"" + this.level.getDisplayName() + "\" успешно остановлен");
 
-                this.player.sendMessage(
-                    "Редактор уровня \"" + this.level.getDisplayName() + "\" успешно остановлен");
-
-                this.plugin.get(LevelsManager.class).saveLevelSettingsAndBlocks(this.level);
-                result.complete(null);
-            });
-        });
-        return result;
+        this.plugin.get(LevelsManager.class).saveLevelSettingsAndBlocks(this.level);
     }
 
     public void startTesting() {
@@ -172,44 +156,15 @@ public class EditActivity extends UserActivity {
     public void endTesting() {
         if (this.testingActivity == null) throw new IllegalArgumentException("Testing not started");
 
-        TeleportUtils.teleportAsync(this.plugin, this.player, this.level.getSpawn())
-            .thenAccept(success -> {
-                if (!success) {
-                    this.player.sendMessage("Не удалось покинуть режим тестирования");
-                    return;
-                }
+        this.testingActivity.endActivity();
+        this.testingActivity = null;
+        this.startActivity();
+        this.player.getInventory().setContents(this.creativeInventoryContents);
 
-                this.testingActivity.endActivity();
-                this.testingActivity = null;
-                this.startActivity();
-
-                this.player.getInventory().setContents(this.creativeInventoryContents);
-
-                this.player.sendMessage("Вы покинули режим тестирования");
-            });
+        TeleportUtils.teleportAsync(this.plugin, this.player, this.level.getSpawn());
     }
 
     public boolean isTesting() {
         return this.testingActivity != null;
-    }
-
-    @NonNull
-    private CompletableFuture<Boolean> start() {
-        CompletableFuture<Boolean> result = new CompletableFuture<>();
-        TeleportUtils.teleportAsync(this.plugin, this.player, this.level.getSpawn())
-            .thenAccept(success -> {
-                if (!success) {
-                    result.complete(false);
-                    return;
-                }
-
-                this.player.sendMessage("Редактор уровня \"" + this.level.getDisplayName() + "\" успешно запущен");
-
-                this.level.getLevelSettings().updateParticleLocations();
-
-                this.level.setEditing(true);
-                result.complete(true);
-            });
-        return result;
     }
 }

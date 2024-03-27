@@ -8,7 +8,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
-import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.type.EditActivity;
 import ru.sortix.parkourbeat.commands.CommandDelete;
 import ru.sortix.parkourbeat.data.Settings;
@@ -115,11 +114,10 @@ public class EditorMainMenu extends ParkourBeatInventory {
     private void leaveEditor(@NonNull ClickEvent event) {
         Player player = event.getPlayer();
 
-        TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn())
-            .thenAccept(success -> {
-                if (!success) return;
-                this.plugin.get(ActivityManager.class).setActivity(player, null);
-            });
+        TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn()).thenAccept(success -> {
+            if (success) return;
+            player.sendMessage("Телепортация на спаун отменена");
+        });
     }
 
     private void selectParticlesColor(@NonNull ClickEvent event) {

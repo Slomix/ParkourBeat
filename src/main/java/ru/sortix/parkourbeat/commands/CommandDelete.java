@@ -12,6 +12,7 @@ import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.constant.Messages;
+import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
@@ -36,7 +37,7 @@ public class CommandDelete {
                     player.sendMessage(
                         String.format(Messages.LEVEL_DELETION_ALREADY_DELETED, settings.getDisplayName()));
                 }
-                activityManager.setActivity(player, null);
+                activityManager.switchActivity(player, null, Settings.getLobbySpawn());
             }
         }
 

@@ -12,23 +12,15 @@ import ru.sortix.parkourbeat.activity.UserActivity;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
-import java.util.concurrent.CompletableFuture;
-
 public class SpectateActivity extends UserActivity {
-    private SpectateActivity(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
+    public SpectateActivity(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         super(plugin, player, level);
     }
 
-    public static CompletableFuture<SpectateActivity> createAsync(
-        @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
-        return CompletableFuture.completedFuture(new SpectateActivity(plugin, player, level));
-    }
-
     @Override
-    public @NonNull CompletableFuture<Void> startActivity() {
+    public void startActivity() {
         this.player.setGameMode(GameMode.SPECTATOR);
         this.player.sendMessage("Вы наблюдаете за уровнем \"" + this.level.getDisplayName() + "\"");
-        return CompletableFuture.completedFuture(null);
     }
 
     @Override
@@ -62,8 +54,7 @@ public class SpectateActivity extends UserActivity {
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> endActivity() {
+    public void endActivity() {
         this.player.setGameMode(GameMode.ADVENTURE);
-        return CompletableFuture.completedFuture(null);
     }
 }

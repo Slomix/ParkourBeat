@@ -34,6 +34,7 @@ public class Game {
         this.player = player;
         this.level = level;
         this.gameMoveHandler = new GameMoveHandler(this);
+        this.prepareGame(plugin);
     }
 
     @NonNull
@@ -64,9 +65,7 @@ public class Game {
                     }
                 }
 
-                Game game = new Game(plugin, player, level);
-                prepareGame(plugin, game)
-                    .thenAccept(success -> result.complete(success ? game : null));
+                result.complete(new Game(plugin, player, level));
             } catch (Exception e) {
                 plugin.getLogger().log(java.util.logging.Level.SEVERE, "Unable to prepare game", e);
                 result.complete(null);
@@ -75,45 +74,33 @@ public class Game {
         return result;
     }
 
-    @NonNull
-    private static CompletableFuture<Boolean> prepareGame(@NonNull ParkourBeat plugin, @NonNull Game game) {
-        CompletableFuture<Boolean> result = new CompletableFuture<>();
-        Player player = game.getPlayer();
-        LevelSettings settings = game.level.getLevelSettings();
+    private void prepareGame(@NonNull ParkourBeat plugin) {
+        LevelSettings settings = this.level.getLevelSettings();
 
-        TeleportUtils.teleportAsync(plugin, player, game.level.getSpawn()).thenAccept(success -> {
-            if (!success) {
-                result.complete(false);
-                return;
+        ParticleController particleController = settings.getParticleController();
+
+        if (!particleController.isLoaded()) {
+            particleController.loadParticleLocations(
+                settings.getWorldSettings().getWaypoints());
+        }
+
+        this.player.setGameMode(GameMode.ADVENTURE);
+
+        boolean ready = true;
+        Song song = settings.getGameSettings().getSong();
+        if (song != null) {
+            String currentPlayList = AMusic.getPackName(this.player); // nullable
+            String requiredPlaylist = song.getSongPlaylist();
+            if (!requiredPlaylist.equals(currentPlayList)) {
+                ready = false;
+                plugin.getServer()
+                    .getScheduler()
+                    .runTaskLater(plugin, () -> this.setPlaylist(requiredPlaylist), 20L);
             }
-
-            ParticleController particleController = settings.getParticleController();
-
-            if (!particleController.isLoaded()) {
-                particleController.loadParticleLocations(
-                    settings.getWorldSettings().getWaypoints());
-            }
-
-            player.setGameMode(GameMode.ADVENTURE);
-
-            boolean ready = true;
-            Song song = settings.getGameSettings().getSong();
-            if (song != null) {
-                String currentPlayList = AMusic.getPackName(player); // nullable
-                String requiredPlaylist = song.getSongPlaylist();
-                if (!requiredPlaylist.equals(currentPlayList)) {
-                    ready = false;
-                    plugin.getServer()
-                        .getScheduler()
-                        .runTaskLater(plugin, () -> game.setPlaylist(requiredPlaylist), 20L);
-                }
-            }
-            if (ready) {
-                game.currentState = State.READY;
-            }
-            result.complete(true);
-        });
-        return result;
+        }
+        if (ready) {
+            this.currentState = State.READY;
+        }
     }
 
     @NonNull
@@ -168,23 +155,20 @@ public class Game {
         this.currentState = currentState;
     }
 
-    public @NonNull CompletableFuture<Void> failLevel(@NonNull String reason) {
-        return this.stopGame(reason, false);
+    public void failLevel(@NonNull String reason) {
+        this.resetLevelGame(reason, false);
+        TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn());
     }
 
-    public @NonNull CompletableFuture<Void> completeLevel() {
-        return this.stopGame("§aВы прошли уровень", true);
+    public void completeLevel() {
+        this.resetLevelGame("§aВы прошли уровень", true);
+        TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn());
     }
 
-    private @NonNull CompletableFuture<Void> stopGame(@NonNull String title, boolean levelComplete) {
-        return
-        TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn())
-            .thenAccept(success -> {
-                if (!success) return;
-                this.resetRunningLevelGame(title, levelComplete);
-                this.forceStopLevelGame();
-                this.currentState = State.READY;
-            });
+    public void resetLevelGame(@NonNull String title, boolean levelComplete) {
+        this.resetRunningLevelGame(title, levelComplete);
+        this.forceStopLevelGame();
+        this.currentState = Game.State.READY;
     }
 
     private void resetRunningLevelGame(@NonNull String title, boolean levelComplete) {

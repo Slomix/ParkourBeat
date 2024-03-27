@@ -50,19 +50,19 @@ public class PlayActivity extends UserActivity {
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> startActivity() {
-        return this.game.failLevel("§cВы умерли").thenAccept(unused -> {
-            this.player.setGameMode(GameMode.ADVENTURE);
+    public void startActivity() {
+        this.game.resetLevelGame("§cПодготовка уровня", false);
 
-            for (PotionEffect effect : this.player.getActivePotionEffects()) {
-                this.player.removePotionEffect(effect.getType());
-            }
+        this.player.setGameMode(GameMode.ADVENTURE);
 
-            this.player.getInventory().clear();
-            if (this.isEditorGame) {
-                this.plugin.get(ItemsManager.class).putItem(this.player, TestGameItem.class);
-            }
-        });
+        for (PotionEffect effect : this.player.getActivePotionEffects()) {
+            this.player.removePotionEffect(effect.getType());
+        }
+
+        this.player.getInventory().clear();
+        if (this.isEditorGame) {
+            this.plugin.get(ItemsManager.class).putItem(this.player, TestGameItem.class);
+        }
     }
 
     @Override
@@ -140,8 +140,7 @@ public class PlayActivity extends UserActivity {
     }
 
     @Override
-    public @NonNull CompletableFuture<Void> endActivity() {
+    public void endActivity() {
         this.game.forceStopLevelGame();
-        return CompletableFuture.completedFuture(null);
     }
 }

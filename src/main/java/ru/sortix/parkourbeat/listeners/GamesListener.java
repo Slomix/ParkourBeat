@@ -69,9 +69,9 @@ public final class GamesListener implements Listener {
             plugin.get(LevelsManager.class).getLevelsSettings().getLevelSettingDAO();
 
         for (Player player : plugin.getServer().getOnlinePlayers()) {
-            if (this.teleportToSpawnIfInLevelWorld(player)) {
-                player.sendMessage("Перезагрузка плагина привела к телепортации в лобби");
-            }
+            // TODO Check .getSpawnLocation() if quit-world is unloaded at this moment
+            // TODO Spectate if world is level world
+            TeleportUtils.teleportAsync(plugin, player, Settings.getLobbySpawn());
         }
     }
 
@@ -100,27 +100,16 @@ public final class GamesListener implements Listener {
     @EventHandler
     private void on(PlayerJoinEvent event) {
         Player player = event.getPlayer();
-        if (this.isLobby(player.getWorld())) {
-            this.onPlayerTeleportToLobby.accept(player);
-        } else {
-            this.teleportToSpawnIfInLevelWorld(player);
-        }
+        // TODO Check .getSpawnLocation() if quit-world is unloaded at this moment
+        // TODO Spectate if world is level world
+        this.onPlayerTeleportToLobby.accept(player);
     }
 
     @EventHandler
     private void on(PlayerSpawnLocationEvent event) {
-        Player player = event.getPlayer();
-
-        if (true) {
-            event.setSpawnLocation(Settings.getLobbySpawn());
-            return;
-        }
-
-        if (this.isLobby(player.getWorld())) {
-            event.setSpawnLocation(Settings.getLobbySpawn());
-        } else {
-            this.teleportToSpawnIfInLevelWorld(player);
-        }
+        // TODO Check .getSpawnLocation() if quit-world is unloaded at this moment
+        // TODO Spectate if world is level world
+        event.setSpawnLocation(Settings.getLobbySpawn());
     }
 
     @EventHandler
@@ -134,16 +123,6 @@ public final class GamesListener implements Listener {
                 activity.startActivity();
             });
         }
-    }
-
-    private boolean teleportToSpawnIfInLevelWorld(@NonNull Player player) {
-        if (!this.levelSettingDAO.isLevelWorld(player.getWorld())) return false;
-        TeleportUtils.teleportAsync(this.plugin, player, Settings.getLobbySpawn())
-            .thenAccept(success -> {
-                if (!success) return;
-                this.onPlayerTeleportToLobby.accept(player);
-            });
-        return true;
     }
 
     @EventHandler
@@ -280,7 +259,7 @@ public final class GamesListener implements Listener {
     private void doActivityAction(@NonNull Player player, @NonNull Consumer<UserActivity> activityConsumer) {
         UserActivity activity = this.activityManager.getActivity(player);
         if (activity == null) return;
-        if (player.getLocation().getWorld() == activity.getLevel().getWorld()) {
+        if (activity.isValidWorld(player.getWorld())) {
             activityConsumer.accept(activity);
             return;
         }
@@ -288,7 +267,7 @@ public final class GamesListener implements Listener {
             + "Expected: " + activity.getLevel().getWorld().getName() + ". "
             + "Got: " + player.getLocation().getWorld().getName()
         );
-        this.activityManager.setActivity(player, null);
+        this.activityManager.switchActivity(player, null, null);
         player.sendMessage("Произошла техническая ошибка, приносим свои извинения");
     }
 

@@ -176,7 +176,7 @@ public class ParticleController {
     }
 
     public void startSpawnParticles(@NonNull Player player) {
-        if (player.getWorld() != this.world) {
+        if (false && player.getWorld() != this.world) {
             throw new IllegalStateException(
                 "Player is not in world " + this.world.getName() + "!\nPlayer world: " + player.getWorld().getName());
         }

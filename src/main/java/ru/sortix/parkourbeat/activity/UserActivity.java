@@ -12,8 +12,6 @@ import org.bukkit.event.player.PlayerToggleSprintEvent;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.levels.Level;
 
-import java.util.concurrent.CompletableFuture;
-
 @Getter
 @RequiredArgsConstructor
 public abstract class UserActivity {
@@ -25,7 +23,7 @@ public abstract class UserActivity {
         return this.getLevel().getWorld() == world;
     }
 
-    public abstract @NonNull CompletableFuture<Void> startActivity();
+    public abstract void startActivity();
 
     public abstract void on(@NonNull PlayerResourcePackStatusEvent event);
 
@@ -41,7 +39,7 @@ public abstract class UserActivity {
 
     public abstract void onPlayerFall();
 
-    public abstract @NonNull CompletableFuture<Void> endActivity();
+    public abstract void endActivity();
 
     protected int getFallHeight(boolean isEditing) {
         if (isEditing) return -5;
