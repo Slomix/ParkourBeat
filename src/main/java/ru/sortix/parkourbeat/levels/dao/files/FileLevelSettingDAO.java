@@ -1,12 +1,11 @@
 package ru.sortix.parkourbeat.levels.dao.files;
 
 import lombok.NonNull;
-import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
+import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
@@ -22,11 +21,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class FileLevelSettingDAO implements LevelSettingDAO {
-    private final Logger logger;
-    private final Server server;
+    private final ParkourBeat plugin;
 
     private final Path worldsContainerPath;
     private final File levelsDirRelativeDir;
@@ -36,11 +33,9 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     private final WorldSettingsDAO worldSettingsDAO;
 
     public FileLevelSettingDAO(@NonNull LevelsManager levelsManager) {
-        Plugin plugin = levelsManager.getPlugin();
-        this.logger = plugin.getLogger();
-        this.server = plugin.getServer();
+        this.plugin = levelsManager.getPlugin();
 
-        this.worldsContainerPath = this.server.getWorldContainer().toPath();
+        this.worldsContainerPath = this.plugin.getServer().getWorldContainer().toPath();
         this.levelsDirRelativeDir = new File(plugin.getDataFolder(), "levels");
         this.levelsDirAbsoluteFile = this.levelsDirRelativeDir.getAbsoluteFile();
         //noinspection ResultOfMethodCallIgnored
@@ -64,7 +59,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     @Override
     @Nullable
     public LevelSettings loadLevelSettings(@NonNull UUID levelId, @Nullable GameSettings gameSettings) {
-        World world = this.server.getWorld(getBukkitWorldName(levelId));
+        World world = this.plugin.getServer().getWorld(getBukkitWorldName(levelId));
         if (world == null) return null;
 
         File settingsDir = getSettingsDirectory(levelId);
@@ -73,7 +68,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
             worldSettings = this.loadLevelWorldSettings(settingsDir);
             worldSettings = worldSettings.setWorld(worldSettings.getEnvironment(), world);
         } catch (Exception e) {
-            this.logger.log(Level.SEVERE,
+            this.plugin.getLogger().log(Level.SEVERE,
                 "Unable to load level settings of " + levelId + " from " + settingsDir, e);
             return null;
         }
@@ -81,7 +76,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         if (gameSettings == null) gameSettings = this.loadLevelGameSettings(levelId);
         if (gameSettings == null) return null;
 
-        return new LevelSettings(world, worldSettings, gameSettings);
+        return new LevelSettings(this.plugin, world, worldSettings, gameSettings);
     }
 
     @Override
@@ -100,7 +95,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
             saveConfig(gameSettingsConfig, getFile(levelId, "game_settings.yml"));
             saveConfig(worldSettingsConfig, getFile(levelId, "world_settings.yml"));
         } catch (Exception e) {
-            this.logger.log(
+            this.plugin.getLogger().log(
                 Level.SEVERE,
                 "Unable to save level " + settings.getGameSettings().getUniqueId(),
                 e);
@@ -110,7 +105,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
     @Override
     @Nullable
     public World getBukkitWorld(@NonNull UUID levelId) {
-        return this.server.getWorld(this.getBukkitWorldName(levelId));
+        return this.plugin.getServer().getWorld(this.getBukkitWorldName(levelId));
     }
 
     @Override
@@ -156,14 +151,14 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         File settingsDir = getSettingsDirectory(levelId);
         File gameSettingsFile = new File(settingsDir, "game_settings.yml");
         if (!gameSettingsFile.isFile()) {
-            this.logger.warning("Not a file: " + gameSettingsFile.getAbsolutePath());
+            this.plugin.getLogger().warning("Not a file: " + gameSettingsFile.getAbsolutePath());
             return null;
         }
         try {
             FileConfiguration gameConfig = YamlConfiguration.loadConfiguration(gameSettingsFile);
             return this.gameSettingsDAO.load(levelId, gameConfig);
         } catch (Exception e) {
-            this.logger.log(Level.SEVERE, "Unable to load game settings from " + gameSettingsFile, e);
+            this.plugin.getLogger().log(Level.SEVERE, "Unable to load game settings from " + gameSettingsFile, e);
             return null;
         }
     }
@@ -207,32 +202,32 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         List<GameSettings> result = new ArrayList<>();
 
         if (!this.levelsDirRelativeDir.isDirectory()) {
-            this.logger.warning("Levels directory not found: " + this.levelsDirRelativeDir.getAbsolutePath());
+            this.plugin.getLogger().warning("Levels directory not found: " + this.levelsDirRelativeDir.getAbsolutePath());
             return result;
         }
 
         File[] files = this.levelsDirRelativeDir.listFiles();
         if (files == null) {
-            this.logger.warning(
+            this.plugin.getLogger().warning(
                 "Unable to get levels directory content: " + this.levelsDirRelativeDir.getAbsolutePath());
             return result;
         }
 
         for (File file : files) {
             if (!file.isDirectory()) {
-                this.logger.warning("Not a directory: " + file.getAbsolutePath());
+                this.plugin.getLogger().warning("Not a directory: " + file.getAbsolutePath());
                 continue;
             }
             UUID levelId;
             try {
                 levelId = UUID.fromString(file.getName());
             } catch (IllegalArgumentException e) {
-                this.logger.warning("Unable to parse level UUID by world dir name: " + file.getAbsolutePath());
+                this.plugin.getLogger().warning("Unable to parse level UUID by world dir name: " + file.getAbsolutePath());
                 continue;
             }
             GameSettings gameSettings = this.loadLevelGameSettings(levelId);
             if (gameSettings == null) {
-                this.logger.warning("Unable to load name of level " + levelId);
+                this.plugin.getLogger().warning("Unable to load name of level " + levelId);
                 continue;
             }
             result.add(gameSettings);

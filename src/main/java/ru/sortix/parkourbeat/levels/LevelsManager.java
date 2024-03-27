@@ -9,6 +9,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.boss.DragonBattle;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EnderDragon;
+import org.bukkit.scheduler.BukkitTask;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.inventory.type.CreateLevelMenu;
@@ -40,6 +41,8 @@ public class LevelsManager implements PluginManager {
     private final AvailableLevelsCollection availableLevels;
     private final Map<UUID, Level> loadedLevelsById = new HashMap<>();
     private final Map<World, Level> loadedLevelsByWorld = new HashMap<>();
+    private final Set<ParticleController> particleControllers = new HashSet<>();
+    private final BukkitTask particlesRenderingTask;
     private final boolean gameRulesSupport = ClassUtils.isClassPresent("org.bukkit.GameRule");
     private int nextLevelNumber = 1;
 
@@ -54,6 +57,12 @@ public class LevelsManager implements PluginManager {
         this.levelsSettings = new LevelSettingsManager(new FileLevelSettingDAO(this));
         this.availableLevels = new AvailableLevelsCollection(this.plugin.getLogger());
         this.loadAvailableLevelNames();
+
+        this.particlesRenderingTask = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+            for (ParticleController controller : this.particleControllers) {
+                controller.tickParticles();
+            }
+        }, 0, 5);
     }
 
     private void loadAvailableLevelNames() {
@@ -103,7 +112,15 @@ public class LevelsManager implements PluginManager {
                     int uniqueNumber = this.nextLevelNumber++;
                     String displayName = "Уровень #" + uniqueNumber;
                     LevelSettings levelSettings = LevelSettings.create(
-                        world, environment, levelId, uniqueNumber, displayName, ownerId, ownerName);
+                        this.plugin,
+                        world,
+                        environment,
+                        levelId,
+                        uniqueNumber,
+                        displayName,
+                        ownerId,
+                        ownerName
+                    );
                     world.setSpawnLocation(levelSettings.getWorldSettings().getSpawn());
                     Level level = new Level(levelSettings, world);
                     level.setEditing(true);
@@ -414,9 +431,20 @@ public class LevelsManager implements PluginManager {
 
     @Override
     public void disable() {
+        if (!this.particlesRenderingTask.isCancelled()) {
+            this.particlesRenderingTask.cancel();
+        }
         for (Level level : this.loadedLevelsById.values()) {
             if (!level.isEditing()) continue;
             this.saveLevelSettingsAndBlocks(level);
         }
+    }
+
+    public void addParticleController(@NonNull ParticleController controller) {
+        this.particleControllers.add(controller);
+    }
+
+    public void removeParticleController(@NonNull ParticleController controller) {
+        this.particleControllers.remove(controller);
     }
 }

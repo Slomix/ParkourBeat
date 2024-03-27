@@ -1,36 +1,39 @@
 package ru.sortix.parkourbeat.levels;
 
+import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.utils.java.ParticleUtils;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
 
 public class ParticleController {
     private static final double SEGMENT_LENGTH = 0.25;
     private static final double MAX_PARTICLES_VIEW_DISTANCE_SQUARED = Math.pow(10, 2);
 
-    private final @NonNull Plugin plugin;
+    private final @NonNull ParkourBeat plugin;
     private final @NonNull ConcurrentLinkedQueue<Location> particleLocations = new ConcurrentLinkedQueue<>();
     private final @NonNull Map<Double, Color> colorsChangeLocations = new LinkedHashMap<>();
     private final @NonNull Set<Player> particleViewers = ConcurrentHashMap.newKeySet();
+    @Getter
     private final @NonNull World world;
     private final @NonNull DirectionChecker directionChecker;
-    private @Nullable BukkitTask particleTask = null;
     private boolean isLoaded = false;
 
     public ParticleController(
-        @NonNull Plugin plugin, @NonNull World world, @NonNull DirectionChecker directionChecker) {
+        @NonNull ParkourBeat plugin,
+        @NonNull World world,
+        @NonNull DirectionChecker directionChecker
+    ) {
         this.plugin = plugin;
         this.world = world;
         this.directionChecker = directionChecker;
@@ -95,10 +98,12 @@ public class ParticleController {
     }
 
     public void loadParticleLocations(@NonNull List<Waypoint> waypoints) {
+        this.stopSpawnParticles();
+
         if (this.isLoaded) {
+            this.isLoaded = false;
             this.particleLocations.clear();
             this.colorsChangeLocations.clear();
-            if (this.particleTask != null) this.particleTask.cancel();
         }
 
         Color previousColor = null;
@@ -121,37 +126,59 @@ public class ParticleController {
                 this.particleLocations.addAll(curvedPath);
             }
         }
-        this.particleTask = this.plugin
-            .getServer()
-            .getScheduler()
-            .runTaskTimerAsynchronously(
-                this.plugin,
-                () -> {
-                    this.particleViewers.forEach((player) -> {
-                        if (player == null || !player.isOnline()) {
-                            throw new IllegalStateException("Player is not online!");
-                        } else if (player.getWorld() != this.world) {
-                            throw new IllegalStateException("Player is not in world "
-                                + this.world.getName()
-                                + "!\nPlayer world: "
-                                + player.getWorld());
-                        } else {
-                            updatePlayerParticles(player);
-                        }
-                    });
-                },
-                0,
-                5);
         this.isLoaded = true;
+        this.plugin.get(LevelsManager.class).addParticleController(this);
+    }
+
+    private static long LAST_STACK_PRINTED_AT = 0;
+
+    public void tickParticles() {
+        if (!this.isLoaded) {
+            this.plugin.getLogger().severe(
+                "Unable to tick particles in world " + this.world.getName() + ": "
+                    + "Controller not loaded");
+            return;
+        }
+
+        for (Player player : this.particleViewers) {
+            try {
+                this.displayPlayerParticles(player);
+            } catch (Exception e) {
+                if (System.currentTimeMillis() - LAST_STACK_PRINTED_AT > 5_000) {
+                    LAST_STACK_PRINTED_AT = System.currentTimeMillis();
+                    this.plugin.getLogger().log(Level.SEVERE,
+                        "Unable to tick particles in world " + this.world.getName()
+                            + " of player " + player.getName(), e);
+                } else {
+                    this.plugin.getLogger().log(Level.SEVERE,
+                        "Unable to tick particles in world " + this.world.getName()
+                            + " of player " + player.getName() + ": " + e.getMessage());
+                }
+            }
+        }
+    }
+
+    private void displayPlayerParticles(@NonNull Player player) {
+        if (!player.isOnline()) {
+            throw new IllegalStateException("Player is not online!");
+        }
+        if (player.getWorld() != this.world) {
+            throw new IllegalStateException("Wrong player world: " + player.getWorld().getName());
+        }
+
+        Color color = getCurrentColor(player.getLocation());
+
+        // TODO Отправлять лишь частицы из двух ближайших секций:
+        //  https://github.com/Slomix/ParkourBeat/issues/17
+        //noinspection UnnecessaryLocalVariable
+        Iterable<Location> locations = this.particleLocations;
+        ParticleUtils.displayRedstoneParticles(player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
     }
 
     public void startSpawnParticles(@NonNull Player player) {
         if (player.getWorld() != this.world) {
             throw new IllegalStateException(
                 "Player is not in world " + this.world.getName() + "!\nPlayer world: " + player.getWorld());
-        }
-        if (this.particleTask == null || this.particleTask.isCancelled()) {
-            throw new IllegalStateException("Particle task is not running!");
         }
 
         this.particleViewers.add(player);
@@ -161,17 +188,8 @@ public class ParticleController {
         this.particleViewers.remove(player);
     }
 
-    private void updatePlayerParticles(@NonNull Player player) {
-        Color color = getCurrentColor(player.getLocation());
-
-        // TODO Отправлять лишь частицы из двух ближайших секций:
-        //  https://github.com/Slomix/ParkourBeat/issues/17
-        Iterable<Location> locations = this.particleLocations;
-        ParticleUtils.displayRedstoneParticles(player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
-    }
-
     public void stopSpawnParticles() {
-        if (this.particleTask != null) this.particleTask.cancel();
+        this.plugin.get(LevelsManager.class).removeParticleController(this);
     }
 
     public boolean isLoaded() {
