@@ -51,7 +51,13 @@ public class TeleportUtils {
 
     @NonNull
     public CompletableFuture<Boolean> teleportAsync(
-        @NonNull Plugin plugin, @NonNull Player player, @NonNull Location location) {
+        @NonNull Plugin plugin,
+        @NonNull Player player,
+        @NonNull Location location
+    ) {
+        if (false) plugin.getLogger().log(Level.INFO,
+            "Teleporting " + player.getName()
+                + " from " + toString(player.getLocation()) + " to " + toString(location), new RuntimeException("DEBUG"));
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         if (ASYNC_TELEPORT_SUPPORTED) {
             player.setFallDistance(0f);
@@ -71,8 +77,17 @@ public class TeleportUtils {
 
     @NonNull
     private String toString(@NonNull Location loc) {
+        String worldName = loc.getWorld() == null ? null : loc.getWorld().getName();
+        if (worldName == null) {
+            worldName = "null";
+        } else {
+            int splitter = worldName.lastIndexOf("/");
+            if (splitter >= 0) {
+                worldName = worldName.substring(splitter + "/".length());
+            }
+        }
         return "|"
-            + (loc.getWorld() == null ? "null" : loc.getWorld().getName())
+            + worldName
             + " "
             + loc.getBlockX()
             + " "
