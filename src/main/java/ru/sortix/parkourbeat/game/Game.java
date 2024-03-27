@@ -188,22 +188,18 @@ public class Game {
     }
 
     private void resetRunningLevelGame(@NonNull String title, boolean levelComplete) {
-                if (this.currentState != State.RUNNING) return;
+        if (this.currentState != State.RUNNING) return;
 
+        this.player.sendTitle(title, null, 10, 10, 10);
 
-                this.player.sendTitle(title, null, 10, 10, 10);
+        if (levelComplete) {
+            this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
+            this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 0.5f, 1);
+        } else {
+            this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
+        }
 
-
-                if (levelComplete) {
-                    this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
-                    this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 0.5f, 1);
-                } else {
-                    this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
-                }
-
-                this.gameMoveHandler.getAccuracyChecker().reset();
-
-
+        this.gameMoveHandler.getAccuracyChecker().reset();
     }
 
     public void forceStopLevelGame() {

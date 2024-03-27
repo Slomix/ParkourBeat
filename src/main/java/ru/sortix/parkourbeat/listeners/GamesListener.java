@@ -279,7 +279,17 @@ public final class GamesListener implements Listener {
 
     private void doActivityAction(@NonNull Player player, @NonNull Consumer<UserActivity> activityConsumer) {
         UserActivity activity = this.activityManager.getActivity(player);
-        if (activity != null) activityConsumer.accept(activity);
+        if (activity == null) return;
+        if (player.getLocation().getWorld() == activity.getLevel().getWorld()) {
+            activityConsumer.accept(activity);
+            return;
+        }
+        this.plugin.getLogger().severe("Detected wrong activity world of player " + player.getName() + ". "
+            + "Expected: " + activity.getLevel().getWorld().getName() + ". "
+            + "Got: " + player.getLocation().getWorld().getName()
+        );
+        this.activityManager.setActivity(player, null);
+        player.sendMessage("Произошла техническая ошибка, приносим свои извинения");
     }
 
     private boolean isLobby(@NonNull World world) {
