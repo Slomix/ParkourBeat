@@ -1,5 +1,7 @@
 package ru.sortix.parkourbeat.game.movement;
 
+import lombok.Getter;
+import lombok.NonNull;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.levels.DirectionChecker;
@@ -10,28 +12,29 @@ import java.util.List;
 public class MovementAccuracyChecker {
 
     private static final double MAX_ALLOW_OFFSET = 0.1;
-    private final List<Waypoint> waypoints;
-    private final DirectionChecker directionChecker;
+    private final @NonNull List<Waypoint> waypoints;
+    private final @NonNull DirectionChecker directionChecker;
+    @Getter
     private double accuracy;
     private int currentSegment;
     private int totalSteps;
     private double totalOffset;
 
-    public MovementAccuracyChecker(List<Waypoint> waypoints, DirectionChecker directionChecker) {
+    public MovementAccuracyChecker(@NonNull List<Waypoint> waypoints, @NonNull DirectionChecker directionChecker) {
         this.waypoints = waypoints;
         this.directionChecker = directionChecker;
-        reset();
+        this.reset();
     }
 
-    public void onPlayerLocationChange(Location newLocation) {
-        if (currentSegment >= waypoints.size() - 1) {
+    public void onPlayerLocationChange(@NonNull Location newLocation) {
+        if (this.currentSegment >= this.waypoints.size() - 1) {
             return;
         }
         Location previousLocation = null;
-        if (currentSegment < waypoints.size() - 2) {
-            previousLocation = waypoints.get(currentSegment + 1).getLocation();
-            if (directionChecker.isCorrectDirection(previousLocation, newLocation)) {
-                currentSegment++;
+        if (this.currentSegment < this.waypoints.size() - 2) {
+            previousLocation = this.waypoints.get(this.currentSegment + 1).getLocation();
+            if (this.directionChecker.isCorrectDirection(previousLocation, newLocation)) {
+                this.currentSegment++;
             } else {
                 previousLocation = null;
             }
@@ -39,30 +42,26 @@ public class MovementAccuracyChecker {
 
         Location point1 = previousLocation != null
             ? previousLocation
-            : waypoints.get(currentSegment).getLocation();
-        Location point2 = waypoints.get(currentSegment + 1).getLocation();
+            : this.waypoints.get(this.currentSegment).getLocation();
+        Location point2 = this.waypoints.get(this.currentSegment + 1).getLocation();
 
         double distanceToLine = calculateDistanceToLine(newLocation, point1, point2);
 
         if (distanceToLine > MAX_ALLOW_OFFSET) {
-            totalOffset += distanceToLine - MAX_ALLOW_OFFSET;
+            this.totalOffset += distanceToLine - MAX_ALLOW_OFFSET;
         }
-        totalSteps++;
+        this.totalSteps++;
 
-        double averageDeviation = totalOffset / totalSteps;
+        double averageDeviation = this.totalOffset / this.totalSteps;
 
-        accuracy = 1.0 / (1.0 + averageDeviation);
+        this.accuracy = 1.0 / (1.0 + averageDeviation);
     }
 
     public void reset() {
-        accuracy = 1;
-        currentSegment = 0;
-        totalSteps = 0;
-        totalOffset = 0;
-    }
-
-    public double getAccuracy() {
-        return accuracy;
+        this.accuracy = 1;
+        this.currentSegment = 0;
+        this.totalSteps = 0;
+        this.totalOffset = 0;
     }
 
     /**
@@ -73,7 +72,7 @@ public class MovementAccuracyChecker {
      * @param linePoint2 the second location defining the line
      * @return the distance from the point to the line
      */
-    private double calculateDistanceToLine(Location point, Location linePoint1, Location linePoint2) {
+    private double calculateDistanceToLine(@NonNull Location point, @NonNull Location linePoint1, @NonNull Location linePoint2) {
         Vector lineVector = linePoint2.toVector().subtract(linePoint1.toVector());
         Vector pointVector = point.toVector().subtract(linePoint1.toVector());
 

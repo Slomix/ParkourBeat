@@ -7,7 +7,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
@@ -19,17 +18,17 @@ public class GameMoveHandler {
     private static final int NOT_SPRINT_DAMAGE_PER_PERIOD = 1;
     private static final int NOT_SPRINT_DAMAGE_PERIOD_TICKS = 1;
 
-    private final Game game;
-    private final Location startWaypoint;
-    private final Location finishWaypoint;
-    private final Vector startToFinishVector;
+    private final @NonNull Game game;
+    private final @NonNull Location startWaypoint;
+    private final @NonNull Location finishWaypoint;
+    private final @NonNull Vector startToFinishVector;
 
     @Getter
-    private final MovementAccuracyChecker accuracyChecker;
+    private final @NonNull MovementAccuracyChecker accuracyChecker;
 
     private BukkitTask task;
 
-    public GameMoveHandler(Game game) {
+    public GameMoveHandler(@NonNull Game game) {
         this.game = game;
 
         LevelSettings settings = game.getLevel().getLevelSettings();
@@ -42,7 +41,7 @@ public class GameMoveHandler {
         this.startToFinishVector = this.finishWaypoint.toVector().subtract(this.startWaypoint.toVector());
     }
 
-    public void onPreparingState(PlayerMoveEvent event) {
+    public void onPreparingState(@NonNull PlayerMoveEvent event) {
         event.setCancelled(true);
     }
 
@@ -74,7 +73,7 @@ public class GameMoveHandler {
         player.sendActionBar("§aТочность: " + String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f) + "%");
     }
 
-    public void onRunningState(PlayerToggleSprintEvent event) {
+    public void onRunningState(@NonNull PlayerToggleSprintEvent event) {
         Player player = event.getPlayer();
         if (!event.isSprinting()) {
             startDamageTask(player, "§cНе переставайте бежать", "§cВы остановились");
@@ -85,13 +84,13 @@ public class GameMoveHandler {
         }
     }
 
-    private boolean isLookingAtFinish(Player player) {
+    private boolean isLookingAtFinish(@NonNull Player player) {
         Vector playerVector = player.getLocation().getDirection();
         double angleDegrees = Math.toDegrees(playerVector.angle(this.startToFinishVector));
         return angleDegrees < 100;
     }
 
-    private void startDamageTask(Player player, String reason, String stopReason) {
+    private void startDamageTask(@NonNull Player player, @NonNull String reason, @NonNull String stopReason) {
         player.playSound(player.getLocation(), Sound.ENTITY_WOLF_HURT, 1, 1);
 
         this.task = new BukkitRunnable() {
@@ -119,11 +118,6 @@ public class GameMoveHandler {
                     this.cancel();
                 }
             }
-        }.runTaskTimer(this.getPlugin(), 0, 2);
-    }
-
-    @NonNull
-    public Plugin getPlugin() {
-        return this.game.getPlugin();
+        }.runTaskTimer(this.game.getPlugin(), 0, 2);
     }
 }

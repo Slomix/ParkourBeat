@@ -18,23 +18,24 @@ import java.util.List;
 
 @Getter
 public class WorldSettings {
-    private final World.Environment environment;
-    private final List<Waypoint> waypoints;
-    private final int minWorldHeight;
-    private final DirectionChecker.Direction direction;
+    private final @NonNull World.Environment environment;
+    private final @NonNull List<Waypoint> waypoints;
+    private final int minWorldHeight; // TODO Update dynamically
+    private final @NonNull DirectionChecker.Direction direction;
 
     @Setter
-    private Location spawn;
+    private @NonNull Location spawn;
 
     @Setter
-    private Vector startWaypoint;
+    private @NonNull Vector startWaypoint;
 
     @Setter
-    private Vector finishWaypoint;
+    private @NonNull Vector finishWaypoint;
 
     public WorldSettings(
         @NonNull World.Environment environment,
-        @NonNull DirectionChecker.Direction direction, @NonNull Location spawn,
+        @NonNull DirectionChecker.Direction direction,
+        @NonNull Location spawn,
         @NonNull List<Waypoint> waypoints
     ) {
 

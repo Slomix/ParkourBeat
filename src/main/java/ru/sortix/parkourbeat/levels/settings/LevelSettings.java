@@ -13,12 +13,13 @@ import java.util.UUID;
 
 @Getter
 public class LevelSettings {
-    private final WorldSettings worldSettings;
-    private final GameSettings gameSettings;
-    private final ParticleController particleController;
-    private final DirectionChecker directionChecker;
-    private final Location startWaypoint;
-    private final Location finishWaypoint;
+    private final @NonNull WorldSettings worldSettings;
+    private final @NonNull GameSettings gameSettings;
+    private final @NonNull ParticleController particleController;
+    private final @NonNull DirectionChecker directionChecker;
+    private final @NonNull Location startWaypoint;
+    private final @NonNull Location finishWaypoint;
+
     public LevelSettings(@NonNull World world, @NonNull WorldSettings worldSettings, @NonNull GameSettings gameSettings) {
         this.worldSettings = worldSettings;
         this.gameSettings = gameSettings;

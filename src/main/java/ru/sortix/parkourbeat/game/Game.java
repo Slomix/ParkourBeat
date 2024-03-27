@@ -27,7 +27,8 @@ public class Game {
     private final @NonNull Player player;
     private final @NonNull Level level;
     private final @NonNull GameMoveHandler gameMoveHandler;
-    private State currentState = State.PREPARING;
+    private @NonNull State currentState = State.PREPARING;
+
     private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         this.levelsManager = plugin.get(LevelsManager.class);
         this.player = player;
