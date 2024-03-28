@@ -65,6 +65,13 @@ public class Settings {
         isLoaded = true;
     }
 
+    public static void unload() {
+        isLoaded = false;
+        lobbySpawn = null;
+        levelFixedEditableArea = null;
+        levelDefaultSettings = null;
+    }
+
     @NonNull
     private WorldCreator newWorldCreator(@NonNull String worldName) {
         WorldCreator worldCreator = new WorldCreator(worldName);
