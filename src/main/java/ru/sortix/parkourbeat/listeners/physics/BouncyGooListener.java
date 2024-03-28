@@ -19,7 +19,7 @@ public class BouncyGooListener implements Listener {
     private static final double FACTOR = 3d;
     private static final TouchChecker checker = new TouchChecker(Set.of(
         Material.SLIME_BLOCK,
-        Material.LIGHT_BLUE_CONCRETE    // got a portal 2 reference? x2
+        Material.LIGHT_BLUE_CONCRETE
     ));
 
     public BouncyGooListener(@NotNull ParkourBeat plugin) {}

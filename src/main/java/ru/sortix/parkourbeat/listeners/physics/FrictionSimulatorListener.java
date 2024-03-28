@@ -23,7 +23,7 @@ public class FrictionSimulatorListener implements Listener {
         Material.BLUE_ICE,
         Material.FROSTED_ICE,
         Material.PACKED_ICE,
-        Material.ORANGE_CONCRETE    // got a portal 2 reference?
+        Material.ORANGE_CONCRETE
     ));
 
     public FrictionSimulatorListener(@NotNull ParkourBeat plugin) {}
@@ -39,17 +39,12 @@ public class FrictionSimulatorListener implements Listener {
         Vector velocity = event.getFrom().toVector().subtract(event.getTo().toVector());
         Vector normal = calculateNormal(touching);
 
-        // A lot of cursed Maths related stuff.
-        // WARNING: Dymeth is prohibited here due to
-        // the high severity of mind-blowing!
-
         // You're pretty lucky that this is actually implemented by Bukkit!
+        // But just in case... arc cosine of dot / (magnitude product)
         float playerWallSlope = normal.angle(velocity);
         if (playerWallSlope > WHAT_IS_ACTUALLY_ASKEW && playerWallSlope < INVERSE_WHAT_IS_ACTUALLY_ASKEW) return;
 
-        // This formula is self-written from my imagination
-        // at the 3 am (Europe/Moscow), so be aware of possible
-        // ~~bugs~~ unintended features!
+        // Be aware of ~~bugs~~ unintended features as it is SELF-INVENTED!
         Vector friction = velocity.subtract(normal.multiply(velocity.dot(normal) * 2));
         player.setVelocity(friction);
     }
@@ -64,8 +59,10 @@ public class FrictionSimulatorListener implements Listener {
         // -> x -> = ^
         // -> x ^ = |
         // \ x ^ = /
+        //
+        // Basically in some cases that provides a decent rotation
+        // without the use of matrices and quaternions.
 
-        // SELF-INVENTED AT 4.10 AM
         if (!touching.isEmpty()) {
             touching.forEach(face -> vec.add(face.getDirection()));
         }
