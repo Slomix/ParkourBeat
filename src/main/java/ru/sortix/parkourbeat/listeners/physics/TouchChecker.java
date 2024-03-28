@@ -14,7 +14,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class TouchChecker {
 
-    private static final double WHAT_IS_ACTUALLY_CLOSE = 1.01d;
+    private static final double WHAT_IS_ACTUALLY_CLOSE = 0.85d;
     private final Set<Material> introverts;
 
     public List<BlockFace> getTouchingNeighbourIntroverts(Location pos, BoundingBox aabb) {
