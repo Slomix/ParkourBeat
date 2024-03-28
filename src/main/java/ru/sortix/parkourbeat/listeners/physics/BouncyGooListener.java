@@ -34,12 +34,18 @@ public class BouncyGooListener implements Listener {
         Vector velocity = event.getFrom().toVector().subtract(event.getTo().toVector());
 
         Vector bounceVelocity = normal.multiply(velocity.dot(normal) * 2).subtract(velocity);
+        try {
+            bounceVelocity.checkFinite();
+        } catch (Exception exception) {
+            return;
+        }
         player.setVelocity(bounceVelocity.multiply(FACTOR));
     }
 
     private Vector calculateBounceNormal(List<BlockFace> slimes) {
         Vector velocity = new Vector();
         slimes.forEach(face -> velocity.add(face.getDirection()));
+        if (velocity.equals(new Vector())) return velocity.zero();
         return velocity.normalize();
     }
 
