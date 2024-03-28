@@ -45,7 +45,11 @@ public class FrictionSimulatorListener implements Listener {
         if (playerWallSlope > WHAT_IS_ACTUALLY_ASKEW && playerWallSlope < INVERSE_WHAT_IS_ACTUALLY_ASKEW) return;
 
         // Be aware of ~~bugs~~ unintended features as it is SELF-INVENTED!
-        Vector friction = velocity.subtract(normal.multiply(velocity.dot(normal) * 2));
+        Vector friction = velocity.clone().subtract(normal.multiply(velocity.dot(normal) * 2));
+        if (friction.equals(velocity)) {
+            // Nothing changed, We do not want to interrupt player's movement
+            return;
+        }
         player.setVelocity(friction);
     }
 
@@ -66,7 +70,9 @@ public class FrictionSimulatorListener implements Listener {
         if (!touching.isEmpty()) {
             touching.forEach(face -> vec.add(face.getDirection()));
         }
-        return vec.crossProduct(new Vector(0, 1, 0)).normalize();
+        vec.crossProduct(new Vector(0, 1, 0));
+        if (vec.equals(new Vector())) return vec.zero();
+        return vec.normalize();
     }
 
 }
