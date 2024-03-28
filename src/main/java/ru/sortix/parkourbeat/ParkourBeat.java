@@ -48,10 +48,10 @@ public class ParkourBeat extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        this.unregisterListeners();
-        this.unregisterCommands();
+        this.unregisterAllListeners();
+        this.unregisterAllCommands();
         Settings.unload();
-        this.unregisterManagers();
+        this.unregisterAllManagers();
     }
 
     private void registerAllManagers() {
@@ -109,7 +109,7 @@ public class ParkourBeat extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(listener, this);
     }
 
-    private void unregisterManagers() {
+    private void unregisterAllManagers() {
         List<PluginManager> managersToDisable = new ArrayList<>(this.managers.values());
         Collections.reverse(managersToDisable);
         for (PluginManager manager : managersToDisable) {
@@ -118,7 +118,7 @@ public class ParkourBeat extends JavaPlugin {
         this.managers.clear();
     }
 
-    private void unregisterCommands() {
+    private void unregisterAllCommands() {
         unregisterSafely(() -> {
             if (liteCommands != null) {
                 liteCommands.unregister();
@@ -127,7 +127,7 @@ public class ParkourBeat extends JavaPlugin {
         });
     }
 
-    private void unregisterListeners() {
+    private void unregisterAllListeners() {
         unregisterSafely(() -> HandlerList.unregisterAll(this));
     }
 
