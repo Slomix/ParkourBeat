@@ -16,7 +16,7 @@ import java.util.Set;
 // Makes slime blocks quite bouncy
 public class BouncyGooListener implements Listener {
 
-    private static final double FACTOR = 3d;
+    private static final double FACTOR = 1.1d;
     private static final TouchChecker checker = new TouchChecker(Set.of(
         Material.SLIME_BLOCK,
         Material.LIGHT_BLUE_CONCRETE
