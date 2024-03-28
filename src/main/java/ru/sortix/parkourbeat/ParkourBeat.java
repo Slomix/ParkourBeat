@@ -23,6 +23,8 @@ import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
 import ru.sortix.parkourbeat.listeners.FixesListener;
 import ru.sortix.parkourbeat.listeners.GamesListener;
+import ru.sortix.parkourbeat.listeners.physics.BouncyGooListener;
+import ru.sortix.parkourbeat.listeners.physics.FrictionSimulatorListener;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
 import ru.sortix.parkourbeat.world.WorldsListener;
 import ru.sortix.parkourbeat.world.WorldsManager;
@@ -51,6 +53,8 @@ public class ParkourBeat extends JavaPlugin {
         this.registerListener(GamesListener::new);
         this.registerListener(WorldsListener::new);
         this.registerListener(InventoriesListener::new);
+        this.registerListener(BouncyGooListener::new);
+        this.registerListener(FrictionSimulatorListener::new);
     }
 
     @Override
