@@ -14,7 +14,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class TouchChecker {
 
-    private static final double WHAT_IS_ACTUALLY_CLOSE = 0.85d;
+    private static final double WHAT_IS_ACTUALLY_CLOSE = 1d;
     private final Set<Material> introverts;
 
     public List<BlockFace> getTouchingNeighbourIntroverts(Location pos, BoundingBox aabb) {
@@ -42,7 +42,7 @@ public class TouchChecker {
 
     private boolean cantTouchThis(BoundingBox aabb, BoundingBox anotherAaBb) {
         // Check if player can't touch this :(
-        return !aabb.expand(WHAT_IS_ACTUALLY_CLOSE, WHAT_IS_ACTUALLY_CLOSE, WHAT_IS_ACTUALLY_CLOSE).overlaps(anotherAaBb);
+        return !aabb.expand(WHAT_IS_ACTUALLY_CLOSE, WHAT_IS_ACTUALLY_CLOSE * 2, WHAT_IS_ACTUALLY_CLOSE).overlaps(anotherAaBb);
     }
 
 }
