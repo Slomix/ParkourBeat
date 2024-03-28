@@ -1,11 +1,13 @@
 package ru.sortix.parkourbeat;
 
+import dev.rollczi.litecommands.LiteCommands;
 import dev.rollczi.litecommands.argument.ArgumentKey;
 import dev.rollczi.litecommands.bukkit.LiteBukkitFactory;
 import dev.rollczi.litecommands.bukkit.LiteBukkitMessages;
 import dev.rollczi.litecommands.message.LiteMessages;
 import dev.rollczi.litecommands.schematic.SchematicFormat;
 import lombok.NonNull;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -34,43 +36,31 @@ import java.util.logging.Level;
 public class ParkourBeat extends JavaPlugin {
     private final Map<Class<?>, PluginManager> managers = new LinkedHashMap<>();
 
+    private LiteCommands<CommandSender> liteCommands;
+
     @Override
     public void onEnable() {
+        this.registerAllManagers();
+        Settings.load(this, this.get(WorldsManager.class), this.get(LevelsManager.class));
+        this.registerAllCommands();
+        this.registerAllListeners();
+    }
+
+    @Override
+    public void onDisable() {
+        this.unregisterAllListeners();
+        this.unregisterAllCommands();
+        Settings.unload();
+        this.unregisterAllManagers();
+    }
+
+    private void registerAllManagers() {
         this.registerManager(ItemsManager::new);
         this.registerManager(WorldsManager::new);
         this.registerManager(ActivityManager::new);
         this.registerManager(SongsManager::new);
         this.registerManager(LevelsManager::new);
         this.registerManager(PlayersInputManager::new);
-
-        Settings.load(this, this.get(WorldsManager.class), this.get(LevelsManager.class));
-
-        this.registerCommands();
-
-        this.registerListener(FixesListener::new);
-        this.registerListener(GamesListener::new);
-        this.registerListener(WorldsListener::new);
-        this.registerListener(InventoriesListener::new);
-    }
-
-    @Override
-    public void onDisable() {
-        List<PluginManager> managers = new ArrayList<>(this.managers.values());
-        Collections.reverse(managers);
-        for (PluginManager manager : managers) {
-            try {
-                manager.disable();
-            } catch (Exception e) {
-                this.getLogger()
-                    .log(
-                        Level.SEVERE,
-                        "Unable to unload manager " + manager.getClass().getName(),
-                        e);
-            }
-        }
-        this.managers.clear();
-
-        HandlerList.unregisterAll(this);
     }
 
     private void registerManager(@NonNull Function<ParkourBeat, PluginManager> commandConstructor) {
@@ -86,8 +76,8 @@ public class ParkourBeat extends JavaPlugin {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private void registerCommands() {
-        LiteBukkitFactory.builder(getName().toLowerCase(Locale.ROOT), this)
+    private void registerAllCommands() {
+        liteCommands = LiteBukkitFactory.builder(getName().toLowerCase(Locale.ROOT), this)
             .commands(
                 new CommandConvertData(this),
                 new CommandCreate(this),
@@ -107,9 +97,46 @@ public class ParkourBeat extends JavaPlugin {
             .build();
     }
 
+    private void registerAllListeners() {
+        this.registerListener(FixesListener::new);
+        this.registerListener(GamesListener::new);
+        this.registerListener(WorldsListener::new);
+        this.registerListener(InventoriesListener::new);
+    }
+
     private void registerListener(@NonNull Function<ParkourBeat, Listener> listenerConstructor) {
         Listener listener = listenerConstructor.apply(this);
         this.getServer().getPluginManager().registerEvents(listener, this);
+    }
+
+    private void unregisterAllManagers() {
+        List<PluginManager> managersToDisable = new ArrayList<>(this.managers.values());
+        Collections.reverse(managersToDisable);
+        for (PluginManager manager : managersToDisable) {
+            unregisterSafely(manager::disable);
+        }
+        this.managers.clear();
+    }
+
+    private void unregisterAllCommands() {
+        unregisterSafely(() -> {
+            if (liteCommands != null) {
+                liteCommands.unregister();
+                liteCommands = null;
+            }
+        });
+    }
+
+    private void unregisterAllListeners() {
+        unregisterSafely(() -> HandlerList.unregisterAll(this));
+    }
+
+    private void unregisterSafely(Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (RuntimeException e) {
+            this.getLogger().log(Level.SEVERE, "An occurred error while disabling plugin", e);
+        }
     }
 
     @NonNull
