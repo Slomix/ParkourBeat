@@ -33,7 +33,7 @@ public class FrictionSimulatorListener implements Listener {
         if (event.getFrom().equals(event.getTo())) return;
 
         Player player = event.getPlayer();
-        List<BlockFace> touching = checker.getTouchingNeighbourIntroverts(player.getLocation(), player.getBoundingBox());
+        List<BlockFace> touching = checker.getTouchingNeighboursFromEntireBody(player);
         if (touching.isEmpty()) return;
 
         Vector velocity = event.getFrom().toVector().subtract(event.getTo().toVector());
