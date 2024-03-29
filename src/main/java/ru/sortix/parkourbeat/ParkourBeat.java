@@ -52,8 +52,8 @@ public class ParkourBeat extends JavaPlugin {
     public void onDisable() {
         this.unregisterAllListeners();
         this.unregisterAllCommands();
-        Settings.unload();
         this.unregisterAllManagers();
+        Settings.unload();
     }
 
     private void registerAllManagers() {
