@@ -5,6 +5,7 @@ import lombok.NonNull;
 import me.bomb.amusic.AMusic;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import ru.sortix.parkourbeat.ParkourBeat;
@@ -129,10 +130,16 @@ public class Game {
         if (this.currentState != State.READY) {
             return;
         }
+        this.currentState = State.RUNNING;
 
         if (!this.player.isSprinting() || this.player.isSneaking()) {
             this.currentState = State.RUNNING;
             this.failLevel("§cЗажмите бег!", null);
+            return;
+        }
+
+        if (!((LivingEntity) this.player).isOnGround()) {
+            this.failLevel(null, "§cНе прыгайте без нужды!");
             return;
         }
 
@@ -148,8 +155,6 @@ public class Game {
         for (Player onlinePlayer : this.player.getWorld().getPlayers()) {
             this.player.hidePlayer(plugin, onlinePlayer);
         }
-
-        this.currentState = State.RUNNING;
     }
 
     public void setCurrentState(@NonNull State currentState) {
