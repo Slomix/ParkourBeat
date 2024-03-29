@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.ParkourBeat;
@@ -16,7 +17,7 @@ import java.util.Set;
 // Makes slime blocks quite bouncy
 public class BouncyGooListener implements Listener {
 
-    private static final double FACTOR = 1.1d;
+    private static final double FACTOR = 2.8d;
     private static final TouchChecker checker = new TouchChecker(Set.of(
         Material.SLIME_BLOCK,
         Material.LIGHT_BLUE_CONCRETE
@@ -34,12 +35,16 @@ public class BouncyGooListener implements Listener {
         Vector velocity = event.getFrom().toVector().subtract(event.getTo().toVector());
 
         Vector bounceVelocity = normal.multiply(velocity.dot(normal) * 2).subtract(velocity);
+        if (!NumberConversions.isFinite(bounceVelocity.getX())
+            || !NumberConversions.isFinite(bounceVelocity.getY())
+            || !NumberConversions.isFinite(bounceVelocity.getZ())) return;
         player.setVelocity(bounceVelocity.multiply(FACTOR));
     }
 
     private Vector calculateBounceNormal(List<BlockFace> slimes) {
         Vector velocity = new Vector();
         slimes.forEach(face -> velocity.add(face.getDirection()));
+        if (velocity.equals(new Vector())) return velocity.zero();
         return velocity.normalize();
     }
 
