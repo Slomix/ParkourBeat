@@ -109,6 +109,21 @@ public class EditorMainMenu extends ParkourBeatInventory {
                     ChatColor.RED + "" + ChatColor.BOLD + "БЕЗ возможности восстановления"));
             }),
             this::deleteLevel);
+        this.setItem(
+            5,
+            5,
+            ItemUtils.create(Material.SLIME_BLOCK, (meta) -> {
+                meta.setDisplayName(ChatColor.GREEN + "Физика Блоков");
+                meta.setLore(Arrays.asList(
+                    ChatColor.GRAY + "У некоторых блоков есть уникальные",
+                    ChatColor.GRAY + "физические свойства.",
+                    "",
+                    ChatColor.GRAY + "От блоков " + ChatColor.GREEN + "Слизи, Голубого бетона" + ChatColor.GRAY + " игрок отскакивает.",
+                    ChatColor.GRAY + "По стенам из " + ChatColor.BLUE + "Всех Вариаций Льда, Оранжевого бетона" + ChatColor.GRAY + " игрок скользит."
+                ));
+            }),
+            null
+        );
     }
 
     private void leaveEditor(@NonNull ClickEvent event) {
