@@ -9,6 +9,7 @@ import org.bukkit.WorldCreator;
 import org.bukkit.WorldType;
 import org.bukkit.configuration.ConfigurationSection;
 import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
@@ -18,6 +19,8 @@ import ru.sortix.parkourbeat.world.WorldsManager;
 
 import javax.annotation.Nullable;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
 
 @UtilityClass
 public class Settings {
@@ -27,7 +30,7 @@ public class Settings {
     private @Getter Location lobbySpawn;
 
     // level fixed options
-    private @Getter Cuboid levelFixedEditableArea;
+    private @Getter Map<DirectionChecker.Direction, Cuboid> levelFixedEditableArea;
 
     // level default settings
     private @Getter WorldSettings levelDefaultSettings;
@@ -50,9 +53,21 @@ public class Settings {
         if (allLevelsConfig == null) {
             throw new IllegalArgumentException("Section \"all_levels\" not found");
         }
-        levelFixedEditableArea = new Cuboid(
-            ConfigUtils.parseVector(allLevelsConfig.getString("min_editable_point")),
-            ConfigUtils.parseVector(allLevelsConfig.getString("max_editable_point")));
+
+        levelFixedEditableArea = new HashMap<>();
+        for (String key : allLevelsConfig.getKeys(false)) {
+            try {
+                DirectionChecker.Direction direction = DirectionChecker.Direction.valueOf(key);
+                ConfigurationSection directionConfig = allLevelsConfig.getConfigurationSection(key);
+                if (directionConfig == null) throw new IllegalArgumentException("Not a section");
+                levelFixedEditableArea.put(direction, new Cuboid(
+                    ConfigUtils.parseVector(directionConfig.getString("min_editable_point")),
+                    ConfigUtils.parseVector(directionConfig.getString("max_editable_point"))
+                ));
+            } catch (Exception e) {
+                throw new IllegalArgumentException("Unable to load all_levels." + key, e);
+            }
+        }
 
         LevelSettingDAO levelSettingDAO = levelsManager.getLevelsSettings().getLevelSettingDAO();
         File settingsDir = new File(new File(plugin.getDataFolder(), "pb_default_level"), "parkourbeat");
