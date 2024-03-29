@@ -17,6 +17,8 @@ import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 import javax.annotation.Nullable;
 
 public class GameMoveHandler {
+    private static final boolean DISPLAY_DEBUG_FAIL_REASONS = true;
+
     private static final int NOT_SPRINT_DAMAGE_PER_PERIOD = 1;
     private static final int NOT_SPRINT_DAMAGE_PERIOD_TICKS = 1;
 
@@ -68,11 +70,21 @@ public class GameMoveHandler {
         }
         double angle = getLeftOrRightRotationAngle(player);
         if (angle > 100) {
-            this.game.failLevel("§cНельзя бежать назад", null);
+            if (DISPLAY_DEBUG_FAIL_REASONS) {
+                this.game.failLevel("§cНеверный угол поворота: ", String.valueOf(angle));
+            } else {
+                this.game.failLevel("§cНельзя бежать назад", null);
+            }
             return;
         }
         if (!settings.getDirectionChecker().isCorrectDirection(from, to)) {
-            this.game.failLevel("§cНельзя бежать назад", null);
+            if (DISPLAY_DEBUG_FAIL_REASONS) {
+                double fromPos = settings.getDirectionChecker().getCoordinate(from);
+                double toPos = settings.getDirectionChecker().getCoordinate(to);
+                this.game.failLevel("§cНеверные координаты: ", fromPos + " -> " + toPos);
+            } else {
+                this.game.failLevel("§cНельзя бежать назад", null);
+            }
             return;
         }
         this.accuracyChecker.onPlayerLocationChange(to);
