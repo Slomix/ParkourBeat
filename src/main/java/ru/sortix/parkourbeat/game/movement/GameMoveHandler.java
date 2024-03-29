@@ -111,8 +111,8 @@ public class GameMoveHandler {
     }
 
     private void startDamageTask(@NonNull Player player,
-                                 @NonNull String warnReasonFirstLine, @Nullable String warnReasonSecondLine,
-                                 @NonNull String failReasonFirstLine, @Nullable String failReasonSecondLine
+                                 @Nullable String warnReasonFirstLine, @Nullable String warnReasonSecondLine,
+                                 @Nullable String failReasonFirstLine, @Nullable String failReasonSecondLine
     ) {
         player.playSound(player.getLocation(), Sound.ENTITY_WOLF_HURT, 1, 1);
 
@@ -130,7 +130,11 @@ public class GameMoveHandler {
                     game.failLevel(failReasonFirstLine, failReasonSecondLine);
                 } else {
                     levelFailed = false;
-                    player.sendTitle(warnReasonFirstLine, warnReasonSecondLine, 0, 5, 5);
+                    player.sendTitle(
+                        warnReasonFirstLine == null ? "" : warnReasonFirstLine,
+                        warnReasonSecondLine == null ? "" : warnReasonSecondLine,
+                        0, 5, 5
+                    );
                     if (player.getNoDamageTicks() <= 0) {
                         player.setHealth(player.getHealth() - NOT_SPRINT_DAMAGE_PER_PERIOD);
                         player.setNoDamageTicks(NOT_SPRINT_DAMAGE_PERIOD_TICKS);

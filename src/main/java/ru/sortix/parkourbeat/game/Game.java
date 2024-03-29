@@ -156,7 +156,7 @@ public class Game {
         this.currentState = currentState;
     }
 
-    public void failLevel(@NonNull String reasonFirstLine, @Nullable String reasonSecondLine) {
+    public void failLevel(@Nullable String reasonFirstLine, @Nullable String reasonSecondLine) {
         this.resetLevelGame(reasonFirstLine, reasonSecondLine, false);
         TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn());
     }
@@ -166,16 +166,20 @@ public class Game {
         TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn());
     }
 
-    public void resetLevelGame(@NonNull String reasonFirstLine, @Nullable String reasonSecondLine, boolean levelComplete) {
+    public void resetLevelGame(@Nullable String reasonFirstLine, @Nullable String reasonSecondLine, boolean levelComplete) {
         this.resetRunningLevelGame(reasonFirstLine, reasonSecondLine, levelComplete);
         this.forceStopLevelGame();
         this.currentState = Game.State.READY;
     }
 
-    private void resetRunningLevelGame(@NonNull String reasonFirstLine, @Nullable String reasonSecondLine, boolean levelComplete) {
+    private void resetRunningLevelGame(@Nullable String reasonFirstLine, @Nullable String reasonSecondLine, boolean levelComplete) {
         if (this.currentState != State.RUNNING) return;
 
-        this.player.sendTitle(reasonFirstLine, reasonSecondLine, 10, 10, 10);
+        this.player.sendTitle(
+            reasonFirstLine == null ? "" : reasonFirstLine,
+            reasonSecondLine == null ? "" : reasonSecondLine,
+            10, 10, 10
+        );
 
         if (levelComplete) {
             this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
