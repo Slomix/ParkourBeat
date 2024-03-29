@@ -2,7 +2,7 @@
 
 ### Plugin dependencies:
 
-- Paper 1.12.2 or 1.16.5 (other versions haven't been tested, but probably work too)
+- Paper 1.16.5+ (newer versions haven't been tested, but probably work too)
 - [AMusic 0.12](https://spigotmc.org/resources/108835)
 
 # Building, testing, deployment
