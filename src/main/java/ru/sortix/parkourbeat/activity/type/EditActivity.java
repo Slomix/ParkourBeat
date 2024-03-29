@@ -3,6 +3,7 @@ package ru.sortix.parkourbeat.activity.type;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -142,26 +143,43 @@ public class EditActivity extends UserActivity {
                     return;
                 }
 
-                this.creativeInventoryContents = this.player.getInventory().getContents();
-                this.player.getInventory().clear();
+                TeleportUtils.teleportAsync(this.plugin, this.player, this.level.getSpawn()).thenAccept(success -> {
+                    if (!success) {
+                        this.player.sendMessage(Component.text("Не удалось войти в режим тестирования"));
+                        return;
+                    }
 
-                this.level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(this.player);
-                this.testingActivity = playActivity;
-                this.testingActivity.startActivity();
+                    this.creativeInventoryContents = this.player.getInventory().getContents();
+                    this.player.getInventory().clear();
 
-                this.player.sendMessage("Вы вошли в режим тестирования");
+                    this.level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(this.player);
+
+                    this.testingActivity = playActivity;
+                    this.testingActivity.startActivity();
+
+                    this.player.sendActionBar(Component.text("Вы вошли в режим тестирования"));
+                });
             });
     }
 
     public void endTesting() {
         if (this.testingActivity == null) throw new IllegalArgumentException("Testing not started");
 
-        this.testingActivity.endActivity();
-        this.testingActivity = null;
-        this.startActivity();
-        this.player.getInventory().setContents(this.creativeInventoryContents);
+        TeleportUtils.teleportAsync(this.plugin, this.player, this.level.getSpawn()).thenAccept(success -> {
+            if (!success) {
+                this.player.sendMessage(Component.text("Не удалось покинуть режим тестирования"));
+                return;
+            }
 
-        TeleportUtils.teleportAsync(this.plugin, this.player, this.level.getSpawn());
+            this.testingActivity.endActivity();
+            this.testingActivity = null;
+            this.startActivity();
+
+            this.player.getInventory().setContents(this.creativeInventoryContents);
+            this.creativeInventoryContents = null;
+
+            this.player.sendActionBar(Component.text("Вы покинули режим тестирования"));
+        });
     }
 
     public boolean isTesting() {
