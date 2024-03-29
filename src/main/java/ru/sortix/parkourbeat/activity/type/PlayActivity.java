@@ -51,7 +51,7 @@ public class PlayActivity extends UserActivity {
 
     @Override
     public void startActivity() {
-        this.game.resetLevelGame("§cПодготовка уровня", false);
+        this.game.resetLevelGame("§cПодготовка уровня", null, false);
 
         this.player.setGameMode(GameMode.ADVENTURE);
 
@@ -125,7 +125,7 @@ public class PlayActivity extends UserActivity {
     @Override
     public void on(@NonNull PlayerToggleSneakEvent event) {
         if (event.isSneaking() && this.game.getCurrentState() == Game.State.RUNNING) {
-            this.game.failLevel("§cВы остановились");
+            this.game.failLevel("§cВы остановились", null);
         }
     }
 
@@ -136,7 +136,7 @@ public class PlayActivity extends UserActivity {
 
     @Override
     public void onPlayerFall() {
-        this.game.failLevel("§cВы упали");
+        this.game.failLevel("§cВы упали", null);
     }
 
     @Override

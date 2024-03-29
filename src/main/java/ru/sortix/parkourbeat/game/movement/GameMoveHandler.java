@@ -14,6 +14,8 @@ import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
 
+import javax.annotation.Nullable;
+
 public class GameMoveHandler {
     private static final int NOT_SPRINT_DAMAGE_PER_PERIOD = 1;
     private static final int NOT_SPRINT_DAMAGE_PERIOD_TICKS = 1;
@@ -50,7 +52,10 @@ public class GameMoveHandler {
         if (settings.getDirectionChecker().isCorrectDirection(this.startWaypoint, player.getLocation())) {
             this.game.start();
             if ((this.task == null || this.task.isCancelled()) && !player.isSprinting()) {
-                startDamageTask(player, "§cНе переставайте бежать", "§cВы остановились");
+                this.startDamageTask(player,
+                    "§cНе переставайте бежать", null,
+                    "§cВы остановились", null
+                );
             }
         }
     }
@@ -61,12 +66,13 @@ public class GameMoveHandler {
             this.game.completeLevel();
             return;
         }
-        if (!isLookingAtFinish(player)) {
-            this.game.failLevel("§cНельзя бежать назад");
+        double angle = getLeftOrRightRotationAngle(player);
+        if (angle > 100) {
+            this.game.failLevel("§cНельзя бежать назад", null);
             return;
         }
         if (!settings.getDirectionChecker().isCorrectDirection(from, to)) {
-            this.game.failLevel("§cНельзя бежать назад");
+            this.game.failLevel("§cНельзя бежать назад", null);
             return;
         }
         this.accuracyChecker.onPlayerLocationChange(to);
@@ -76,7 +82,10 @@ public class GameMoveHandler {
     public void onRunningState(@NonNull PlayerToggleSprintEvent event) {
         Player player = event.getPlayer();
         if (!event.isSprinting()) {
-            startDamageTask(player, "§cНе переставайте бежать", "§cВы остановились");
+            this.startDamageTask(player,
+                "§cНе переставайте бежать", null,
+                "§cВы остановились", null
+            );
         } else {
             if (this.task != null) {
                 this.task.cancel();
@@ -84,13 +93,15 @@ public class GameMoveHandler {
         }
     }
 
-    private boolean isLookingAtFinish(@NonNull Player player) {
+    private double getLeftOrRightRotationAngle(@NonNull Player player) {
         Vector playerVector = player.getLocation().getDirection();
-        double angleDegrees = Math.toDegrees(playerVector.angle(this.startToFinishVector));
-        return angleDegrees < 100;
+        return Math.toDegrees(playerVector.angle(this.startToFinishVector));
     }
 
-    private void startDamageTask(@NonNull Player player, @NonNull String reason, @NonNull String stopReason) {
+    private void startDamageTask(@NonNull Player player,
+                                 @NonNull String warnReasonFirstLine, @Nullable String warnReasonSecondLine,
+                                 @NonNull String failReasonFirstLine, @Nullable String failReasonSecondLine
+    ) {
         player.playSound(player.getLocation(), Sound.ENTITY_WOLF_HURT, 1, 1);
 
         this.task = new BukkitRunnable() {
@@ -101,20 +112,20 @@ public class GameMoveHandler {
                     return;
                 }
 
-                player.sendTitle(reason, null, 0, 5, 5);
-                boolean stopped;
+                boolean levelFailed;
                 if (player.getHealth() <= NOT_SPRINT_DAMAGE_PER_PERIOD) {
-                    game.failLevel(stopReason);
-                    stopped = true;
+                    levelFailed = true;
+                    game.failLevel(failReasonFirstLine, failReasonSecondLine);
                 } else {
+                    levelFailed = false;
+                    player.sendTitle(warnReasonFirstLine, warnReasonSecondLine, 0, 5, 5);
                     if (player.getNoDamageTicks() <= 0) {
                         player.setHealth(player.getHealth() - NOT_SPRINT_DAMAGE_PER_PERIOD);
                         player.setNoDamageTicks(NOT_SPRINT_DAMAGE_PERIOD_TICKS);
                     }
-                    stopped = false;
                 }
 
-                if (stopped) {
+                if (levelFailed) {
                     this.cancel();
                 }
             }

@@ -16,6 +16,7 @@ import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.Song;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
+import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -131,7 +132,7 @@ public class Game {
 
         if (!this.player.isSprinting() || this.player.isSneaking()) {
             this.currentState = State.RUNNING;
-            this.failLevel("§cЗажмите бег!");
+            this.failLevel("§cЗажмите бег!", null);
             return;
         }
 
@@ -155,26 +156,26 @@ public class Game {
         this.currentState = currentState;
     }
 
-    public void failLevel(@NonNull String reason) {
-        this.resetLevelGame(reason, false);
+    public void failLevel(@NonNull String reasonFirstLine, @Nullable String reasonSecondLine) {
+        this.resetLevelGame(reasonFirstLine, reasonSecondLine, false);
         TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn());
     }
 
     public void completeLevel() {
-        this.resetLevelGame("§aВы прошли уровень", true);
+        this.resetLevelGame("§aВы прошли уровень", null, true);
         TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn());
     }
 
-    public void resetLevelGame(@NonNull String title, boolean levelComplete) {
-        this.resetRunningLevelGame(title, levelComplete);
+    public void resetLevelGame(@NonNull String reasonFirstLine, @Nullable String reasonSecondLine, boolean levelComplete) {
+        this.resetRunningLevelGame(reasonFirstLine, reasonSecondLine, levelComplete);
         this.forceStopLevelGame();
         this.currentState = Game.State.READY;
     }
 
-    private void resetRunningLevelGame(@NonNull String title, boolean levelComplete) {
+    private void resetRunningLevelGame(@NonNull String reasonFirstLine, @Nullable String reasonSecondLine, boolean levelComplete) {
         if (this.currentState != State.RUNNING) return;
 
-        this.player.sendTitle(title, null, 10, 10, 10);
+        this.player.sendTitle(reasonFirstLine, reasonSecondLine, 10, 10, 10);
 
         if (levelComplete) {
             this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
