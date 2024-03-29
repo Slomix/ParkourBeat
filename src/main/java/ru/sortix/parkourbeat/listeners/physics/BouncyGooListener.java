@@ -6,6 +6,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.util.NumberConversions;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.ParkourBeat;
@@ -34,11 +35,9 @@ public class BouncyGooListener implements Listener {
         Vector velocity = event.getFrom().toVector().subtract(event.getTo().toVector());
 
         Vector bounceVelocity = normal.multiply(velocity.dot(normal) * 2).subtract(velocity);
-        try {
-            bounceVelocity.checkFinite();
-        } catch (Exception exception) {
-            return;
-        }
+        if (!NumberConversions.isFinite(bounceVelocity.getX())
+            || !NumberConversions.isFinite(bounceVelocity.getY())
+            || !NumberConversions.isFinite(bounceVelocity.getZ())) return;
         player.setVelocity(bounceVelocity.multiply(FACTOR));
     }
 
