@@ -1,7 +1,9 @@
 package ru.sortix.parkourbeat.levels.settings;
 
 import lombok.*;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
@@ -20,19 +22,27 @@ public class GameSettings {
     private final @NonNull UUID ownerId;
     private final @NonNull String ownerName;
     @Setter
-    private @NonNull String displayName;
+    private @NonNull Component displayName;
 
     private final long createdAtMills;
     private @Nullable Song song;
 
     @NonNull
-    public String getDisplayName() {
-        return this.displayName + ChatColor.RESET;
+    public Component getDisplayName() {
+        return this.displayName.colorIfAbsent(NamedTextColor.GOLD);
     }
 
     @NonNull
-    public String getRawDisplayName() {
-        return this.displayName;
+    public String getDisplayNameLegacy() {
+        return LegacyComponentSerializer.legacySection().serialize(
+            this.displayName.colorIfAbsent(NamedTextColor.GOLD));
+    }
+
+    @NonNull
+    public String getDisplayNameLegacy(boolean useDefaultColor) {
+        if (useDefaultColor) return this.getDisplayNameLegacy();
+        return LegacyComponentSerializer.legacySection().serialize(
+            this.displayName);
     }
 
     public void setSong(@NonNull Song song) {

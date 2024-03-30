@@ -34,7 +34,9 @@ public class CommandConvertData {
 
     @Execute
     @Permission(COMMAND_PERMISSION + ".convertdata")
-    public void onCommand(@Context CommandSender sender, @Arg("settings-console-owning") Optional<GameSettings> gameSettingsOpt) {
+    public void onCommand(@Context CommandSender sender,
+                          @Arg("settings-console-owning") Optional<GameSettings> gameSettingsOpt
+    ) {
         this.plugin.getServer().getScheduler().runTaskAsynchronously(this.plugin, () -> {
             if (gameSettingsOpt.isPresent()) {
                 upgradeDataOnLevel(sender, gameSettingsOpt.get());
@@ -48,9 +50,9 @@ public class CommandConvertData {
         levelsManager.upgradeDataAsync(gameSettings.getUniqueId(), null).thenAccept(successResult -> {
             if (Boolean.TRUE.equals(successResult)) {
                 sender.sendMessage(
-                    String.format(Messages.SUCCESSFUL_LEVEL_DATA_CONVERSION, gameSettings.getDisplayName()));
+                    String.format(Messages.SUCCESSFUL_LEVEL_DATA_CONVERSION, gameSettings.getDisplayNameLegacy()));
             } else {
-                sender.sendMessage(String.format(Messages.FAILED_LEVEL_DATA_CONVERSION, gameSettings.getDisplayName()));
+                sender.sendMessage(String.format(Messages.FAILED_LEVEL_DATA_CONVERSION, gameSettings.getDisplayNameLegacy()));
             }
         });
     }

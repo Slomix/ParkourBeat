@@ -1,6 +1,7 @@
 package ru.sortix.parkourbeat.inventory;
 
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -12,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.inventory.event.ClickEvent;
+import ru.sortix.parkourbeat.item.ItemUtils;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -24,15 +26,13 @@ public abstract class PluginInventory<P extends JavaPlugin> implements Inventory
     private final Inventory handle;
     private final Map<Integer, Consumer<ClickEvent>> clickActions = new HashMap<>();
 
-    protected PluginInventory(@NonNull P plugin, int rows, @NonNull String title) {
+    protected PluginInventory(@NonNull P plugin, int rows, @NonNull Component title) {
         this.plugin = plugin;
-        //noinspection deprecation
         this.handle = plugin.getServer().createInventory(this, rows * 9, title);
     }
 
-    protected PluginInventory(@NonNull P plugin, @NonNull InventoryType type, @NonNull String title) {
+    protected PluginInventory(@NonNull P plugin, @NonNull InventoryType type, @NonNull Component title) {
         this.plugin = plugin;
-        //noinspection deprecation
         this.handle = plugin.getServer().createInventory(this, type, title);
     }
 
@@ -42,7 +42,7 @@ public abstract class PluginInventory<P extends JavaPlugin> implements Inventory
     }
 
     protected void setItem(int slotIndex, @Nullable ItemStack stack, @Nullable Consumer<ClickEvent> action) {
-        this.handle.setItem(slotIndex, stack);
+        this.handle.setItem(slotIndex, ItemUtils.fixItalic(stack));
         if (stack == null) {
             if (action == null) this.clickActions.remove(slotIndex);
             else throw new IllegalArgumentException("Action must be null with null item");

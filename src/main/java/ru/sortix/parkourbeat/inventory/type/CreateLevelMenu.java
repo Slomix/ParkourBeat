@@ -1,7 +1,8 @@
 package ru.sortix.parkourbeat.inventory.type;
 
 import lombok.NonNull;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -16,34 +17,33 @@ public class CreateLevelMenu extends ParkourBeatInventory {
     // TODO Support for NETHER and THE_END environments
     public static final boolean DISPLAY_NON_DEFAULT_WORLD_TYPES = false;
 
-    @SuppressWarnings("deprecation")
     public CreateLevelMenu(@NonNull ParkourBeat plugin) {
-        super(plugin, 3, "Выберите небо");
+        super(plugin, 3, Component.text("Выберите небо"));
         if (DISPLAY_NON_DEFAULT_WORLD_TYPES) {
             this.setItem(
                 2,
                 3,
                 ItemUtils.create(
-                    Material.NETHERRACK, meta -> meta.setDisplayName(ChatColor.RED + "Небо Нижнего мира")),
+                    Material.NETHERRACK, meta -> meta.displayName(Component.text("Небо Нижнего мира", NamedTextColor.RED))),
                 event -> this.createLevel(event.getPlayer(), World.Environment.NETHER));
         }
         this.setItem(
             2,
             5,
-            ItemUtils.create(Material.GRASS_BLOCK, meta -> meta.setDisplayName(ChatColor.AQUA + "Обычное небо")),
+            ItemUtils.create(Material.GRASS_BLOCK, meta -> meta.displayName(Component.text("Обычное небо", NamedTextColor.AQUA))),
             event -> this.createLevel(event.getPlayer(), World.Environment.NORMAL));
         if (DISPLAY_NON_DEFAULT_WORLD_TYPES) {
             this.setItem(
                 2,
                 7,
                 ItemUtils.create(
-                    Material.END_STONE, meta -> meta.setDisplayName(ChatColor.DARK_PURPLE + "Небо Края")),
+                    Material.END_STONE, meta -> meta.displayName(Component.text("Небо Края", NamedTextColor.DARK_PURPLE))),
                 event -> this.createLevel(event.getPlayer(), World.Environment.THE_END));
         }
         this.setItem(
             3,
             9,
-            ItemUtils.create(Material.BARRIER, meta -> meta.setDisplayName(ChatColor.RED + "Отмена")),
+            ItemUtils.create(Material.BARRIER, meta -> meta.displayName(Component.text("Отмена", NamedTextColor.RED))),
             event -> event.getPlayer().closeInventory());
     }
 
@@ -67,15 +67,20 @@ public class CreateLevelMenu extends ParkourBeatInventory {
                 }
                 EditActivity.createAsync(this.plugin, owner, level).thenAccept(editActivity -> {
                     if (editActivity == null) {
-                        owner.sendMessage("Уровень \"" + level.getDisplayName() + "\""
-                            + " создан, однако не удалось запустить редактор уровня");
+                        owner.sendMessage(Component.text("Уровень \"", NamedTextColor.WHITE)
+                            .append(level.getDisplayName())
+                            .append(Component.text("\" создан, однако не удалось запустить редактор уровня", NamedTextColor.WHITE))
+                        );
                         return;
                     }
                     this.plugin.get(ActivityManager.class).switchActivity(owner, editActivity, level.getSpawn()).thenAccept(success -> {
                         if (success) {
-                            owner.sendMessage("Уровень \"" + level.getDisplayName() + "\" создан");
+                            owner.sendMessage(Component.text("Уровень \"", NamedTextColor.WHITE)
+                                .append(level.getDisplayName())
+                                .append(Component.text("\" создан", NamedTextColor.WHITE))
+                            );
                         } else {
-                            owner.sendMessage("Не удалось телепортировать вас на новый уровень");
+                            owner.sendMessage(Component.text("Не удалось телепортировать вас на новый уровень"));
                         }
                     });
                 });

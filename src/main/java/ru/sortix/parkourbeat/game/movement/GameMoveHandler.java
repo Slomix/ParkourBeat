@@ -2,6 +2,8 @@ package ru.sortix.parkourbeat.game.movement;
 
 import lombok.Getter;
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -88,7 +90,10 @@ public class GameMoveHandler {
             return;
         }
         this.accuracyChecker.onPlayerLocationChange(to);
-        player.sendActionBar("§aТочность: " + String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f) + "%");
+        player.sendActionBar(Component.text(
+            "Точность: " + String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f) + "%",
+            NamedTextColor.GREEN
+        ));
     }
 
     public void onRunningState(@NonNull PlayerToggleSprintEvent event) {
@@ -110,6 +115,7 @@ public class GameMoveHandler {
         return Math.toDegrees(playerVector.angle(this.startToFinishVector));
     }
 
+    @SuppressWarnings("SameParameterValue")
     private void startDamageTask(@NonNull Player player,
                                  @Nullable String warnReasonFirstLine, @Nullable String warnReasonSecondLine,
                                  @Nullable String failReasonFirstLine, @Nullable String failReasonSecondLine

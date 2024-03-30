@@ -18,9 +18,7 @@ import java.util.UUID;
 
 @SuppressWarnings("unused")
 public class Heads {
-
-    private static final boolean USE_MODERN_HEADS = Material.getMaterial("PLAYER_HEAD") != null;
-    private static final Material HEAD_MATERIAL = Material.valueOf(USE_MODERN_HEADS ? "PLAYER_HEAD" : "SKULL_ITEM");
+    private static final Material HEAD_MATERIAL = Material.PLAYER_HEAD;
 
     public static void cloneProfile(@NonNull ItemStack from, @NonNull ItemStack to) {
         ItemMeta fromMeta = from.getItemMeta();
@@ -86,13 +84,7 @@ public class Heads {
 
     @NonNull
     private static ItemStack createPlayerHeadWithProfile(@Nullable PlayerProfile profile) {
-        ItemStack head;
-        if (USE_MODERN_HEADS) {
-            head = new ItemStack(HEAD_MATERIAL);
-        } else {
-            //noinspection deprecation
-            head = new ItemStack(HEAD_MATERIAL, 1, (short) 3);
-        }
+        ItemStack head = new ItemStack(HEAD_MATERIAL);
         if (profile != null) {
             SkullMeta headMeta = (SkullMeta) head.getItemMeta();
             headMeta.setPlayerProfile(profile);

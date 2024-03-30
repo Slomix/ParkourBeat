@@ -1,6 +1,7 @@
 package ru.sortix.parkourbeat.inventory.type.editor;
 
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.data.SongsManager;
@@ -19,15 +20,14 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, Song> {
     private final Level level;
 
     public SelectSongMenu(@NonNull ParkourBeat plugin, @NonNull Level level) {
-        super(plugin, 6, "Выбрать музыку", 0, 5 * 9);
+        super(plugin, 6, Component.text("Выбрать музыку"), 0, 5 * 9);
         this.level = level;
         this.setItems(plugin.get(SongsManager.class).getAllSongs());
     }
 
     @Override
     protected @NonNull ItemStack createItemDisplay(@NonNull Song song) {
-        //noinspection deprecation
-        return ItemUtils.modifyMeta(NOTE_HEAD.clone(), meta -> meta.setDisplayName(song.getSongName()));
+        return ItemUtils.modifyMeta(NOTE_HEAD.clone(), meta -> meta.displayName(Component.text(song.getSongName())));
     }
 
     @Override

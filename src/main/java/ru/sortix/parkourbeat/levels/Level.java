@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.levels;
 
 import lombok.Getter;
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.World;
 import ru.sortix.parkourbeat.data.Settings;
@@ -38,7 +39,7 @@ public class Level {
     }
 
     @NonNull
-    public String getDisplayName() {
+    public Component getDisplayName() {
         return this.levelSettings.getGameSettings().getDisplayName();
     }
 

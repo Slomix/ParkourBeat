@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.inventory;
 
 import lombok.Getter;
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.sortix.parkourbeat.inventory.event.ClickEvent;
@@ -19,7 +20,7 @@ public abstract class PaginatedMenu<P extends JavaPlugin, Item> extends PluginIn
     private int currentPageNumber = -1;
 
     public PaginatedMenu(
-        @NonNull P plugin, int rows, @NonNull String title, int itemsMinSlotIndex, int itemsAmountOnPage) {
+        @NonNull P plugin, int rows, @NonNull Component title, int itemsMinSlotIndex, int itemsAmountOnPage) {
         super(plugin, rows, title);
         this.itemsMinSlotIndex = itemsMinSlotIndex;
         this.itemsAmountOnPage = itemsAmountOnPage;

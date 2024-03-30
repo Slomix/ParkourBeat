@@ -1,6 +1,8 @@
 package ru.sortix.parkourbeat.levels.dao.files;
 
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.configuration.file.FileConfiguration;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.Song;
@@ -13,7 +15,7 @@ public class GameSettingsDAO {
         config.set("unique_number", gameSettings.getUniqueNumber());
         config.set("owner_id", gameSettings.getOwnerId().toString());
         config.set("owner_name", gameSettings.getOwnerName());
-        config.set("display_name", gameSettings.getRawDisplayName());
+        config.set("display_name", gameSettings.getDisplayNameLegacy(false));
         config.set("level_name", null);
         config.set("created_at_mills", gameSettings.getCreatedAtMills());
 
@@ -44,10 +46,11 @@ public class GameSettingsDAO {
             throw new IllegalArgumentException("String \"owner_name\" not found");
         }
 
-        String displayName = config.getString("display_name");
-        if (displayName == null) {
+        String displayNameLegacy = config.getString("display_name");
+        if (displayNameLegacy == null) {
             throw new IllegalArgumentException("String \"display_name\" not found");
         }
+        Component displayName = LegacyComponentSerializer.legacySection().deserialize(displayNameLegacy);
 
         long createdAtMills = config.getLong("created_at_mills", -1);
         if (createdAtMills < 0) {

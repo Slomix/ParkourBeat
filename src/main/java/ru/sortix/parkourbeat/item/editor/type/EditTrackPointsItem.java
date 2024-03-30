@@ -1,7 +1,12 @@
 package ru.sortix.parkourbeat.item.editor.type;
 
 import lombok.NonNull;
-import org.bukkit.*;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Color;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.util.RayTraceResult;
@@ -27,15 +32,15 @@ public class EditTrackPointsItem extends EditorItem {
     public static final int REMOVE_POINT_DISTANCE = 1;
     public static final int INTERACT_BLOCK_DISTANCE = 5;
 
-    @SuppressWarnings("deprecation")
     public EditTrackPointsItem(@NonNull ParkourBeat plugin, int slot) {
         super(plugin, slot, 0, ItemUtils.create(Material.BLAZE_ROD, (meta) -> {
-            meta.setDisplayName(ChatColor.GOLD + "Путь (см. описание)");
-            meta.setLore(Arrays.asList(
-                ChatColor.YELLOW + "ЛКМ - установить точку",
-                ChatColor.YELLOW + "ПКМ - удалить точку",
-                ChatColor.YELLOW + "SHIFT + ЛКМ - увеличить высоту прыжка",
-                ChatColor.YELLOW + "SHIFT + ПКМ - уменьшить высоту прыжка"));
+            meta.displayName(Component.text("Путь (см. описание)", NamedTextColor.GOLD));
+            meta.lore(Arrays.asList(
+                Component.text("ЛКМ - установить точку", NamedTextColor.YELLOW),
+                Component.text("ПКМ - удалить точку", NamedTextColor.YELLOW),
+                Component.text("SHIFT + ЛКМ - увеличить высоту прыжка", NamedTextColor.YELLOW),
+                Component.text("SHIFT + ПКМ - уменьшить высоту прыжка", NamedTextColor.YELLOW)
+            ));
         }));
     }
 

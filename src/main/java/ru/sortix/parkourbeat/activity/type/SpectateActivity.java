@@ -1,6 +1,8 @@
 package ru.sortix.parkourbeat.activity.type;
 
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -20,7 +22,10 @@ public class SpectateActivity extends UserActivity {
     @Override
     public void startActivity() {
         this.player.setGameMode(GameMode.SPECTATOR);
-        this.player.sendMessage("Вы наблюдаете за уровнем \"" + this.level.getDisplayName() + "\"");
+        this.player.sendMessage(Component.text("Вы наблюдаете за уровнем \"", NamedTextColor.WHITE)
+            .append(this.level.getDisplayName())
+            .append(Component.text("\"", NamedTextColor.WHITE))
+        );
     }
 
     @Override

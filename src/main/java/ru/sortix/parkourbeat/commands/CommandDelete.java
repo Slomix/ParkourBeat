@@ -35,7 +35,7 @@ public class CommandDelete {
             for (Player player : loadedLevel.getWorld().getPlayers()) {
                 if (player != sender) {
                     player.sendMessage(
-                        String.format(Messages.LEVEL_DELETION_ALREADY_DELETED, settings.getDisplayName()));
+                        String.format(Messages.LEVEL_DELETION_ALREADY_DELETED, settings.getDisplayNameLegacy()));
                 }
                 activityManager.switchActivity(player, null, Settings.getLobbySpawn());
             }
@@ -43,9 +43,9 @@ public class CommandDelete {
 
         levelsManager.deleteLevelAsync(settings).thenAccept(successResult -> {
             if (Boolean.TRUE.equals(successResult)) {
-                sender.sendMessage(String.format(Messages.SUCCESSFUL_LEVEL_DELETION, settings.getDisplayName()));
+                sender.sendMessage(String.format(Messages.SUCCESSFUL_LEVEL_DELETION, settings.getDisplayNameLegacy()));
             } else {
-                sender.sendMessage(String.format(Messages.FAILED_LEVEL_DELETION, settings.getDisplayName()));
+                sender.sendMessage(String.format(Messages.FAILED_LEVEL_DELETION, settings.getDisplayNameLegacy()));
             }
         });
     }

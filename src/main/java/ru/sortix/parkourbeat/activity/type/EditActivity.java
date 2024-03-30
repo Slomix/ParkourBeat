@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -38,7 +39,10 @@ public class EditActivity extends UserActivity {
 
     private EditActivity(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         super(plugin, player, level);
-        this.player.sendMessage("Редактор уровня \"" + this.level.getDisplayName() + "\" успешно запущен");
+        this.player.sendMessage(Component.text("Редактор уровня \"", NamedTextColor.WHITE)
+            .append(this.level.getDisplayName())
+            .append(Component.text("\" успешно запущен", NamedTextColor.WHITE))
+        );
         this.level.getLevelSettings().updateParticleLocations();
         this.level.setEditing(true);
     }
@@ -127,8 +131,10 @@ public class EditActivity extends UserActivity {
         this.level.getLevelSettings().getParticleController().stopSpawnParticles();
         this.level.setEditing(false);
 
-        this.player.sendMessage(
-            "Редактор уровня \"" + this.level.getDisplayName() + "\" успешно остановлен");
+        this.player.sendMessage(Component.text("Редактор уровня \"", NamedTextColor.WHITE)
+            .append(this.level.getDisplayName())
+            .append(Component.text("\" успешно остановлен", NamedTextColor.WHITE))
+        );
 
         this.plugin.get(LevelsManager.class).saveLevelSettingsAndBlocks(this.level);
     }

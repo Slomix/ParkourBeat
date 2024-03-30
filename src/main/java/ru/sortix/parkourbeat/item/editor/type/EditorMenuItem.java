@@ -1,7 +1,8 @@
 package ru.sortix.parkourbeat.item.editor.type;
 
 import lombok.NonNull;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.event.player.PlayerInteractEvent;
 import ru.sortix.parkourbeat.ParkourBeat;
@@ -11,10 +12,9 @@ import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.item.editor.EditorItem;
 
 public class EditorMenuItem extends EditorItem {
-    @SuppressWarnings("deprecation")
     public EditorMenuItem(@NonNull ParkourBeat plugin, int slot) {
         super(plugin, slot, 20, ItemUtils.create(Material.COMPARATOR, (meta) -> {
-            meta.setDisplayName(ChatColor.RED + "Параметры уровня");
+            meta.displayName(Component.text("Параметры уровня", NamedTextColor.RED));
         }));
     }
 

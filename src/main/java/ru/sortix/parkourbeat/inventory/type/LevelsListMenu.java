@@ -1,7 +1,9 @@
 package ru.sortix.parkourbeat.inventory.type;
 
 import lombok.NonNull;
-import net.md_5.bungee.api.ChatColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +19,6 @@ import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
-import ru.sortix.parkourbeat.utils.ComponentUtils;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
 import javax.annotation.Nullable;
@@ -28,13 +29,13 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
     private static final SimpleDateFormat LEVEL_CREATION_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
     private final Player viewer;
     private final boolean displayTechInfo;
-    private final boolean editMenu;
+    private final boolean onlyOwnLevels;
 
     public LevelsListMenu(@NonNull ParkourBeat plugin, @NonNull Player viewer, @Nullable UUID ownerId) {
-        super(plugin, 6, "Уровни", 0, 5 * 9);
+        super(plugin, 6, Component.text("Уровни"), 0, 5 * 9);
         this.viewer = viewer;
         this.displayTechInfo = viewer.hasPermission("parkourbeat.admin");
-        this.editMenu = ownerId != null;
+        this.onlyOwnLevels = ownerId != null;
         this.setItems(this.getAvailableLevels(ownerId));
     }
 
@@ -139,70 +140,64 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     protected @NonNull ItemStack createItemDisplay(@NonNull GameSettings gameSettings) {
         return ItemUtils.modifyMeta(new ItemStack(Material.PAPER), meta -> {
-            meta.setDisplayName(ChatColor.GOLD + gameSettings.getDisplayName());
+            meta.displayName(gameSettings.getDisplayName());
 
-            List<String> lore = new ArrayList<>();
+            List<Component> lore = new ArrayList<>();
             if (this.displayTechInfo) {
-                lore.add(ChatColor.YELLOW + "UUID: " + gameSettings.getUniqueId());
+                lore.add(Component.text("UUID: " + gameSettings.getUniqueId(), NamedTextColor.YELLOW));
             }
             if (gameSettings.getUniqueName() == null) {
-                lore.add(ChatColor.YELLOW + "Номер для команд: " + gameSettings.getUniqueNumber());
+                lore.add(Component.text("Номер для команд: " + gameSettings.getUniqueNumber(), NamedTextColor.YELLOW));
             } else {
-                lore.add(ChatColor.YELLOW + "Название для команд: " + gameSettings.getUniqueName());
+                lore.add(Component.text("Название для команд: " + gameSettings.getUniqueName(), NamedTextColor.YELLOW));
             }
-            lore.add(ChatColor.YELLOW + "Создатель: " + gameSettings.getOwnerName());
+            lore.add(Component.text("Создатель: " + gameSettings.getOwnerName(), NamedTextColor.YELLOW));
             if (this.displayTechInfo) {
-                lore.add(ChatColor.YELLOW + "UUID создателя: " + gameSettings.getOwnerId());
+                lore.add(Component.text("UUID создателя: " + gameSettings.getOwnerId(), NamedTextColor.YELLOW));
             }
-            lore.add(ChatColor.YELLOW + "Дата создания: "
-                + LEVEL_CREATION_DATE_FORMAT.format(new Date(gameSettings.getCreatedAtMills())));
-            lore.add(ChatColor.YELLOW + "Трек: "
+            lore.add(Component.text("Дата создания: "
+                + LEVEL_CREATION_DATE_FORMAT.format(new Date(gameSettings.getCreatedAtMills())), NamedTextColor.YELLOW));
+            lore.add(Component.text("Трек: "
                 + (gameSettings.getSong() == null
                 ? "отсутствует"
-                : gameSettings.getSong().getSongName()));
-            lore.add(ChatColor.GOLD + "ЛКМ, чтобы играть");
-            lore.add(ChatColor.GOLD + "ПКМ, чтобы наблюдать");
+                : gameSettings.getSong().getSongName()), NamedTextColor.YELLOW));
+            lore.add(Component.text("ЛКМ, чтобы играть", NamedTextColor.GOLD));
+            lore.add(Component.text("ПКМ, чтобы наблюдать", NamedTextColor.GOLD));
             if (gameSettings.isOwner(this.viewer, true, false)) {
-                lore.add(ChatColor.GOLD + "Шифт + ЛКМ, чтобы редактировать");
+                lore.add(Component.text("Шифт + ЛКМ, чтобы редактировать", NamedTextColor.GOLD));
             }
             if (this.displayTechInfo) {
-                lore.add(ChatColor.GOLD + "Шифт + ПКМ, чтобы скопировать UUID");
+                lore.add(Component.text("Шифт + ПКМ, чтобы скопировать UUID", NamedTextColor.GOLD));
             }
-            meta.setLore(lore);
+            meta.lore(lore);
         });
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected void onPageDisplayed() {
         this.setNextPageItem(6, 3);
         this.setItem(
             6, 5, RegularItems.closeInventory(), event -> event.getPlayer().closeInventory());
         this.setPreviousPageItem(6, 7);
-        if (this.editMenu) {
+        if (this.onlyOwnLevels) {
             this.setItem(
                 6,
                 1,
                 ItemUtils.create(
-                    Material.WRITABLE_BOOK, meta -> meta.setDisplayName(ChatColor.GOLD + "Создать уровень")),
+                    Material.WRITABLE_BOOK, meta -> meta.displayName(Component.text("Создать уровень", NamedTextColor.GOLD))),
                 event -> new CreateLevelMenu(this.plugin).open(event.getPlayer()));
         }
         this.setItem(
             6,
             9,
             ItemUtils.create(Material.BOOK, meta -> {
-                if (this.editMenu) {
-                    meta.setDisplayName(ChatColor.GOLD + "Все уровни");
-                } else {
-                    meta.setDisplayName(ChatColor.GOLD + "Собственные уровни");
-                }
+                meta.displayName(Component.text(this.onlyOwnLevels ? "Все уровни" : "Собственные уровни", NamedTextColor.GOLD));
             }),
             event -> {
                 Player player = event.getPlayer();
-                new LevelsListMenu(this.plugin, this.viewer, this.editMenu ? null : player.getUniqueId())
+                new LevelsListMenu(this.plugin, this.viewer, this.onlyOwnLevels ? null : player.getUniqueId())
                     .open(player);
             });
     }
@@ -219,11 +214,10 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
             if (event.isShift()) {
                 if (this.displayTechInfo) {
                     event.getPlayer().closeInventory();
-                    //noinspection deprecation
-                    this.viewer.sendMessage(ComponentUtils.createCopyTextComponent(
-                        ChatColor.YELLOW + "> Скопировать UUID уровня <",
-                        ChatColor.GOLD + "Нажмите для копирования",
-                        settings.getUniqueId().toString()));
+                    this.viewer.sendMessage(Component.text("> Скопировать UUID уровня <", NamedTextColor.YELLOW)
+                        .hoverEvent(HoverEvent.showText(Component.text("Нажмите для копирования", NamedTextColor.GOLD)))
+                        .clickEvent(net.kyori.adventure.text.event.ClickEvent.copyToClipboard(settings.getUniqueId().toString()))
+                    );
                 }
             } else {
                 startSpectating(this.plugin, event.getPlayer(), settings);

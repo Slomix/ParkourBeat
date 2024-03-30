@@ -1,13 +1,14 @@
 package ru.sortix.parkourbeat.player.input;
 
+import io.papermc.paper.event.player.AsyncChatEvent;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
@@ -63,11 +64,12 @@ public class PlayersInputManager implements PluginManager, Listener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
-    private void on(@SuppressWarnings("deprecation") AsyncPlayerChatEvent event) {
+    private void on(AsyncChatEvent event) {
         InputRequest request = this.requestedPlayers.remove(event.getPlayer());
         if (request == null || request.type != PlayerInputType.CHAT) return;
         event.setCancelled(true);
-        request.future.complete(new ChatInput(event.getMessage()));
+        String message = PlainComponentSerializer.plain().serialize(event.message());
+        request.future.complete(new ChatInput(message));
     }
 
     @EventHandler

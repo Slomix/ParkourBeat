@@ -3,6 +3,7 @@ package ru.sortix.parkourbeat.levels;
 import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
 import org.bukkit.GameRule;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -20,7 +21,6 @@ import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
 import ru.sortix.parkourbeat.utils.StringUtils;
-import ru.sortix.parkourbeat.utils.java.ClassUtils;
 import ru.sortix.parkourbeat.world.WorldsManager;
 
 import javax.annotation.Nullable;
@@ -44,7 +44,6 @@ public class LevelsManager implements PluginManager {
     private final Map<World, Level> loadedLevelsByWorld = new HashMap<>();
     private final Set<ParticleController> particleControllers = new HashSet<>();
     private final BukkitTask particlesRenderingTask;
-    private final boolean gameRulesSupport = ClassUtils.isClassPresent("org.bukkit.GameRule");
     private int nextLevelNumber = 1;
 
     public LevelsManager(@NonNull ParkourBeat plugin) {
@@ -111,7 +110,7 @@ public class LevelsManager implements PluginManager {
                     this.prepareLevelWorld(world, true);
 
                     int uniqueNumber = this.nextLevelNumber++;
-                    String displayName = "Уровень #" + uniqueNumber;
+                    Component displayName = Component.text("Уровень #" + uniqueNumber);
                     LevelSettings levelSettings = LevelSettings.create(
                         this.plugin,
                         world,
@@ -394,11 +393,6 @@ public class LevelsManager implements PluginManager {
     }
 
     private void setBooleanGameRule(@NonNull World world, @NonNull String name, boolean newValue) {
-        if (!gameRulesSupport) {
-            //noinspection deprecation
-            world.setGameRuleValue(name, String.valueOf(newValue));
-            return;
-        }
         GameRule<?> byName = GameRule.getByName(name);
         if (byName == null) return;
         //noinspection unchecked
@@ -406,11 +400,6 @@ public class LevelsManager implements PluginManager {
     }
 
     private void setIntegerGameRule(@NonNull World world, @NonNull String name, int newValue) {
-        if (!gameRulesSupport) {
-            //noinspection deprecation
-            world.setGameRuleValue(name, String.valueOf(newValue));
-            return;
-        }
         GameRule<?> byName = GameRule.getByName(name);
         if (byName == null) return;
         //noinspection unchecked

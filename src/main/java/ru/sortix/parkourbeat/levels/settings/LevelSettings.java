@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.levels.settings;
 
 import lombok.Getter;
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.World;
 import ru.sortix.parkourbeat.ParkourBeat;
@@ -43,7 +44,7 @@ public class LevelSettings {
         @NonNull World.Environment environment,
         @NonNull UUID uniqueId,
         int uniqueNumber,
-        @NonNull String displayName,
+        @NonNull Component displayName,
         @NonNull UUID ownerId,
         @NonNull String ownerName
     ) {
