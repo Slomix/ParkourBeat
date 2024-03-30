@@ -2,7 +2,6 @@ package ru.sortix.parkourbeat.game;
 
 import lombok.Getter;
 import lombok.NonNull;
-import me.bomb.amusic.AMusic;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
@@ -14,7 +13,8 @@ import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
-import ru.sortix.parkourbeat.levels.settings.Song;
+import ru.sortix.parkourbeat.player.music.MusicTracksManager;
+import ru.sortix.parkourbeat.player.music.MusicTrack;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
 import javax.annotation.Nullable;
@@ -88,42 +88,32 @@ public class Game {
 
         this.player.setGameMode(GameMode.ADVENTURE);
 
-        boolean ready = true;
-        Song song = settings.getGameSettings().getSong();
-        if (song != null) {
-            String currentPlayList = AMusic.getPackName(this.player); // nullable
-            String requiredPlaylist = song.getSongPlaylist();
-            if (!requiredPlaylist.equals(currentPlayList)) {
-                ready = false;
-                plugin.getServer()
-                    .getScheduler()
-                    .runTaskLater(plugin, () -> this.setPlaylist(requiredPlaylist), 20L);
-            }
+        this.currentState = State.READY;
+
+        MusicTrack musicTrack = settings.getGameSettings().getMusicTrack();
+        if (musicTrack == null || musicTrack.isResourcepackCurrentlySet(this.player)) return;
+
+        if (!musicTrack.isAvailable()) {
+            this.player.sendMessage("Трек \"" + musicTrack.getName() + "\" в данный момент недоступен для загрузки");
+            return;
         }
-        if (ready) {
+
+        this.currentState = State.PREPARING;
+
+        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+
+            boolean startedSuccessfully = musicTrack.setResourcepackAsync(this.getPlugin(), this.player);
+            if (startedSuccessfully) return;
+
+            this.player.sendMessage("Не удалось загрузить трек \"" + musicTrack.getName() + "\"");
             this.currentState = State.READY;
-        }
+
+        }, 20L);
     }
 
     @NonNull
     public ParkourBeat getPlugin() {
         return this.levelsManager.getPlugin();
-    }
-
-    private void setPlaylist(@NonNull String requiredPlaylist) {
-        try {
-            AMusic.loadPack(this.player, requiredPlaylist, false);
-        } catch (Throwable t) {
-            this.levelsManager
-                .getPlugin()
-                .getLogger()
-                .log(
-                    java.util.logging.Level.SEVERE,
-                    "Не удалось загрузить плейлист " + requiredPlaylist + " игроку " + this.player.getName(),
-                    t);
-            this.player.sendMessage("Не удалось создать ресурспак с указанной песней");
-            this.currentState = State.READY;
-        }
     }
 
     public void start() {
@@ -146,9 +136,9 @@ public class Game {
         LevelSettings settings = this.level.getLevelSettings();
         settings.getParticleController().startSpawnParticles(this.player);
 
-        if (settings.getGameSettings().getSong() != null) {
-            AMusic.setRepeatMode(this.player, null);
-            AMusic.playSound(this.player, settings.getGameSettings().getSong().getSongName());
+        MusicTrack musicTrack = settings.getGameSettings().getMusicTrack();
+        if (musicTrack != null) {
+            this.getPlugin().get(MusicTracksManager.class).playSongFromLoadedResourcepack(this.player);
         }
 
         Plugin plugin = this.levelsManager.getPlugin();
@@ -199,7 +189,7 @@ public class Game {
     public void forceStopLevelGame() {
         this.player.setHealth(20);
         this.player.setGameMode(GameMode.ADVENTURE);
-        AMusic.stopSound(this.player);
+        this.getPlugin().get(MusicTracksManager.class).stopSongFromLoadedResourcepack(this.player);
 
         this.level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(this.player);
 

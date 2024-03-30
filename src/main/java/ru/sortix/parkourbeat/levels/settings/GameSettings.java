@@ -7,6 +7,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
+import ru.sortix.parkourbeat.player.music.MusicTrack;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -25,7 +26,7 @@ public class GameSettings {
     private @NonNull Component displayName;
 
     private final long createdAtMills;
-    private @Nullable Song song;
+    private @Nullable MusicTrack musicTrack;
 
     @NonNull
     public Component getDisplayName() {
@@ -45,8 +46,8 @@ public class GameSettings {
             this.displayName);
     }
 
-    public void setSong(@NonNull Song song) {
-        this.song = song;
+    public void setMusicTrack(@NonNull MusicTrack musicTrack) {
+        this.musicTrack = musicTrack;
     }
 
     public boolean isOwner(@NonNull UUID playerId) {

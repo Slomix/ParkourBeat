@@ -4,16 +4,16 @@ import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import org.bukkit.inventory.ItemStack;
 import ru.sortix.parkourbeat.ParkourBeat;
-import ru.sortix.parkourbeat.data.SongsManager;
 import ru.sortix.parkourbeat.inventory.Heads;
 import ru.sortix.parkourbeat.inventory.PaginatedMenu;
 import ru.sortix.parkourbeat.inventory.RegularItems;
 import ru.sortix.parkourbeat.inventory.event.ClickEvent;
 import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.levels.Level;
-import ru.sortix.parkourbeat.levels.settings.Song;
+import ru.sortix.parkourbeat.player.music.MusicTrack;
+import ru.sortix.parkourbeat.player.music.MusicTracksManager;
 
-public class SelectSongMenu extends PaginatedMenu<ParkourBeat, Song> {
+public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
     public static final ItemStack NOTE_HEAD =
         Heads.getHeadByHash("f22e40b4bfbcc0433044d86d67685f0567025904271d0a74996afbe3f9be2c0f");
 
@@ -22,12 +22,12 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, Song> {
     public SelectSongMenu(@NonNull ParkourBeat plugin, @NonNull Level level) {
         super(plugin, 6, Component.text("Выбрать музыку"), 0, 5 * 9);
         this.level = level;
-        this.setItems(plugin.get(SongsManager.class).getAllSongs());
+        this.setItems(plugin.get(MusicTracksManager.class).getAllTracksModern());
     }
 
     @Override
-    protected @NonNull ItemStack createItemDisplay(@NonNull Song song) {
-        return ItemUtils.modifyMeta(NOTE_HEAD.clone(), meta -> meta.displayName(Component.text(song.getSongName())));
+    protected @NonNull ItemStack createItemDisplay(@NonNull MusicTrack musicTrack) {
+        return ItemUtils.modifyMeta(NOTE_HEAD.clone(), meta -> meta.displayName(Component.text(musicTrack.getName())));
     }
 
     @Override
@@ -40,9 +40,9 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, Song> {
     }
 
     @Override
-    protected void onClick(@NonNull ClickEvent event, @NonNull Song song) {
-        this.level.getLevelSettings().getGameSettings().setSong(song);
-        event.getPlayer().sendMessage("Вы успешно установили песню: " + song.getSongName());
+    protected void onClick(@NonNull ClickEvent event, @NonNull MusicTrack musicTrack) {
+        this.level.getLevelSettings().getGameSettings().setMusicTrack(musicTrack);
+        event.getPlayer().sendMessage("Вы успешно установили песню: " + musicTrack.getName());
         event.getPlayer().closeInventory();
     }
 }

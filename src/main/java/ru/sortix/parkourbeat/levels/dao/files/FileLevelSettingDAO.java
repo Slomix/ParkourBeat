@@ -41,7 +41,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         //noinspection ResultOfMethodCallIgnored
         this.levelsDirAbsoluteFile.mkdirs();
 
-        this.gameSettingsDAO = new GameSettingsDAO();
+        this.gameSettingsDAO = new GameSettingsDAO(this.plugin);
         this.worldSettingsDAO = new WorldSettingsDAO();
     }
 

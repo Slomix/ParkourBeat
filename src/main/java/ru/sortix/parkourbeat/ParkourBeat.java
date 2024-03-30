@@ -17,7 +17,7 @@ import ru.sortix.parkourbeat.commands.argument.GameSettingsArgumentResolver;
 import ru.sortix.parkourbeat.commands.handler.DefaultInvalidUsageHandler;
 import ru.sortix.parkourbeat.constant.Messages;
 import ru.sortix.parkourbeat.data.Settings;
-import ru.sortix.parkourbeat.data.SongsManager;
+import ru.sortix.parkourbeat.player.music.MusicTracksManager;
 import ru.sortix.parkourbeat.inventory.InventoriesListener;
 import ru.sortix.parkourbeat.item.ItemsManager;
 import ru.sortix.parkourbeat.levels.LevelsManager;
@@ -60,7 +60,7 @@ public class ParkourBeat extends JavaPlugin {
         this.registerManager(ItemsManager::new);
         this.registerManager(WorldsManager::new);
         this.registerManager(ActivityManager::new);
-        this.registerManager(SongsManager::new);
+        this.registerManager(MusicTracksManager::new);
         this.registerManager(LevelsManager::new);
         this.registerManager(PlayersInputManager::new);
     }
