@@ -6,12 +6,15 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import ru.sortix.parkourbeat.ParkourBeat;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 // Adds a friction mechanic to ice walls
 public class FrictionSimulatorListener implements Listener {
@@ -26,15 +29,31 @@ public class FrictionSimulatorListener implements Listener {
         Material.ORANGE_CONCRETE
     ));
 
-    public FrictionSimulatorListener(@NotNull ParkourBeat plugin) {}
+    private final Set<UUID> gliding = new HashSet<>();
+    private final CustomPhysicsChecker physicsChecker;
+
+    public FrictionSimulatorListener(@NotNull ParkourBeat plugin) {
+        this.physicsChecker = new CustomPhysicsChecker(plugin);
+    }
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
-        if (event.getFrom().equals(event.getTo())) return;
+        if (!event.hasChangedPosition()) return;
 
         Player player = event.getPlayer();
-        List<BlockFace> touching = checker.getTouchingNeighbourIntroverts(player.getLocation(), player.getBoundingBox());
-        if (touching.isEmpty()) return;
+
+        UUID uuid = player.getUniqueId();
+        List<BlockFace> touching = checker.getTouchingEntireBody(player);
+        if (touching.isEmpty()) {
+            if (gliding.contains(uuid)) {
+                player.setGravity(true);
+                gliding.remove(uuid);
+            }
+            return;
+        }
+
+        // Only run if custom physics is enabled
+        if (!physicsChecker.getCustomPhysicsRule(player)) return;
 
         Vector velocity = event.getFrom().toVector().subtract(event.getTo().toVector());
         Vector normal = calculateNormal(touching);
@@ -50,7 +69,14 @@ public class FrictionSimulatorListener implements Listener {
             // Nothing changed, We do not want to interrupt player's movement
             return;
         }
+        gliding.add(player.getUniqueId());
+        player.setGravity(false);
         player.setVelocity(friction);
+    }
+
+    @EventHandler
+    public void onLeave(PlayerQuitEvent event) {
+        event.getPlayer().setGravity(true);
     }
 
     private Vector calculateNormal(List<BlockFace> touching) {

@@ -22,13 +22,20 @@ public class BouncyGooListener implements Listener {
         Material.SLIME_BLOCK,
         Material.LIGHT_BLUE_CONCRETE
     ));
+    private final CustomPhysicsChecker physicsChecker;
 
-    public BouncyGooListener(@NotNull ParkourBeat plugin) {}
+    public BouncyGooListener(@NotNull ParkourBeat plugin) {
+        this.physicsChecker = new CustomPhysicsChecker(plugin);
+    }
 
     @EventHandler
     public void onMove(PlayerMoveEvent event) {
-        if (event.getTo().getBlock().equals(event.getFrom().getBlock())) return;
+        if (!event.hasChangedPosition()) return;
         Player player = event.getPlayer();
+
+        // Only run if custom physics is enabled
+        if (!physicsChecker.getCustomPhysicsRule(player)) return;
+
         List<BlockFace> slimes = checker.getTouchingNeighbourIntroverts(event.getTo(), player.getBoundingBox());
         if (slimes.isEmpty()) return;
         Vector normal = calculateBounceNormal(slimes);

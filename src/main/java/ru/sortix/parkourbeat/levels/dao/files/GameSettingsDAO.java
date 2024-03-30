@@ -18,6 +18,7 @@ public class GameSettingsDAO {
         config.set("display_name", gameSettings.getDisplayNameLegacy(false));
         config.set("level_name", null);
         config.set("created_at_mills", gameSettings.getCreatedAtMills());
+        config.set("custom_physics_enabled", gameSettings.isCustomPhysicsEnabled());
 
         Song song = gameSettings.getSong();
         if (song != null) {
@@ -57,6 +58,8 @@ public class GameSettingsDAO {
             throw new IllegalArgumentException("Long \"created_at_mills\" not found");
         }
 
+        boolean customPhysicsEnabled = config.getBoolean("custom_physics_enabled", true);
+
         Song song = null;
         String songPlayListName = config.getString("song_play_list_name");
         if (songPlayListName != null) {
@@ -68,6 +71,6 @@ public class GameSettingsDAO {
         }
 
         return new GameSettings(
-            uniqueId, uniqueName, uniqueNumber, ownerId, ownerName, displayName, createdAtMills, song);
+            uniqueId, uniqueName, uniqueNumber, ownerId, ownerName, displayName, createdAtMills, song, customPhysicsEnabled);
     }
 }

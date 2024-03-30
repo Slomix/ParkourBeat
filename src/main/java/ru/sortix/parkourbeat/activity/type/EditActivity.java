@@ -125,6 +125,8 @@ public class EditActivity extends UserActivity {
     public void endActivity() {
         if (this.testingActivity != null) this.testingActivity.endActivity();
 
+        this.player.setGravity(true);
+
         this.player.setGameMode(GameMode.ADVENTURE);
         this.player.getInventory().clear();
 

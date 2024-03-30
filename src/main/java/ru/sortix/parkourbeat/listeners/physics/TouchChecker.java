@@ -5,6 +5,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 
 import java.util.ArrayList;
@@ -38,6 +39,12 @@ public class TouchChecker {
             neighbours.add(face.getOppositeFace());
         }
         return neighbours;
+    }
+
+    public List<BlockFace> getTouchingEntireBody(Player player) {
+        List<BlockFace> feet = this.getTouchingNeighbourIntroverts(player.getLocation(), player.getBoundingBox());
+        feet.addAll(this.getTouchingNeighbourIntroverts(player.getEyeLocation(), player.getBoundingBox()));
+        return feet;
     }
 
     private boolean cantTouchThis(BoundingBox aabb, BoundingBox anotherAaBb) {
