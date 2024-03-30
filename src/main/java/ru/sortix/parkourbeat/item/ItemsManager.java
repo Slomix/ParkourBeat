@@ -11,6 +11,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.inventory.InventoryUtils;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.item.editor.type.EditorMenuItem;
 import ru.sortix.parkourbeat.item.editor.type.TestGameItem;
@@ -66,6 +67,7 @@ public class ItemsManager implements PluginManager, Listener {
     @EventHandler
     private void on(@NonNull PlayerInteractEvent event) {
         if (event.getAction() == Action.PHYSICAL) return;
+        if (InventoryUtils.isInventoryOpen(event.getPlayer())) return;
         if (event.getItem() == null) return;
 
         UsableItem usableItem = this.allItems.get(event.getItem());
