@@ -21,4 +21,6 @@ public class Messages {
     public static final String SUCCESSFUL_LEVEL_DELETION = "Вы успешно удалили уровень %s";
     public static final String LEVEL_DELETION_ALREADY_DELETED = "Уровень %s был удален";
     public static final String FAILED_LEVEL_DELETION = "Не удалось удалить уровень %s";
+    public static final String PHYSICS_DEBUG_SWITCHED = "Отладка движка физики %s";
+
 }

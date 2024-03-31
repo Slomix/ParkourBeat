@@ -55,6 +55,9 @@ public class ActivityManager implements PluginManager {
         return this.activities.get(player);
     }
 
+    @NonNull
+    public Collection<UserActivity> getAllActivities() { return this.activities.values(); }
+
     private void setActivity(@NonNull Player player, @Nullable UserActivity newActivity) {
         UserActivity previousActivity = this.activities.get(player);
 

@@ -25,8 +25,7 @@ import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
 import ru.sortix.parkourbeat.listeners.FixesListener;
 import ru.sortix.parkourbeat.listeners.GamesListener;
-import ru.sortix.parkourbeat.listeners.physics.BouncyGooListener;
-import ru.sortix.parkourbeat.listeners.physics.FrictionSimulatorListener;
+import ru.sortix.parkourbeat.physics.CustomPhysicsManager;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
 import ru.sortix.parkourbeat.world.WorldsListener;
 import ru.sortix.parkourbeat.world.WorldsManager;
@@ -63,6 +62,7 @@ public class ParkourBeat extends JavaPlugin {
         this.registerManager(SongsManager::new);
         this.registerManager(LevelsManager::new);
         this.registerManager(PlayersInputManager::new);
+        this.registerManager(CustomPhysicsManager::new);
     }
 
     private void registerManager(@NonNull Function<ParkourBeat, PluginManager> commandConstructor) {
@@ -88,7 +88,8 @@ public class ParkourBeat extends JavaPlugin {
                 new CommandPlay(this),
                 new CommandSpawn(this),
                 new CommandTest(),
-                new CommandTpToWorld(this))
+                new CommandTpToWorld(this),
+                new CommandPhysicsDebug(this))
             .argument(GameSettings.class, ArgumentKey.of("settings-console-owning"), new GameSettingsArgumentResolver(get(LevelsManager.class), false, true, true))
             .argument(GameSettings.class, ArgumentKey.of("settings-players-owning"), new GameSettingsArgumentResolver(get(LevelsManager.class), true, false, true))
             .argument(GameSettings.class, ArgumentKey.of("settings-players-all"), new GameSettingsArgumentResolver(get(LevelsManager.class), true, false, false))
@@ -104,8 +105,6 @@ public class ParkourBeat extends JavaPlugin {
         this.registerListener(GamesListener::new);
         this.registerListener(WorldsListener::new);
         this.registerListener(InventoriesListener::new);
-        this.registerListener(BouncyGooListener::new);
-        this.registerListener(FrictionSimulatorListener::new);
     }
 
     private void registerListener(@NonNull Function<ParkourBeat, Listener> listenerConstructor) {

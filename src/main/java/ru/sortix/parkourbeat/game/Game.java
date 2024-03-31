@@ -197,7 +197,6 @@ public class Game {
     }
 
     public void forceStopLevelGame() {
-        this.player.setGravity(true);
         this.player.setHealth(20);
         this.player.setGameMode(GameMode.ADVENTURE);
         AMusic.stopSound(this.player);
