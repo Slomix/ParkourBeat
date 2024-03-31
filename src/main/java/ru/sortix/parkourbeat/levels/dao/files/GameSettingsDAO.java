@@ -1,15 +1,21 @@
 package ru.sortix.parkourbeat.levels.dao.files;
 
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.configuration.file.FileConfiguration;
+import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
-import ru.sortix.parkourbeat.levels.settings.Song;
+import ru.sortix.parkourbeat.player.music.MusicTracksManager;
+import ru.sortix.parkourbeat.player.music.MusicTrack;
 
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class GameSettingsDAO {
+    private final @NonNull ParkourBeat plugin;
+
     public void set(@NonNull GameSettings gameSettings, @NonNull FileConfiguration config) {
         config.set("unique_name", gameSettings.getUniqueName());
         config.set("unique_number", gameSettings.getUniqueNumber());
@@ -20,10 +26,9 @@ public class GameSettingsDAO {
         config.set("created_at_mills", gameSettings.getCreatedAtMills());
         config.set("custom_physics_enabled", gameSettings.isCustomPhysicsEnabled());
 
-        Song song = gameSettings.getSong();
-        if (song != null) {
-            config.set("song_play_list_name", song.getSongPlaylist());
-            config.set("song_name", song.getSongName());
+        MusicTrack musicTrack = gameSettings.getMusicTrack();
+        if (musicTrack != null) {
+            config.set("song_id", musicTrack.getUniqueId());
         }
     }
 
@@ -60,17 +65,13 @@ public class GameSettingsDAO {
 
         boolean customPhysicsEnabled = config.getBoolean("custom_physics_enabled", true);
 
-        Song song = null;
-        String songPlayListName = config.getString("song_play_list_name");
-        if (songPlayListName != null) {
-            String songName = config.getString("song_name");
-            if (songName == null) {
-                throw new IllegalArgumentException("String \"song_name\" not found");
-            }
-            song = new Song(songPlayListName, songName);
+        MusicTrack musicTrack = null;
+        String songUniqueId = config.getString("song_id", config.getString("song_name"));
+        if (songUniqueId != null) {
+            musicTrack = this.plugin.get(MusicTracksManager.class).createSongByUniqueId(songUniqueId);
         }
 
         return new GameSettings(
-            uniqueId, uniqueName, uniqueNumber, ownerId, ownerName, displayName, createdAtMills, song, customPhysicsEnabled);
+            uniqueId, uniqueName, uniqueNumber, ownerId, ownerName, displayName, createdAtMills, musicTrack, customPhysicsEnabled);
     }
 }

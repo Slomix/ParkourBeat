@@ -23,7 +23,7 @@ import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
-import ru.sortix.parkourbeat.levels.settings.Song;
+import ru.sortix.parkourbeat.player.music.MusicTrack;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
@@ -64,14 +64,14 @@ public class EditorMainMenu extends ParkourBeatInventory {
             4,
             ItemUtils.modifyMeta(SelectSongMenu.NOTE_HEAD.clone(), meta -> {
                 meta.displayName(Component.text("Выбрать музыку", NamedTextColor.GOLD));
-                Song song = activity.getLevel()
+                MusicTrack musicTrack = activity.getLevel()
                     .getLevelSettings()
                     .getGameSettings()
-                    .getSong();
+                    .getMusicTrack();
                 meta.lore(Arrays.asList(
                     Component.text("Трек, который будет запускаться", NamedTextColor.YELLOW),
                     Component.text("Текущая композиция:", NamedTextColor.YELLOW),
-                    Component.text(song == null ? "отсутствует" : song.getSongName(), NamedTextColor.YELLOW)
+                    Component.text(musicTrack == null ? "отсутствует" : musicTrack.getName(), NamedTextColor.YELLOW)
                 ));
             }),
             this::selectLevelSong);

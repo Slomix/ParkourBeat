@@ -160,9 +160,9 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
             lore.add(Component.text("Дата создания: "
                 + LEVEL_CREATION_DATE_FORMAT.format(new Date(gameSettings.getCreatedAtMills())), NamedTextColor.YELLOW));
             lore.add(Component.text("Трек: "
-                + (gameSettings.getSong() == null
+                + (gameSettings.getMusicTrack() == null
                 ? "отсутствует"
-                : gameSettings.getSong().getSongName()), NamedTextColor.YELLOW));
+                : gameSettings.getMusicTrack().getName()), NamedTextColor.YELLOW));
             lore.add(Component.text("ЛКМ, чтобы играть", NamedTextColor.GOLD));
             lore.add(Component.text("ПКМ, чтобы наблюдать", NamedTextColor.GOLD));
             if (gameSettings.isOwner(this.viewer, true, false)) {
