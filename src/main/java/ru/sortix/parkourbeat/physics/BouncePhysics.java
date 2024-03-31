@@ -8,8 +8,10 @@ import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.type.SpectateActivity;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class BouncePhysics {
 
@@ -18,6 +20,7 @@ public class BouncePhysics {
     private final VelocityCalculator velocityCalculator;
     private final CollisionChecker collisionChecker;
     private final ParkourBeat plugin;
+    private final Set<UUID> skipNextTick = new HashSet<>();
 
     public BouncePhysics(ParkourBeat plugin, VelocityCalculator velocityCalculator, BoundingBoxRegistry bbRegistry) {
         this.plugin = plugin;
@@ -27,16 +30,18 @@ public class BouncePhysics {
             Material.SLIME_BLOCK,
             Material.LIGHT_BLUE_CONCRETE
         ), bbRegistry);
-        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,
-            () -> {
-                activityManager.getAllActivities().forEach(activity -> {
-                    if (activity instanceof SpectateActivity) return;
-                    Player player = activity.getPlayer();
-                    doBounceLogic(player);
-                });
-            },
-            1L,
-            1L);
+//        Bukkit.getScheduler().runTaskTimerAsynchronously(plugin,
+//            () -> {
+//                activityManager.getAllActivities().forEach(activity -> {
+//                    if (activity instanceof SpectateActivity) return;
+//                    Player player = activity.getPlayer();
+//                    if (skipNextTick.remove(player.getUniqueId())) return;
+//                    doBounceLogic(player);
+//                });
+//                skipNextTick.clear();
+//            },
+//            1L,
+//            1L);
     }
 
     private void doBounceLogic(Player player) {
@@ -51,6 +56,7 @@ public class BouncePhysics {
             .subtract(wallVolumetricNormal.multiply(delta.dot(wallVolumetricNormal) * 2)).multiply(BOUNCINESS);
         Bukkit.getScheduler().runTaskLaterAsynchronously(plugin,
             () -> player.setVelocity(bounce), 1L);
+        skipNextTick.add(player.getUniqueId());
     }
 
     private Vector mergeCollisionVelocities(List<CollisionChecker.Collision> collisions) {
