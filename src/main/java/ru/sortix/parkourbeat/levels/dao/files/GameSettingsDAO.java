@@ -72,6 +72,6 @@ public class GameSettingsDAO {
         }
 
         return new GameSettings(
-            uniqueId, uniqueName, uniqueNumber, ownerId, ownerName, displayName, createdAtMills, musicTrack, customPhysicsEnabled);
+                    uniqueId, uniqueName, uniqueNumber, ownerId, ownerName, displayName, createdAtMills, customPhysicsEnabled, musicTrack);
     }
 }
