@@ -27,7 +27,7 @@ public class GameSettingsDAO {
 
         MusicTrack musicTrack = gameSettings.getMusicTrack();
         if (musicTrack != null) {
-            config.set("song_id", musicTrack.getUniqueId());
+            config.set("music_track_id", musicTrack.getUniqueId());
         }
     }
 
@@ -63,7 +63,7 @@ public class GameSettingsDAO {
         }
 
         MusicTrack musicTrack = null;
-        String songUniqueId = config.getString("song_id", config.getString("song_name"));
+        String songUniqueId = config.getString("music_track_id");
         if (songUniqueId != null) {
             musicTrack = this.plugin.get(MusicTracksManager.class).createSongByUniqueId(songUniqueId);
         }

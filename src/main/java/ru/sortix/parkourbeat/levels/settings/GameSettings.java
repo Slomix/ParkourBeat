@@ -26,6 +26,7 @@ public class GameSettings {
     private @NonNull Component displayName;
 
     private final long createdAtMills;
+    @Setter
     private @Nullable MusicTrack musicTrack;
 
     @NonNull
@@ -44,10 +45,6 @@ public class GameSettings {
         if (useDefaultColor) return this.getDisplayNameLegacy();
         return LegacyComponentSerializer.legacySection().serialize(
             this.displayName);
-    }
-
-    public void setMusicTrack(@NonNull MusicTrack musicTrack) {
-        this.musicTrack = musicTrack;
     }
 
     public boolean isOwner(@NonNull UUID playerId) {
