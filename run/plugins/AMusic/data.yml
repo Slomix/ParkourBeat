@@ -1,9 +1,9 @@
 playlists:
-  parkourbeat-tutorial:
+  ParkourBeat - Tutorial:
     size: 813177
-    name: music3.zip
+    name: music1.zip
     sounds:
-      - ParkourBeat - Tutorial
+      - track
     length:
       - 66
-    sha1: 602BEA384F224D118EC6422D0728E3E154703DE6
+    sha1: D53DE756261F017882A05541EE7BBB8642E2E058

@@ -1,13 +1,15 @@
 host: 0.0.0.0
 port: 25599
 processpack: true
-checkpackstatus: true
-packapplystatus: false
-cache: true
+useplaceholderapi: false
+cache:
+  server: true
+  client: true
 strictdownloaderlist: false
-#encoder:
-#  ffmpegbinarypath: plugins/AMusic/ffmpeg.exe
-#  bitrate: 64000
-#  channels: 2
-#  samplingrate: 44100
-#  async: true
+tokensalt: PlaceHereARandomBase64StringIfClientCacheEnabled
+encoder:
+  use: false
+  bitrate: 64000
+  channels: 2
+  samplingrate: 44100
+  async: true
