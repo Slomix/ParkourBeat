@@ -27,16 +27,30 @@ import java.util.*;
 
 public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
     private static final SimpleDateFormat LEVEL_CREATION_DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy");
-    private final Player viewer;
+    private final @NonNull Player viewer;
+    private final @Nullable UUID ownerId;
     private final boolean displayTechInfo;
     private final boolean onlyOwnLevels;
 
     public LevelsListMenu(@NonNull ParkourBeat plugin, @NonNull Player viewer, @Nullable UUID ownerId) {
         super(plugin, 6, Component.text("Уровни"), 0, 5 * 9);
         this.viewer = viewer;
+        this.ownerId = ownerId;
         this.displayTechInfo = viewer.hasPermission("parkourbeat.admin");
         this.onlyOwnLevels = ownerId != null;
-        this.setItems(this.getAvailableLevels(ownerId));
+        this.updateAllItems();
+    }
+
+    @Override
+    @NonNull
+    protected Collection<GameSettings> getAllItems() {
+        List<GameSettings> settings =
+            new ArrayList<>(this.plugin.get(LevelsManager.class).getAvailableLevelsSettings());
+        if (this.ownerId != null) {
+            settings.removeIf(gameSettings -> !gameSettings.isOwner(this.ownerId));
+        }
+        settings.sort(Comparator.comparingLong(GameSettings::getCreatedAtMills));
+        return settings;
     }
 
     public static void startPlaying(
@@ -126,17 +140,6 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
                     });
                 });
             });
-    }
-
-    @NonNull
-    private Collection<GameSettings> getAvailableLevels(@Nullable UUID ownerId) {
-        List<GameSettings> settings =
-            new ArrayList<>(this.plugin.get(LevelsManager.class).getAvailableLevelsSettings());
-        if (ownerId != null) {
-            settings.removeIf(gameSettings -> !gameSettings.isOwner(ownerId));
-        }
-        settings.sort(Comparator.comparingLong(GameSettings::getCreatedAtMills));
-        return settings;
     }
 
     @Override

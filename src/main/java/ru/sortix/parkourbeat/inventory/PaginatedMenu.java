@@ -27,10 +27,15 @@ public abstract class PaginatedMenu<P extends JavaPlugin, Item> extends PluginIn
         this.allItems = new ArrayList<>();
     }
 
-    protected void setItems(@NonNull Collection<Item> items) {
+    public void updateAllItems() {
+        this.setItems(this.getAllItems());
+    }
+
+    private void setItems(@NonNull Collection<Item> items) {
         this.allItems.clear();
         this.allItems.addAll(items);
         this.maxPageNumber = ((this.allItems.size() - 1) / this.itemsAmountOnPage) + 1;
+        this.currentPageNumber = -1;
         this.displayPage(1);
     }
 
@@ -60,16 +65,21 @@ public abstract class PaginatedMenu<P extends JavaPlugin, Item> extends PluginIn
 
     protected void setPreviousPageItem(int row, int column) {
         if (this.currentPageNumber < this.maxPageNumber) {
-            this.setItem(row, column, RegularItems.nextPage(), event -> this.displayPage(this.currentPageNumber + 1));
+            this.setItem(row, column, RegularItems.nextPage(),
+                event -> this.displayPage(this.currentPageNumber + 1));
         }
     }
 
     protected void setNextPageItem(int row, int column) {
         if (this.currentPageNumber > this.minPageNumber) {
             this.setItem(
-                row, column, RegularItems.previousPage(), event -> this.displayPage(this.currentPageNumber - 1));
+                row, column, RegularItems.previousPage(),
+                event -> this.displayPage(this.currentPageNumber - 1));
         }
     }
+
+    @NonNull
+    protected abstract Collection<Item> getAllItems();
 
     @NonNull
     protected abstract ItemStack createItemDisplay(@NonNull Item item);

@@ -37,7 +37,7 @@ public class MusicTracksManager implements PluginManager {
         this.legacyCachedTracks = LEGACY_MODE ? Collections.unmodifiableList(this.loadAllTracksLegacy()) : null;
         for (Player player : this.plugin.getServer().getOnlinePlayers()) {
             if (player.getOpenInventory().getTopInventory().getHolder() instanceof SelectSongMenu menu) {
-                menu.updateItems();
+                menu.updateAllItems();
             }
         }
     }

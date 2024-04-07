@@ -13,6 +13,8 @@ import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.player.music.MusicTrack;
 import ru.sortix.parkourbeat.player.music.MusicTracksManager;
 
+import java.util.Collection;
+
 public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
     public static final ItemStack NOTE_HEAD =
         Heads.getHeadByHash("f22e40b4bfbcc0433044d86d67685f0567025904271d0a74996afbe3f9be2c0f");
@@ -22,11 +24,12 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
     public SelectSongMenu(@NonNull ParkourBeat plugin, @NonNull Level level) {
         super(plugin, 6, Component.text("Выбрать музыку"), 0, 5 * 9);
         this.level = level;
-        this.updateItems();
+        this.updateAllItems();
     }
 
-    public void updateItems() {
-        this.setItems(this.plugin.get(MusicTracksManager.class).getAllTracksModern());
+    @Override
+    protected @NonNull Collection<MusicTrack> getAllItems() {
+        return this.plugin.get(MusicTracksManager.class).getAllTracksModern();
     }
 
     @Override
