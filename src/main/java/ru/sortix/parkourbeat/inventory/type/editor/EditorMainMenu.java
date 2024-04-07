@@ -7,9 +7,11 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.type.EditActivity;
@@ -19,6 +21,7 @@ import ru.sortix.parkourbeat.inventory.ParkourBeatInventory;
 import ru.sortix.parkourbeat.inventory.event.ClickEvent;
 import ru.sortix.parkourbeat.item.ItemUtils;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
+import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.player.music.MusicTrack;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
@@ -121,35 +124,26 @@ public class EditorMainMenu extends ParkourBeatInventory {
             5,
             5,
             ItemUtils.create(Material.SLIME_BLOCK, (meta) -> {
-                meta.displayName(Component.text("Физика Блоков", NamedTextColor.GOLD));
-                boolean blockedEnabled = false;
+                meta.setDisplayName(ChatColor.GREEN + "Физика Блоков");
                 meta.lore(Arrays.asList(
-                    Component.text("У некоторых блоков есть уникальные", NamedTextColor.YELLOW),
-                    Component.text("физические свойства.", NamedTextColor.YELLOW),
+                    Component.text("У некоторых блоков есть уникальные", NamedTextColor.GRAY),
+                    Component.text("физические свойства.", NamedTextColor.RED),
                     Component.empty(),
-                    Component.text("От блоков ", NamedTextColor.YELLOW)
-                        .append(Component.text("слизи", NamedTextColor.GREEN))
-                        .append(Component.text(" и ", NamedTextColor.YELLOW))
-                        .append(Component.text("голубого бетона", NamedTextColor.AQUA))
-                        .append(Component.text(" игрок отскакивает.", NamedTextColor.YELLOW)),
-                    Component.text("По стенам из ", NamedTextColor.YELLOW)
-                        .append(Component.text("всех вариаций льда", NamedTextColor.BLUE))
-                        .append(Component.text(" и ", NamedTextColor.YELLOW))
-                        .append(Component.text("оранжевого бетона", NamedTextColor.GOLD))
-                        .append(Component.text(" игрок скользит.", NamedTextColor.YELLOW)),
+                    Component.text("От блоков ", NamedTextColor.GRAY)
+                        .append(Component.text("Слизи,", NamedTextColor.GREEN))
+                        .append(Component.text(" Голубого бетона", NamedTextColor.AQUA))
+                        .append(Component.text(" игрок отскакивает", NamedTextColor.GRAY)),
+                    Component.text("По стенам из ", NamedTextColor.GRAY)
+                        .append(Component.text("Всех Вариаций Льда,", NamedTextColor.BLUE))
+                        .append(Component.text(" Оранжевого бетона", NamedTextColor.GOLD))
+                        .append(Component.text(" игрок скользит.", NamedTextColor.GRAY)),
                     Component.empty(),
-                    Component.text("Нажмите, чтобы ", NamedTextColor.GOLD)
-                        .append(blockedEnabled
-                            ? Component.text("выключить", NamedTextColor.RED)
-                            : Component.text("включить", NamedTextColor.GREEN)
-                        )
+                    activity.getLevel().getLevelSettings().getGameSettings().isCustomPhysicsEnabled()
+                        ? Component.text("Нажмите, чтобы выключить!", NamedTextColor.RED)
+                        : Component.text("Нажмите, чтобы включить!", NamedTextColor.GREEN)
                 ));
             }),
-            event -> {
-                event.getPlayer().closeInventory();
-                event.getPlayer().sendMessage(Component.text("Функция временно недоступна"));
-            }
-        );
+            this::switchCustomBlockPhysics);
     }
 
     private void leaveEditor(@NonNull ClickEvent event) {
@@ -283,4 +277,19 @@ public class EditorMainMenu extends ParkourBeatInventory {
         CommandDelete.deleteLevel(
             this.plugin, player, this.activity.getLevel().getLevelSettings().getGameSettings());
     }
+
+    private void switchCustomBlockPhysics(@NonNull ClickEvent event) {
+        Player player = event.getPlayer();
+        player.closeInventory();
+
+        GameSettings settings = this.activity.getLevel().getLevelSettings().getGameSettings();
+        boolean inverted = !settings.isCustomPhysicsEnabled();
+        settings.setCustomPhysicsEnabled(inverted);
+
+        player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_SNARE, 1f, 1f);
+        player.sendMessage(inverted
+            ? Component.text("Вы включили физику блоков!", NamedTextColor.GREEN)
+            : Component.text("Вы выключили физику блоков!", NamedTextColor.RED));
+    }
+
 }

@@ -17,11 +17,12 @@ import ru.sortix.parkourbeat.world.TeleportUtils;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ActivityManager implements PluginManager {
     private final ParkourBeat plugin;
     private final ActivityListener listener;
-    private final Map<Player, UserActivity> activities = new HashMap<>();
+    private final Map<Player, UserActivity> activities = new ConcurrentHashMap<>();
     private final BukkitTask movementController;
 
     public ActivityManager(@NonNull ParkourBeat plugin) {
@@ -54,6 +55,9 @@ public class ActivityManager implements PluginManager {
     public UserActivity getActivity(@NonNull Player player) {
         return this.activities.get(player);
     }
+
+    @NonNull
+    public Collection<UserActivity> getAllActivities() { return this.activities.values(); }
 
     private void setActivity(@NonNull Player player, @Nullable UserActivity newActivity) {
         UserActivity previousActivity = this.activities.get(player);

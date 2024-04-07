@@ -15,6 +15,7 @@ import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
 import ru.sortix.parkourbeat.item.ItemsManager;
 import ru.sortix.parkourbeat.item.editor.type.TestGameItem;
+import ru.sortix.parkourbeat.physics.CustomPhysicsManager;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -22,10 +23,12 @@ import java.util.concurrent.CompletableFuture;
 public class PlayActivity extends UserActivity {
     private final @NonNull Game game;
     private final boolean isEditorGame;
+    private final CustomPhysicsManager physicsManager;
     private PlayActivity(@NonNull Game game, boolean isEditorGame) {
         super(game.getPlugin(), game.getPlayer(), game.getLevel());
         this.game = game;
         this.isEditorGame = isEditorGame;
+        this.physicsManager = plugin.get(CustomPhysicsManager.class);
     }
 
     @NonNull
@@ -51,6 +54,7 @@ public class PlayActivity extends UserActivity {
 
     @Override
     public void startActivity() {
+        physicsManager.addPlayer(player, level);
         this.game.resetLevelGame("§cПодготовка уровня", null, false);
 
         this.player.setGameMode(GameMode.ADVENTURE);
@@ -141,6 +145,8 @@ public class PlayActivity extends UserActivity {
 
     @Override
     public void endActivity() {
+        physicsManager.purgePlayer(player);
         this.game.forceStopLevelGame();
     }
+
 }

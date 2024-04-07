@@ -26,6 +26,7 @@ public class GameSettings {
     private @NonNull Component displayName;
 
     private final long createdAtMills;
+    private @Setter boolean customPhysicsEnabled;
     @Setter
     private @Nullable MusicTrack musicTrack;
 

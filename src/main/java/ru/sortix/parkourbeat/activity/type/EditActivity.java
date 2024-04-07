@@ -22,6 +22,7 @@ import ru.sortix.parkourbeat.item.editor.EditorItem;
 import ru.sortix.parkourbeat.item.editor.type.EditTrackPointsItem;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
+import ru.sortix.parkourbeat.physics.CustomPhysicsManager;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
 import javax.annotation.Nullable;
@@ -36,6 +37,7 @@ public class EditActivity extends UserActivity {
     private double currentHeight = 0;
     private @Nullable PlayActivity testingActivity = null;
     private @Nullable ItemStack[] creativeInventoryContents = null;
+    private final CustomPhysicsManager physicsManager;
 
     private EditActivity(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         super(plugin, player, level);
@@ -45,6 +47,7 @@ public class EditActivity extends UserActivity {
         );
         this.level.getLevelSettings().updateParticleLocations();
         this.level.setEditing(true);
+        this.physicsManager = plugin.get(CustomPhysicsManager.class);
     }
 
     @NonNull
@@ -69,6 +72,7 @@ public class EditActivity extends UserActivity {
 
     @Override
     public void startActivity() {
+        physicsManager.addPlayer(player, level);
         if (this.testingActivity != null) {
             this.testingActivity.startActivity();
         } else {
@@ -123,6 +127,7 @@ public class EditActivity extends UserActivity {
 
     @Override
     public void endActivity() {
+        physicsManager.purgePlayer(player);
         if (this.testingActivity != null) this.testingActivity.endActivity();
 
         this.player.setGameMode(GameMode.ADVENTURE);
