@@ -17,7 +17,6 @@ import ru.sortix.parkourbeat.commands.argument.GameSettingsArgumentResolver;
 import ru.sortix.parkourbeat.commands.handler.DefaultInvalidUsageHandler;
 import ru.sortix.parkourbeat.constant.Messages;
 import ru.sortix.parkourbeat.data.Settings;
-import ru.sortix.parkourbeat.player.music.MusicTracksManager;
 import ru.sortix.parkourbeat.inventory.InventoriesListener;
 import ru.sortix.parkourbeat.item.ItemsManager;
 import ru.sortix.parkourbeat.levels.LevelsManager;
@@ -27,6 +26,7 @@ import ru.sortix.parkourbeat.listeners.FixesListener;
 import ru.sortix.parkourbeat.listeners.GamesListener;
 import ru.sortix.parkourbeat.physics.CustomPhysicsManager;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
+import ru.sortix.parkourbeat.player.music.MusicTracksManager;
 import ru.sortix.parkourbeat.world.WorldsListener;
 import ru.sortix.parkourbeat.world.WorldsManager;
 
@@ -81,15 +81,19 @@ public class ParkourBeat extends JavaPlugin {
     private void registerAllCommands() {
         liteCommands = LiteBukkitFactory.builder(getName().toLowerCase(Locale.ROOT), this)
             .commands(
+                // Alphabet order
                 new CommandConvertData(this),
                 new CommandCreate(this),
                 new CommandDelete(this),
                 new CommandEdit(this),
+                new CommandPhysicsDebug(this),
                 new CommandPlay(this),
                 new CommandSpawn(this),
-                new CommandTest(),
+                new CommandTest(this),
                 new CommandTpToWorld(this),
-                new CommandPhysicsDebug(this))
+                new CommandUpdateTrack(this)
+                // Alphabet order
+            )
             .argument(GameSettings.class, ArgumentKey.of("settings-console-owning"), new GameSettingsArgumentResolver(get(LevelsManager.class), false, true, true))
             .argument(GameSettings.class, ArgumentKey.of("settings-players-owning"), new GameSettingsArgumentResolver(get(LevelsManager.class), true, false, true))
             .argument(GameSettings.class, ArgumentKey.of("settings-players-all"), new GameSettingsArgumentResolver(get(LevelsManager.class), true, false, false))

@@ -22,7 +22,11 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
     public SelectSongMenu(@NonNull ParkourBeat plugin, @NonNull Level level) {
         super(plugin, 6, Component.text("Выбрать музыку"), 0, 5 * 9);
         this.level = level;
-        this.setItems(plugin.get(MusicTracksManager.class).getAllTracksModern());
+        this.updateItems();
+    }
+
+    public void updateItems() {
+        this.setItems(this.plugin.get(MusicTracksManager.class).getAllTracksModern());
     }
 
     @Override
