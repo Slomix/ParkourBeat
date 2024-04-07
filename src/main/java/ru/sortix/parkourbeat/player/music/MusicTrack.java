@@ -9,9 +9,11 @@ import java.util.logging.Level;
 
 public class MusicTrack {
 
+    private final @NonNull AMusic aMusic;
     private final @NonNull String playlist;
 
     MusicTrack(@NonNull String playlist) {
+        this.aMusic = AMusic.API();
         this.playlist = playlist;
     }
 
@@ -27,11 +29,11 @@ public class MusicTrack {
 
     public boolean isAvailable() {
         if (MusicTracksManager.LEGACY_MODE) return true;
-        return AMusic.getPlaylists().contains(this.playlist);
+        return this.aMusic.getPlaylists().contains(this.playlist);
     }
 
     public boolean isResourcepackCurrentlySet(@NonNull Player player) {
-        String currentPlayList = AMusic.getPackName(player); // nullable
+        String currentPlayList = this.aMusic.getPackName(player.getUniqueId()); // nullable
         return this.playlist.equals(currentPlayList);
     }
 
@@ -39,7 +41,7 @@ public class MusicTrack {
         if (!this.isAvailable()) return false;
 
         try {
-            AMusic.loadPack(player, this.playlist, false);
+            this.aMusic.loadPack(player.getUniqueId(), this.playlist, false);
             return true;
         } catch (Throwable t) {
             plugin.getLogger().log(Level.SEVERE,

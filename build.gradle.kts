@@ -20,7 +20,7 @@ repositories {
 dependencies {
     compileOnly("com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT")
     compileOnly("com.grinderwolf:slimeworldmanager-api:2.2.1")
-    compileOnly(files("run/plugins/AMusic_v0.12.jar"))
+    compileOnly(files("run/plugins/amusic_bukkit-0.13.jar"))
 
     implementation("org.jetbrains:annotations:24.1.0")
     implementation("dev.rollczi:litecommands-bukkit:3.4.0")
