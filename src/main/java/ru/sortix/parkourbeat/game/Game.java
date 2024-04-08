@@ -2,6 +2,8 @@ package ru.sortix.parkourbeat.game;
 
 import lombok.Getter;
 import lombok.NonNull;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
 import org.bukkit.Sound;
 import org.bukkit.entity.LivingEntity;
@@ -15,13 +17,12 @@ import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.player.music.MusicTracksManager;
 import ru.sortix.parkourbeat.player.music.MusicTrack;
+import ru.sortix.parkourbeat.world.LocationUtils;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-
-import static ru.sortix.parkourbeat.world.LocationUtils.isValidSpawnPoint;
 
 @Getter
 public class Game {
@@ -47,12 +48,13 @@ public class Game {
         levelsManager.loadLevel(levelId, null).thenAccept(level -> {
             if (level == null) {
                 result.complete(null);
+                // TODO Отгружать мир
                 return;
             }
             try {
-                // TODO: Проверять это на этапе загрузки настроек мира и мне кажется
-                // лучше чтобы мир отгружался при result.complete(false)
-                if (!isValidSpawnPoint(level.getSpawn(), level.getLevelSettings())) {
+                // TODO Проверять валидность точки спауна при загрузке мира и при установке новой точки
+                // TODO Отключить данную проверку для уровней, прошедших модерацию
+                if (!LocationUtils.isValidSpawnPoint(level.getSpawn(), level.getLevelSettings())) {
                     if (preventWrongSpawn) {
                         player.sendMessage("Точка спауна установлена неверно. Невозможно начать игру");
 
@@ -63,7 +65,7 @@ public class Game {
                         result.complete(null);
                         return;
                     } else {
-                        player.sendMessage("Точка спауна установлена неверно");
+                        player.sendMessage(Component.text("Точка спауна установлена неверно", NamedTextColor.YELLOW));
                     }
                 }
 
@@ -71,6 +73,7 @@ public class Game {
             } catch (Exception e) {
                 plugin.getLogger().log(java.util.logging.Level.SEVERE, "Unable to prepare game", e);
                 result.complete(null);
+                // TODO Отгружать мир
             }
         });
         return result;

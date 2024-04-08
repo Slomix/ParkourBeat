@@ -12,6 +12,21 @@ import java.util.logging.Level;
 
 @UtilityClass
 public class TeleportUtils {
+    /**
+     * Это трюк для установки корректной позиции игроку после телепортации в другой мир.
+     * При телепортации в другой мир используется алгоритм респауна игрока, который корректирует точку спауна,
+     * в частности делает её более безопасной. Телепортация на высочайшую точку (координата Y) отключается переводом
+     * опции world-settings.default.disable-teleportation-suffocation-check в значение true (paper.yml),
+     * однако в этом случае к локации добавляется небольшой разброс по X и Z.
+     * Данная корректировка происходит уже после PlayerTeleportEvent, поэтому для исправления данной проблемы это
+     * событие не подходит. PlayerSpawnLocationEvent и PlayerRespawnEvent при этом не вызываются вовсе.
+     * Как иначе решить данную проблему - пока неизвестно.
+     * Данным костылём проблему удалось минимизировать,
+     * однако даже при текущем подходе игрока всё равно смещает немного вбок.
+     */
+    private static final boolean USE_SECOND_TELEPORTS = true;
+    private static final boolean DEBUG_TELEPORTATIONS = false;
+
     private final boolean ASYNC_TELEPORT_SUPPORTED;
 
     static {
@@ -30,7 +45,11 @@ public class TeleportUtils {
         WorldsListener.CHUNKS_LOADED = 0;
         long startedAtMills = System.currentTimeMillis();
         player.setFallDistance(0f);
+        boolean useSecondTeleport = player.getWorld() != location.getWorld() && USE_SECOND_TELEPORTS;
         boolean success = player.teleport(location);
+        if (useSecondTeleport && success) {
+            success = player.teleport(location);
+        }
         long durationMills = System.currentTimeMillis() - startedAtMills;
         if (WorldsListener.CHUNKS_LOADED > 0 && ASYNC_TELEPORT_SUPPORTED) {
             plugin.getLogger()
@@ -55,13 +74,20 @@ public class TeleportUtils {
         @NonNull Player player,
         @NonNull Location location
     ) {
-        if (false) plugin.getLogger().log(Level.INFO,
-            "Teleporting " + player.getName()
-                + " from " + toString(player.getLocation()) + " to " + toString(location), new RuntimeException("DEBUG"));
+        if (DEBUG_TELEPORTATIONS) {
+            plugin.getLogger().log(Level.INFO,
+                "Teleporting " + player.getName()
+                    + " from " + toString(player.getLocation()) + " to " + toString(location),
+                new RuntimeException("DEBUG"));
+        }
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         if (ASYNC_TELEPORT_SUPPORTED) {
             player.setFallDistance(0f);
+            boolean useSecondTeleport = player.getWorld() != location.getWorld() && USE_SECOND_TELEPORTS;
             player.teleportAsync(location).thenAccept(success -> {
+                if (useSecondTeleport && success) {
+                    success = player.teleport(location);
+                }
                 if (!success) {
                     player.sendMessage("Телепортация отменена");
                 }

@@ -1,22 +1,31 @@
 package ru.sortix.parkourbeat.world;
 
 import lombok.NonNull;
+import lombok.experimental.UtilityClass;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 
+@UtilityClass
 public class LocationUtils {
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean isValidSpawnPoint(@NonNull Location spawnLocation,
+                                     @NonNull LevelSettings levelSettings
+    ) {
+        if (!levelSettings.getDirectionChecker()
+            .isCorrectDirection(spawnLocation, levelSettings.getStartWaypointLoc())
+        ) {
+            return false;
+        }
 
-    public static boolean isValidSpawnPoint(@NonNull Location spawnLocation, @NonNull LevelSettings levelSettings) {
-        DirectionChecker directionChecker = levelSettings.getDirectionChecker();
-        Location startLocation = levelSettings.getStartWaypointLoc();
-        Block block = spawnLocation.getBlock();
+        if (BoundingBoxUtils.isBoundingBoxOverlapsWithAnyBlock(
+            spawnLocation.getWorld(),
+            BoundingBoxUtils.createBoundingBoxAtPos(0.6F, 1.8F, 0.6F, spawnLocation),
+            true,
+            true
+        )) {
+            return false;
+        }
 
-        return !block.getRelative(BlockFace.DOWN).isPassable()
-            && block.isPassable()
-            && block.getRelative(BlockFace.UP).isPassable()
-            && directionChecker.isCorrectDirection(spawnLocation, startLocation);
+        return true;
     }
 }

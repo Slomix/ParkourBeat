@@ -24,12 +24,11 @@ import ru.sortix.parkourbeat.levels.settings.GameSettings;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
 import ru.sortix.parkourbeat.player.music.MusicTrack;
+import ru.sortix.parkourbeat.world.LocationUtils;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static ru.sortix.parkourbeat.world.LocationUtils.isValidSpawnPoint;
 
 public class EditorMainMenu extends ParkourBeatInventory {
     private final EditActivity activity;
@@ -208,8 +207,8 @@ public class EditorMainMenu extends ParkourBeatInventory {
         LevelSettings levelSettings = this.activity.getLevel().getLevelSettings();
         Location playerLocation = player.getLocation();
 
-        if (!isValidSpawnPoint(playerLocation, levelSettings)) {
-            player.sendMessage("Точка спауна не может быть установлена здесь.");
+        if (!LocationUtils.isValidSpawnPoint(playerLocation, levelSettings)) {
+            player.sendMessage("Точка спауна не может быть установлена здесь");
             return;
         }
 
