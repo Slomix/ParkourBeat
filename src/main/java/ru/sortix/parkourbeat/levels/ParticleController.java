@@ -172,7 +172,14 @@ public class ParticleController {
         //  https://github.com/Slomix/ParkourBeat/issues/17
         //noinspection UnnecessaryLocalVariable
         Iterable<Location> locations = this.particleLocations;
-        ParticleUtils.displayRedstoneParticles(player, color, locations, MAX_PARTICLES_VIEW_DISTANCE_SQUARED);
+        ParticleUtils.displayRedstoneParticles(
+            true, // TODO Detect is player version is 1.12.2 or older
+            player,
+            color,
+            1.0f,
+            locations,
+            MAX_PARTICLES_VIEW_DISTANCE_SQUARED
+        );
     }
 
     public void startSpawnParticles(@NonNull Player player) {
