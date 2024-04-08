@@ -15,8 +15,8 @@ import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
-import ru.sortix.parkourbeat.player.music.MusicTracksManager;
 import ru.sortix.parkourbeat.player.music.MusicTrack;
+import ru.sortix.parkourbeat.player.music.MusicTracksManager;
 import ru.sortix.parkourbeat.world.LocationUtils;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
@@ -91,7 +91,7 @@ public class Game {
 
         this.player.setGameMode(GameMode.ADVENTURE);
 
-        this.currentState = State.READY;
+        this.setCurrentState(State.READY);
 
         MusicTrack musicTrack = settings.getGameSettings().getMusicTrack();
         if (musicTrack == null || musicTrack.isResourcepackCurrentlySet(this.player)) return;
@@ -101,7 +101,7 @@ public class Game {
             return;
         }
 
-        this.currentState = State.PREPARING;
+        this.setCurrentState(State.PREPARING);
 
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
 
@@ -109,7 +109,7 @@ public class Game {
             if (startedSuccessfully) return;
 
             this.player.sendMessage("Не удалось загрузить трек \"" + musicTrack.getName() + "\"");
-            this.currentState = State.READY;
+            this.setCurrentState(State.READY);
 
         }, 20L);
     }
@@ -123,10 +123,10 @@ public class Game {
         if (this.currentState != State.READY) {
             return;
         }
-        this.currentState = State.RUNNING;
+
+        this.setCurrentState(State.RUNNING);
 
         if (!this.player.isSprinting() || this.player.isSneaking()) {
-            this.currentState = State.RUNNING;
             this.failLevel("§cЗажмите бег!", null);
             return;
         }
@@ -150,8 +150,15 @@ public class Game {
         }
     }
 
-    public void setCurrentState(@NonNull State currentState) {
-        this.currentState = currentState;
+    public void setCurrentState(@NonNull State newState) {
+        if (this.currentState == newState) return;
+        if (this.player.getName().equals("Dymeth")) {
+            this.levelsManager.getPlugin().getLogger().info("Switched state: " + this.currentState + " -> " + newState);
+            if (newState == State.READY) {
+                new RuntimeException("DEBUG").printStackTrace();
+            }
+        }
+        this.currentState = newState;
     }
 
     public void failLevel(@Nullable String reasonFirstLine, @Nullable String reasonSecondLine) {
@@ -165,9 +172,10 @@ public class Game {
     }
 
     public void resetLevelGame(@Nullable String reasonFirstLine, @Nullable String reasonSecondLine, boolean levelComplete) {
+        boolean switchState = this.currentState == State.RUNNING;
         this.resetRunningLevelGame(reasonFirstLine, reasonSecondLine, levelComplete);
         this.forceStopLevelGame();
-        this.currentState = Game.State.READY;
+        if (switchState) this.setCurrentState(State.READY);
     }
 
     private void resetRunningLevelGame(@Nullable String reasonFirstLine, @Nullable String reasonSecondLine, boolean levelComplete) {
@@ -200,8 +208,6 @@ public class Game {
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             this.player.showPlayer(plugin, onlinePlayer);
         }
-
-        this.currentState = State.PREPARING;
     }
 
     public enum State {
