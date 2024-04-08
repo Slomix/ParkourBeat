@@ -152,12 +152,6 @@ public class Game {
 
     public void setCurrentState(@NonNull State newState) {
         if (this.currentState == newState) return;
-        if (this.player.getName().equals("Dymeth")) {
-            this.levelsManager.getPlugin().getLogger().info("Switched state: " + this.currentState + " -> " + newState);
-            if (newState == State.READY) {
-                new RuntimeException("DEBUG").printStackTrace();
-            }
-        }
         this.currentState = newState;
     }
 
