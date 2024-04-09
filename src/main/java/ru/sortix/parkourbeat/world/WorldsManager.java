@@ -160,9 +160,11 @@ public class WorldsManager implements PluginManager, Listener {
     }
 
     @NonNull
-    public CompletableFuture<Boolean> unloadBukkitWorld(
-        @NonNull World world, boolean save, @NonNull Location fallbackLocation) {
-
+    public CompletableFuture<Boolean> unloadBukkitWorld(@NonNull World world,
+                                                        boolean save,
+                                                        @NonNull Location fallbackLocation,
+                                                        boolean async
+    ) {
         if (world == this.server.getWorlds().iterator().next()) {
             // world is default
             this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
@@ -182,14 +184,33 @@ public class WorldsManager implements PluginManager, Listener {
             .add(result);
 
         if (!unloadingStarted) {
-            this.startWorldUnloading(world, save, fallbackLocation);
+            if (async) {
+                this.startWorldUnloadingAsync(world, save, fallbackLocation);
+            } else {
+                this.startWorldUnloadingSync(world, save, fallbackLocation);
+            }
         }
 
         return result;
     }
 
-    private void startWorldUnloading(@NonNull World world, boolean save, @NonNull Location fallbackLocation) {
+    private void startWorldUnloadingSync(@NonNull World world, boolean save, @NonNull Location fallbackLocation) {
+        for (Player player : world.getPlayers()) {
+            player.sendMessage("Мир, в котором вы находились, был отключён");
+            TeleportUtils.teleportSync(this.plugin, player, fallbackLocation);
+        }
 
+        if (world.getPlayers().isEmpty()) {
+            this.server.unloadWorld(world, save); // call WorldUnloadEvent, result must be ignored
+            return;
+        }
+
+        this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
+            + " т.к. не удалось освободить его от игроков");
+        this.unloadingWorldsFutures.remove(world).forEach(future -> future.complete(false));
+    }
+
+    private void startWorldUnloadingAsync(@NonNull World world, boolean save, @NonNull Location fallbackLocation) {
         List<CompletableFuture<Boolean>> teleportationFutures = new ArrayList<>();
         for (Player player : world.getPlayers()) {
             player.sendMessage("Мир, в котором вы находились, был отключён");
@@ -209,6 +230,7 @@ public class WorldsManager implements PluginManager, Listener {
                     this.server.unloadWorld(world, save); // call WorldUnloadEvent, result must be ignored
                     return;
                 }
+
                 this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
                     + " т.к. не удалось освободить его от игроков");
                 this.unloadingWorldsFutures.remove(world).forEach(future -> future.complete(false));

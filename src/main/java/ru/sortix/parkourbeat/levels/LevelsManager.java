@@ -219,7 +219,7 @@ public class LevelsManager implements PluginManager {
             worldUnloading = new CompletableFuture<>();
             this.plugin
                 .get(WorldsManager.class)
-                .unloadBukkitWorld(world, false, Settings.getLobbySpawn())
+                .unloadBukkitWorld(world, false, Settings.getLobbySpawn(), true)
                 .thenAccept(worldUnloading::complete);
         }
 
@@ -430,7 +430,7 @@ public class LevelsManager implements PluginManager {
             World world = entry.getKey();
             Level level = entry.getValue();
             this.levelsSettings.saveWorldSettings(level.getUniqueId());
-            this.worldsManager.unloadBukkitWorld(world, level.isEditing(), spawn);
+            this.worldsManager.unloadBukkitWorld(world, level.isEditing(), spawn, false);
         }
     }
 

@@ -40,7 +40,7 @@ public class TeleportUtils {
         ASYNC_TELEPORT_SUPPORTED = asyncTeleportSupported;
     }
 
-    private boolean teleportSync(@NonNull Plugin plugin, @NonNull Player player, @NonNull Location location) {
+    public boolean teleportSync(@NonNull Plugin plugin, @NonNull Player player, @NonNull Location location) {
         Location sourceLoc = player.getLocation();
         WorldsListener.CHUNKS_LOADED = 0;
         long startedAtMills = System.currentTimeMillis();
