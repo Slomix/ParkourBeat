@@ -7,6 +7,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerResourcePackStatusEvent;
@@ -36,6 +37,7 @@ public class EditActivity extends UserActivity {
     @Setter
     private double currentHeight = 0;
     private @Nullable PlayActivity testingActivity = null;
+    private @Nullable Location creativePosition = null;
     private @Nullable ItemStack[] creativeInventoryContents = null;
     private final CustomPhysicsManager physicsManager;
 
@@ -154,6 +156,7 @@ public class EditActivity extends UserActivity {
                     return;
                 }
 
+                this.creativePosition = this.player.getLocation();
                 TeleportUtils.teleportAsync(this.plugin, this.player, this.level.getSpawn()).thenAccept(success -> {
                     if (!success) {
                         this.player.sendMessage(Component.text("Не удалось войти в режим тестирования"));
@@ -176,7 +179,13 @@ public class EditActivity extends UserActivity {
     public void endTesting() {
         if (this.testingActivity == null) throw new IllegalArgumentException("Testing not started");
 
-        TeleportUtils.teleportAsync(this.plugin, this.player, this.level.getSpawn()).thenAccept(success -> {
+        TeleportUtils.teleportAsync(
+            this.plugin,
+            this.player,
+            this.creativePosition == null ? this.level.getSpawn() : this.creativePosition
+        ).thenAccept(success -> {
+            this.creativePosition = null;
+
             if (!success) {
                 this.player.sendMessage(Component.text("Не удалось покинуть режим тестирования"));
                 return;
