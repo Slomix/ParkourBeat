@@ -3,6 +3,7 @@ package ru.sortix.parkourbeat.levels;
 import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import ru.sortix.parkourbeat.data.Settings;
@@ -56,5 +57,22 @@ public class Level {
     public boolean isLocationInside(@NonNull Location location) {
         if (location.getWorld() != this.world) return false;
         return this.cuboid.isInside(location);
+    }
+
+    public boolean isPositionInside(double x, double y, double z) {
+        return this.cuboid.isInside(x, y, z);
+    }
+
+    @SuppressWarnings({"PointlessBitwiseExpression", "OctalInteger", "RedundantIfStatement"})
+    public boolean isChunkInside(@NonNull Chunk chunk) {
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
+
+        if (this.isPositionInside((chunkX << 4) | 00, 0, (chunkZ << 4) | 00)) return true;
+        if (this.isPositionInside((chunkX << 4) | 15, 0, (chunkZ << 4) | 00)) return true;
+        if (this.isPositionInside((chunkX << 4) | 00, 0, (chunkZ << 4) | 15)) return true;
+        if (this.isPositionInside((chunkX << 4) | 15, 0, (chunkZ << 4) | 15)) return true;
+
+        return false;
     }
 }

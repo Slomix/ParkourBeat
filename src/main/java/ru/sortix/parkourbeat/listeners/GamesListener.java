@@ -22,6 +22,7 @@ import org.bukkit.event.entity.EntityRegainHealthEvent;
 import org.bukkit.event.entity.FoodLevelChangeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.event.world.ChunkUnloadEvent;
 import org.jetbrains.annotations.NotNull;
 import org.spigotmc.event.player.PlayerSpawnLocationEvent;
 import ru.sortix.parkourbeat.ParkourBeat;
@@ -29,8 +30,8 @@ import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.UserActivity;
 import ru.sortix.parkourbeat.activity.type.EditActivity;
 import ru.sortix.parkourbeat.data.Settings;
+import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
-import ru.sortix.parkourbeat.levels.dao.LevelSettingDAO;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
 import java.util.function.Consumer;
@@ -38,7 +39,6 @@ import java.util.function.Consumer;
 public final class GamesListener implements Listener {
     private final ParkourBeat plugin;
     private final ActivityManager activityManager;
-    private final LevelSettingDAO levelSettingDAO;
     private final Consumer<Player> onPlayerTeleportToLobby = player -> {
         player.setHealth(20);
         player.setFoodLevel(20);
@@ -65,8 +65,6 @@ public final class GamesListener implements Listener {
     public GamesListener(@NonNull ParkourBeat plugin) {
         this.plugin = plugin;
         this.activityManager = plugin.get(ActivityManager.class);
-        this.levelSettingDAO =
-            plugin.get(LevelsManager.class).getLevelsSettings().getLevelSettingDAO();
 
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             // TODO Check .getSpawnLocation() if quit-world is unloaded at this moment
@@ -282,5 +280,15 @@ public final class GamesListener implements Listener {
     @EventHandler
     private void on(AsyncChatEvent event) {
         event.renderer(ChatRenderer.viewerUnaware(this.viewerUnaware));
+    }
+
+    @EventHandler
+    private void on(ChunkUnloadEvent event) {
+        Level level = this.plugin.get(LevelsManager.class).getLoadedLevel(event.getChunk().getWorld());
+        if (level == null) return;
+
+        if (!level.isChunkInside(event.getChunk())) {
+            event.setSaveChunk(false);
+        }
     }
 }

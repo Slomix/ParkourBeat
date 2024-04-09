@@ -17,15 +17,22 @@ public class Cuboid {
     private @Nullable World world;
 
     @SuppressWarnings("RedundantIfStatement")
-    public boolean isInside(@NonNull Location location) {
-        if (this.world != null && location.getWorld() != null && this.world != location.getWorld()) return false;
+    public boolean isInside(@NonNull Location loc) {
+        if (this.world != null && loc.getWorld() != null && this.world != loc.getWorld()) return false;
 
-        if (location.getX() < this.min.getX()) return false;
-        if (location.getX() > this.max.getX()) return false;
-        if (location.getZ() < this.min.getZ()) return false;
-        if (location.getZ() > this.max.getZ()) return false;
-        if (location.getY() < this.min.getY()) return false;
-        if (location.getY() > this.max.getY()) return false;
+        if (loc.getX() < this.min.getX() || loc.getX() > this.max.getX()) return false;
+        if (loc.getZ() < this.min.getZ() || loc.getZ() > this.max.getZ()) return false;
+        if (loc.getY() < this.min.getY() || loc.getY() > this.max.getY()) return false;
+
+        return true;
+    }
+
+    @SuppressWarnings("RedundantIfStatement")
+    public boolean isInside(double x, double y, double z) {
+
+        if (x < this.min.getX() || x > this.max.getX()) return false;
+        if (z < this.min.getZ() || z > this.max.getZ()) return false;
+        if (y < this.min.getY() || y > this.max.getY()) return false;
 
         return true;
     }
