@@ -99,7 +99,7 @@ public class EditTrackPointsItem extends EditorItem {
         waypoints.add(index, newWaypoint);
         updateBorders(index, level);
 
-        player.sendMessage("Вы успешно добавили точку.");
+        player.sendActionBar(Component.text("Вы успешно добавили точку", NamedTextColor.GREEN));
         return true;
     }
 
@@ -114,13 +114,13 @@ public class EditTrackPointsItem extends EditorItem {
             Waypoint waypoint = waypoints.get(i);
             if (waypoint.getLocation().distance(particleLoc) < REMOVE_POINT_DISTANCE) {
                 if (waypoints.size() <= 2) {
-                    player.sendMessage("Точек должно быть минимум две!");
+                    player.sendActionBar(Component.text("Точек должно быть минимум две!", NamedTextColor.RED));
                     return false;
                 }
                 waypoints.remove(i);
                 updateBorders(i, level);
 
-                player.sendMessage("Вы успешно удалили точку.");
+                player.sendActionBar(Component.text("Вы успешно удалили точку", NamedTextColor.GREEN));
                 return true;
             }
         }
