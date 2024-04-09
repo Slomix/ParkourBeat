@@ -118,7 +118,7 @@ public class EditorMainMenu extends ParkourBeatInventory {
                 ));
             }),
             this::deleteLevel);
-        this.setItem(
+        if (false) this.setItem(
             5,
             5,
             ItemUtils.create(Material.SLIME_BLOCK, (meta) -> {
