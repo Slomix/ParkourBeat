@@ -50,7 +50,15 @@ public class WorldsManager implements PluginManager, Listener {
     @Getter
     private final Executor asyncExecutor;
 
-    private final Map<World, List<CompletableFuture<Boolean>>> unloadingWorldsFutures = new HashMap<>();
+    private final Map<World, UnloadingWorld> unloadingWorlds = new HashMap<>();
+
+    private record UnloadingWorld(@NonNull List<CompletableFuture<Boolean>> futures) {
+        public void complete(boolean success) {
+            for (CompletableFuture<Boolean> future : this.futures) {
+                future.complete(success);
+            }
+        }
+    }
 
     public WorldsManager(@NonNull Plugin plugin) {
         this.plugin = plugin;
@@ -161,7 +169,7 @@ public class WorldsManager implements PluginManager, Listener {
 
     @NonNull
     public CompletableFuture<Boolean> unloadBukkitWorld(@NonNull World world,
-                                                        boolean save,
+                                                        boolean saveChunks,
                                                         @NonNull Location fallbackLocation,
                                                         boolean async
     ) {
@@ -178,16 +186,16 @@ public class WorldsManager implements PluginManager, Listener {
         }
 
         CompletableFuture<Boolean> result = new CompletableFuture<>();
-        boolean unloadingStarted = this.unloadingWorldsFutures.containsKey(world);
-        this.unloadingWorldsFutures
-            .computeIfAbsent(world, world1 -> new ArrayList<>())
-            .add(result);
+        boolean unloadingStarted = this.unloadingWorlds.containsKey(world);
+        this.unloadingWorlds
+            .computeIfAbsent(world, world1 -> new UnloadingWorld(new ArrayList<>()))
+            .futures.add(result);
 
         if (!unloadingStarted) {
             if (async) {
-                this.startWorldUnloadingAsync(world, save, fallbackLocation);
+                this.startWorldUnloadingAsync(world, saveChunks, fallbackLocation);
             } else {
-                this.startWorldUnloadingSync(world, save, fallbackLocation);
+                this.startWorldUnloadingSync(world, saveChunks, fallbackLocation);
             }
         }
 
@@ -200,14 +208,15 @@ public class WorldsManager implements PluginManager, Listener {
             TeleportUtils.teleportSync(this.plugin, player, fallbackLocation);
         }
 
-        if (world.getPlayers().isEmpty()) {
-            this.server.unloadWorld(world, save); // call WorldUnloadEvent, result must be ignored
+        if (!world.getPlayers().isEmpty()) {
+            this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
+                + " т.к. не удалось освободить его от игроков");
+            UnloadingWorld unloadingWorld = this.unloadingWorlds.remove(world);
+            if (unloadingWorld != null) unloadingWorld.complete(false);
             return;
         }
 
-        this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
-            + " т.к. не удалось освободить его от игроков");
-        this.unloadingWorldsFutures.remove(world).forEach(future -> future.complete(false));
+        this.server.unloadWorld(world, save); // call WorldUnloadEvent, result must be ignored
     }
 
     private void startWorldUnloadingAsync(@NonNull World world, boolean save, @NonNull Location fallbackLocation) {
@@ -226,22 +235,24 @@ public class WorldsManager implements PluginManager, Listener {
 
         onPlayersTeleported.thenAcceptAsync(
             unused -> {
-                if (world.getPlayers().isEmpty()) {
-                    this.server.unloadWorld(world, save); // call WorldUnloadEvent, result must be ignored
+
+                if (!world.getPlayers().isEmpty()) {
+                    this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
+                        + " т.к. не удалось освободить его от игроков");
+                    UnloadingWorld unloadingWorld = this.unloadingWorlds.remove(world);
+                    if (unloadingWorld != null) unloadingWorld.complete(false);
                     return;
                 }
 
-                this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
-                    + " т.к. не удалось освободить его от игроков");
-                this.unloadingWorldsFutures.remove(world).forEach(future -> future.complete(false));
+                this.server.unloadWorld(world, save); // call WorldUnloadEvent, result must be ignored
             },
             this.syncExecutor);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     private void on(WorldUnloadEvent event) {
-        List<CompletableFuture<Boolean>> consumers = this.unloadingWorldsFutures.remove(event.getWorld());
-        if (consumers == null) return;
+        UnloadingWorld unloadingWorld = this.unloadingWorlds.remove(event.getWorld());
+        if (unloadingWorld == null) return;
         boolean eventAllowed = !event.isCancelled();
         if (!eventAllowed) {
             this.logger.severe("Не удалось отгрузить мир \"" + event.getWorld().getName() + "\", "
@@ -251,15 +262,13 @@ public class WorldsManager implements PluginManager, Listener {
                 .map(Plugin::getName)
                 .collect(Collectors.joining(", ")));
         }
-        for (CompletableFuture<Boolean> completableFuture : consumers) {
-            completableFuture.complete(eventAllowed);
-        }
+        unloadingWorld.complete(eventAllowed);
     }
 
     @EventHandler(ignoreCancelled = true)
     private void on(PlayerTeleportEvent event) {
         if (event.getFrom().getWorld() == event.getTo().getWorld()) return;
-        if (!this.unloadingWorldsFutures.containsKey(event.getTo().getWorld())) return;
+        if (!this.unloadingWorlds.containsKey(event.getTo().getWorld())) return;
         event.getPlayer().sendMessage("Мир, в который вы телепортируетесь, отключается...");
         event.setCancelled(true);
     }
