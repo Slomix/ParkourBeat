@@ -2,10 +2,7 @@ package ru.sortix.parkourbeat.world;
 
 import lombok.Getter;
 import lombok.NonNull;
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.World;
-import org.bukkit.WorldCreator;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -29,11 +26,14 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class WorldsManager implements PluginManager, Listener {
+    private static final Predicate<Chunk> DISABLE_CHUNKS_SAVING_PREDICATE = chunk -> false;
+
     private final Plugin plugin;
     private final Logger logger;
     private final Server server;
@@ -52,11 +52,50 @@ public class WorldsManager implements PluginManager, Listener {
 
     private final Map<World, UnloadingWorld> unloadingWorlds = new HashMap<>();
 
-    private record UnloadingWorld(@NonNull List<CompletableFuture<Boolean>> futures) {
+    private record UnloadingWorld(@NonNull World world,
+                                  boolean saveChunks,
+                                  @NonNull Predicate<Chunk> shouldSaveChunkPredicate,
+                                  @NonNull List<CompletableFuture<Boolean>> futures
+    ) {
+        public boolean tryToUnloadChunks(@NonNull Logger logger) {
+            int totalChunks = this.world.getLoadedChunks().length;
+            int failedToUnload = this.unloadAllChunks();
+            if (failedToUnload == 0) return true;
+
+            logger.warning("Не удалось отгрузить " + failedToUnload + " из " + totalChunks
+                + " чанков мира \"" + world.getName() + "\"." +
+                " Используются: " + this.getForceLoadedChunksAmount() + "," +
+                " тикеты: " + this.getChunkTicketsAmount());
+            return false;
+        }
+
+        private int unloadAllChunks() {
+            this.world.setKeepSpawnInMemory(false);
+            int failedToUnload = 0;
+            for (Chunk chunk : this.world.getLoadedChunks()) {
+                if (!chunk.unload(this.shouldSaveChunkPredicate.test(chunk))) {
+                    failedToUnload++;
+                }
+            }
+            return failedToUnload;
+        }
+
         public void complete(boolean success) {
             for (CompletableFuture<Boolean> future : this.futures) {
                 future.complete(success);
             }
+        }
+
+        public int getForceLoadedChunksAmount() {
+            return this.world.getForceLoadedChunks().size();
+        }
+
+        public int getChunkTicketsAmount() {
+            Set<Chunk> ticketChunks = new HashSet<>();
+            for (Collection<Chunk> collection : this.world.getPluginChunkTickets().values()) {
+                ticketChunks.addAll(collection);
+            }
+            return ticketChunks.size();
         }
     }
 
@@ -170,6 +209,7 @@ public class WorldsManager implements PluginManager, Listener {
     @NonNull
     public CompletableFuture<Boolean> unloadBukkitWorld(@NonNull World world,
                                                         boolean saveChunks,
+                                                        @NonNull Predicate<Chunk> shouldSaveChunkPredicate,
                                                         @NonNull Location fallbackLocation,
                                                         boolean async
     ) {
@@ -187,22 +227,28 @@ public class WorldsManager implements PluginManager, Listener {
 
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         boolean unloadingStarted = this.unloadingWorlds.containsKey(world);
-        this.unloadingWorlds
-            .computeIfAbsent(world, world1 -> new UnloadingWorld(new ArrayList<>()))
-            .futures.add(result);
+        UnloadingWorld unloadingWorld = this.unloadingWorlds
+            .computeIfAbsent(world, world1 -> new UnloadingWorld(
+                world,
+                saveChunks,
+                saveChunks ? shouldSaveChunkPredicate : DISABLE_CHUNKS_SAVING_PREDICATE,
+                new ArrayList<>()
+            ));
+        unloadingWorld.futures.add(result);
 
         if (!unloadingStarted) {
             if (async) {
-                this.startWorldUnloadingAsync(world, saveChunks, fallbackLocation);
+                this.startWorldUnloadingAsync(unloadingWorld, saveChunks, fallbackLocation);
             } else {
-                this.startWorldUnloadingSync(world, saveChunks, fallbackLocation);
+                this.startWorldUnloadingSync(unloadingWorld, saveChunks, fallbackLocation);
             }
         }
 
         return result;
     }
 
-    private void startWorldUnloadingSync(@NonNull World world, boolean save, @NonNull Location fallbackLocation) {
+    private void startWorldUnloadingSync(@NonNull UnloadingWorld unloadingWorld, boolean save, @NonNull Location fallbackLocation) {
+        World world = unloadingWorld.world;
         for (Player player : world.getPlayers()) {
             player.sendMessage("Мир, в котором вы находились, был отключён");
             TeleportUtils.teleportSync(this.plugin, player, fallbackLocation);
@@ -211,15 +257,19 @@ public class WorldsManager implements PluginManager, Listener {
         if (!world.getPlayers().isEmpty()) {
             this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
                 + " т.к. не удалось освободить его от игроков");
-            UnloadingWorld unloadingWorld = this.unloadingWorlds.remove(world);
-            if (unloadingWorld != null) unloadingWorld.complete(false);
+            if (this.unloadingWorlds.remove(world) == unloadingWorld) {
+                unloadingWorld.complete(false);
+            }
             return;
         }
+
+        unloadingWorld.tryToUnloadChunks(this.logger);
 
         this.server.unloadWorld(world, save); // call WorldUnloadEvent, result must be ignored
     }
 
-    private void startWorldUnloadingAsync(@NonNull World world, boolean save, @NonNull Location fallbackLocation) {
+    private void startWorldUnloadingAsync(@NonNull UnloadingWorld unloadingWorld, boolean save, @NonNull Location fallbackLocation) {
+        World world = unloadingWorld.world;
         List<CompletableFuture<Boolean>> teleportationFutures = new ArrayList<>();
         for (Player player : world.getPlayers()) {
             player.sendMessage("Мир, в котором вы находились, был отключён");
@@ -233,20 +283,22 @@ public class WorldsManager implements PluginManager, Listener {
             onPlayersTeleported = CompletableFuture.allOf(teleportationFutures.toArray(new CompletableFuture[0]));
         }
 
-        onPlayersTeleported.thenAcceptAsync(
-            unused -> {
-
-                if (!world.getPlayers().isEmpty()) {
-                    this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
-                        + " т.к. не удалось освободить его от игроков");
-                    UnloadingWorld unloadingWorld = this.unloadingWorlds.remove(world);
-                    if (unloadingWorld != null) unloadingWorld.complete(false);
-                    return;
+        onPlayersTeleported.thenAccept(unused -> {
+            if (!world.getPlayers().isEmpty()) {
+                this.logger.severe("Не удалось отгрузить мир \"" + world.getName() + "\","
+                    + " т.к. не удалось освободить его от игроков");
+                if (this.unloadingWorlds.remove(world) == unloadingWorld) {
+                    unloadingWorld.complete(false);
                 }
+                return;
+            }
+
+            this.plugin.getServer().getScheduler().runTaskLater(this.plugin, () -> {
+                unloadingWorld.tryToUnloadChunks(this.logger);
 
                 this.server.unloadWorld(world, save); // call WorldUnloadEvent, result must be ignored
-            },
-            this.syncExecutor);
+            }, 5L); // Reason of 5 ticks delay is described here: https://github.com/Slomix/ParkourBeat/issues/87
+        });
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

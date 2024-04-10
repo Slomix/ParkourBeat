@@ -1,6 +1,7 @@
 package ru.sortix.parkourbeat.world;
 
 import lombok.NonNull;
+import org.bukkit.World;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
@@ -33,10 +34,13 @@ public class WorldsListener implements Listener {
 
     @EventHandler
     private void on(PlayerChangedWorldEvent event) {
-        if (!event.getFrom().getPlayers().isEmpty()) return;
-        Level level = this.levelsManager.getLoadedLevel(event.getFrom());
+        World fromWorld = event.getFrom();
+        if (fromWorld.getPlayerCount() > 0) return;
+        Level level = this.levelsManager.getLoadedLevel(fromWorld);
         if (level == null) return;
-        this.levelsManager.unloadLevelAsync(level.getUniqueId()).thenAccept(success -> {
+
+        boolean saveChunks = false; // Chunks are saving on editor stopping
+        this.levelsManager.unloadLevelAsync(level.getUniqueId(), saveChunks).thenAccept(success -> {
             if (!success) {
                 this.logger.warning("Не удалось выгрузить мир уровня " + level.getUniqueId());
             }

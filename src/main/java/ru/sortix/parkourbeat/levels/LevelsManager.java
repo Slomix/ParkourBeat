@@ -191,7 +191,7 @@ public class LevelsManager implements PluginManager {
     public CompletableFuture<Boolean> deleteLevelAsync(@NonNull GameSettings settings) {
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         UUID levelId = settings.getUniqueId();
-        this.unloadLevelAsync(levelId).thenAccept(success -> {
+        this.unloadLevelAsync(levelId, false).thenAccept(success -> {
             if (!success) {
                 result.complete(false);
                 return;
@@ -205,8 +205,9 @@ public class LevelsManager implements PluginManager {
     }
 
     @NonNull
-    public CompletableFuture<Boolean> unloadLevelAsync(@NonNull UUID levelId) {
-        if (!this.loadedLevelsById.containsKey(levelId)) return CompletableFuture.completedFuture(true);
+    public CompletableFuture<Boolean> unloadLevelAsync(@NonNull UUID levelId, boolean saveChunks) {
+        Level level = this.getLoadedLevel(levelId);
+        if (level == null) return CompletableFuture.completedFuture(true);
 
         CompletableFuture<Boolean> result = new CompletableFuture<>();
         LevelSettingDAO dao = this.levelsSettings.getLevelSettingDAO();
@@ -219,7 +220,13 @@ public class LevelsManager implements PluginManager {
             worldUnloading = new CompletableFuture<>();
             this.plugin
                 .get(WorldsManager.class)
-                .unloadBukkitWorld(world, false, Settings.getLobbySpawn(), true)
+                .unloadBukkitWorld(
+                    world,
+                    saveChunks,
+                    level::isChunkInside,
+                    Settings.getLobbySpawn(),
+                    true
+                )
                 .thenAccept(worldUnloading::complete);
         }
 
@@ -284,7 +291,7 @@ public class LevelsManager implements PluginManager {
             }
             if (unload) {
                 boolean finalSuccess = success;
-                this.unloadLevelAsync(levelId).thenAccept(success2 -> result.complete(finalSuccess && success2));
+                this.unloadLevelAsync(levelId, false).thenAccept(success2 -> result.complete(finalSuccess && success2));
             } else {
                 result.complete(success);
             }
@@ -295,7 +302,9 @@ public class LevelsManager implements PluginManager {
     public void saveLevelSettingsAndBlocks(@NonNull Level level) {
         this.levelsSettings.saveWorldSettings(level.getUniqueId());
         try {
-            level.getWorld().save();
+            // TODO Save just some exact chunks:
+            //  https://github.com/Slomix/ParkourBeat/issues/87
+            if (true) level.getWorld().save();
         } catch (Exception e) {
             this.plugin
                 .getLogger()
@@ -430,7 +439,13 @@ public class LevelsManager implements PluginManager {
             World world = entry.getKey();
             Level level = entry.getValue();
             this.levelsSettings.saveWorldSettings(level.getUniqueId());
-            this.worldsManager.unloadBukkitWorld(world, level.isEditing(), spawn, false);
+            this.worldsManager.unloadBukkitWorld(
+                world,
+                level.isEditing(),
+                level::isChunkInside,
+                spawn,
+                false
+            );
         }
     }
 

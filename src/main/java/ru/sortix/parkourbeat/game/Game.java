@@ -59,7 +59,7 @@ public class Game {
                         player.sendMessage("Точка спауна установлена неверно. Невозможно начать игру");
 
                         if (level.getWorld().getPlayers().isEmpty()) {
-                            levelsManager.unloadLevelAsync(levelId);
+                            levelsManager.unloadLevelAsync(levelId, false);
                         }
 
                         result.complete(null);
