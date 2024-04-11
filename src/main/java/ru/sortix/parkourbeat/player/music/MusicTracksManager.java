@@ -3,6 +3,9 @@ package ru.sortix.parkourbeat.player.music;
 import lombok.NonNull;
 import me.bomb.amusic.AMusic;
 import me.bomb.amusic.bukkit.AMusicBukkit;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import ru.sortix.parkourbeat.ParkourBeat;
@@ -84,17 +87,23 @@ public class MusicTracksManager implements PluginManager {
         this.aMusic.stopSound(player.getUniqueId());
     }
 
-    public void updateTrackFileInfo(@NonNull String trackName) {
-        this.plugin.getLogger().info("Updating file of track \"" + trackName + "\"");
+    public void updateTrackFileInfo(@NonNull CommandSender sender, @NonNull String trackName) {
+        sender.sendMessage(Component.text(
+            "Обновление трека \"" + trackName + "\"...", NamedTextColor.YELLOW));
         try {
             this.aMusic.loadPack(null, trackName, true);
             for (Player player : this.getPlayersWithPack(trackName)) {
-                player.sendMessage("Перезагрузка трека \"" + trackName + "\"...");
+                player.sendMessage(Component.text(
+                    "Перезагрузка трека \"" + trackName + "\"...", NamedTextColor.YELLOW));
                 this.aMusic.loadPack(player.getUniqueId(), trackName, false);
             }
             this.reloadAllTracks();
-            this.plugin.getLogger().info("File of track \"" + trackName + "\" updated successfully");
+            sender.sendMessage(Component.text(
+                "Файл трека \"" + trackName + "\" обновлён успешно", NamedTextColor.GREEN));
         } catch (Throwable t) {
+            sender.sendMessage(Component.text(
+                "Не удалось обновить трек \"" + trackName + "\": "
+                    + t.getMessage() + ". Подробности в консоли", NamedTextColor.RED));
             this.plugin.getLogger().log(Level.SEVERE, "Unable to update file of track \"" + trackName + "\"", t);
         }
     }
