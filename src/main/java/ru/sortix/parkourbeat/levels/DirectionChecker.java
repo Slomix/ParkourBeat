@@ -81,6 +81,14 @@ public class DirectionChecker {
         }
     }
 
+    public double getCoordinateWithSign(Location location) {
+        return getCoordinateWithSign(location.toVector());
+    }
+
+    public double getCoordinateWithSign(Vector vector) {
+        return (isNegative() ? -1 : 1) * getCoordinate(vector);
+    }
+
     public boolean isNegative() {
         return this.direction == Direction.NEGATIVE_X || this.direction == Direction.NEGATIVE_Z;
     }

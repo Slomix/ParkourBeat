@@ -4,11 +4,17 @@ import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
 import ru.sortix.parkourbeat.levels.Level;
@@ -31,6 +37,8 @@ public class Game {
     private final @NonNull Level level;
     private final @NonNull GameMoveHandler gameMoveHandler;
     private @NonNull State currentState = State.PREPARING;
+    private BukkitTask bossBarTask;
+    private BossBar bossBar;
 
     private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         this.levelsManager = plugin.get(LevelsManager.class);
@@ -148,6 +156,8 @@ public class Game {
         for (Player onlinePlayer : this.player.getWorld().getPlayers()) {
             this.player.hidePlayer(plugin, onlinePlayer);
         }
+
+        createBossBar();
     }
 
     public void setCurrentState(@NonNull State newState) {
@@ -183,7 +193,7 @@ public class Game {
 
         if (levelComplete) {
             this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
-            this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 0.5f, 1);
+            this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
         } else {
             this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
         }
@@ -202,11 +212,52 @@ public class Game {
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             this.player.showPlayer(plugin, onlinePlayer);
         }
+
+        removeBossBar();
     }
 
     public enum State {
         PREPARING,
         READY,
         RUNNING,
+    }
+
+    private void createBossBar() {
+        removeBossBar();
+
+        bossBar = Bukkit.createBossBar("Прогресс: 0%", BarColor.YELLOW, BarStyle.SOLID);
+        bossBar.addPlayer(player);
+
+        bossBarTask = Bukkit.getScheduler().runTaskTimer(getPlugin(), this::updateBossBar, 0L, 1L);
+    }
+
+    private void removeBossBar() {
+        if (bossBarTask != null && !bossBarTask.isCancelled()) {
+            bossBarTask.cancel();
+            bossBarTask = null;
+        }
+
+        if (bossBar != null) {
+            bossBar.removeAll();
+            bossBar = null;
+        }
+    }
+
+    private void updateBossBar() {
+        Location startPoint = this.level.getLevelSettings().getStartWaypoint();
+        Location endPoint = this.level.getLevelSettings().getFinishWaypoint();
+
+        double playerCoordinate = this.level.getLevelSettings().getDirectionChecker().getCoordinateWithSign(player.getLocation());
+        double startCoordinate = this.level.getLevelSettings().getDirectionChecker().getCoordinateWithSign(startPoint);
+        double endCoordinate = this.level.getLevelSettings().getDirectionChecker().getCoordinateWithSign(endPoint);
+
+        double traveledDistance = startCoordinate + playerCoordinate;
+        double totalDistance = endCoordinate - startCoordinate;
+        double progress = Math.min(1, Math.max(0, traveledDistance / totalDistance));
+
+        String message = String.format("Прогресс: %d%%", Math.round(progress * 100));
+
+        bossBar.setTitle(message);
+        bossBar.setProgress(progress);
     }
 }
