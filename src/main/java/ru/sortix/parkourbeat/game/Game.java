@@ -35,7 +35,6 @@ public class Game {
     private final @NonNull Level level;
     private final @NonNull GameMoveHandler gameMoveHandler;
     private @NonNull State currentState = State.PREPARING;
-    private double progress;
 
     private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         this.levelsManager = plugin.get(LevelsManager.class);
@@ -154,7 +153,7 @@ public class Game {
             this.player.hidePlayer(plugin, onlinePlayer);
         }
 
-        updateBossBar();
+        startUpdateBossBarTask();
     }
 
     public void setCurrentState(@NonNull State newState) {
@@ -223,17 +222,18 @@ public class Game {
             double endPoint = this.level.getEndPoint();
             double playerStartDistance = this.player.getLocation().distance(startPoint);
             double totalDistance = endPoint - startPoint;
+            double progress = playerStartDistance / totalDistance; 
             this.progress = playerStartDistance / totalDistance;
 
             // updbb + view progress
-            String message = String.format("Прогресс: %.2f%%", this.progress * 100);
+            String message = String.format("Прогресс: %.2f%%", progress * 100);
 
             if (bossBar == null) {
                 bossBar = Bukkit.createBossBar(message, BarColor.YELLOW, BarStyle.SOLID);
                 bossBar.addPlayer(player);
             } else {
                 bossBar.setTitle(message);
-                bossBar.setProgress(this.progress);
+                bossBar.setProgress(progress);
             }
         }, 0L, 20L); // rr every 1s
     }
