@@ -235,8 +235,8 @@ public class Game {
 
     private void startUpdateBossBarTask() {
         bossBarTask = Bukkit.getScheduler().runTaskTimer(getPlugin(), () -> {
-            double startPoint = this.level.getStartPoint();
-            double endPoint = this.level.getEndPoint();
+            double startPoint = this.level.getLevelSettings().getStartWaypoint()
+            double endPoint = this.level.getLevelSettings().getEndWaypoint()
             double playerStartDistance = this.player.getLocation().distance(startPoint);
             double totalDistance = endPoint - startPoint;
             double progress = playerStartDistance / totalDistance; 
