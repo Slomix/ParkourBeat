@@ -35,6 +35,7 @@ public class Game {
     private final @NonNull Level level;
     private final @NonNull GameMoveHandler gameMoveHandler;
     private @NonNull State currentState = State.PREPARING;
+    private BukkitTask bossBarTask;
 
     private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         this.levelsManager = plugin.get(LevelsManager.class);
@@ -207,6 +208,10 @@ public class Game {
         Plugin plugin = this.getPlugin();
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             this.player.showPlayer(plugin, onlinePlayer);
+        }
+
+        if (bossBarTask != null && !bossBarTask.isCancelled()) {
+            bossBarTask.cancel();
         }
     }
 
