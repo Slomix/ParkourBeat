@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.game;
 
 import lombok.Getter;
 import lombok.NonNull;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.GameMode;
@@ -31,6 +32,7 @@ public class Game {
     private final @NonNull Level level;
     private final @NonNull GameMoveHandler gameMoveHandler;
     private @NonNull State currentState = State.PREPARING;
+    private BossBar bossBar;
 
     private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         this.levelsManager = plugin.get(LevelsManager.class);
@@ -148,6 +150,11 @@ public class Game {
         for (Player onlinePlayer : this.player.getWorld().getPlayers()) {
             this.player.hidePlayer(plugin, onlinePlayer);
         }
+
+        // Создаем боссбар
+        this.bossBar = BossBar.bossBar(Component.text("Прогресс: 0%", NamedTextColor.YELLOW), 0, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
+        // Добавляем боссбар игроку
+        this.player.showBossBar(this.bossBar);
     }
 
     public void setCurrentState(@NonNull State newState) {
@@ -189,6 +196,9 @@ public class Game {
         }
 
         this.gameMoveHandler.getAccuracyChecker().reset();
+
+        // Удаляем боссбар
+        this.player.hideBossBar(this.bossBar);
     }
 
     public void forceStopLevelGame() {
@@ -202,6 +212,9 @@ public class Game {
         for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
             this.player.showPlayer(plugin, onlinePlayer);
         }
+
+        // Удаляем боссбар
+        this.player.hideBossBar(this.bossBar);
     }
 
     public enum State {
