@@ -191,15 +191,12 @@ public class Game {
             10, 10, 10
         );
 
-        // Асинхронный таск для звукаов после телепортации
-        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
-            if (levelComplete) {
-                this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
-                this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
-            } else {
-                this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
-            }
-        });
+        if (levelComplete) {
+            this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
+            this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
+        } else {
+            this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
+        }
 
         this.gameMoveHandler.getAccuracyChecker().reset();
     }
