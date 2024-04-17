@@ -3,7 +3,7 @@
 ### Plugin dependencies:
 
 - Paper 1.16.5+ (newer versions haven't been tested, but probably work too)
-- [AMusic 0.12](https://spigotmc.org/resources/108835)
+- [AMusic 0.13](https://spigotmc.org/resources/108835)
 
 # Building, testing, deployment
 
@@ -31,3 +31,8 @@
 - Restart server to load plugin
 - Edit all configs in `plugins/ParkourBeat` directory
 - Restart server to apply new configs
+
+# Information about collaboration
+
+### Discord-server
+https://discord.gg/eMbPn7nAUD
