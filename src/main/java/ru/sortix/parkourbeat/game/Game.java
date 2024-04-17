@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -13,6 +14,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.scheduler.BukkitTask;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
 import ru.sortix.parkourbeat.levels.Level;
@@ -35,10 +37,10 @@ public class Game {
     private final @NonNull Level level;
     private final @NonNull GameMoveHandler gameMoveHandler;
     private @NonNull State currentState = State.PREPARING;
-    private BossBar bossBar;
     private BukkitTask bossBarTask;
+    private BossBar bossBar;
 
-    public Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
+    private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         this.levelsManager = plugin.get(LevelsManager.class);
         this.player = player;
         this.level = level;
@@ -46,17 +48,9 @@ public class Game {
         this.prepareGame(plugin);
     }
 
-    public double getStartPoint() {
-        return this.level.getStartPoint();
-    }
-
-    public double getEndPoint() {
-        return this.level.getEndPoint();
-    }
-
     @NonNull
     public static CompletableFuture<Game> createAsync(
-            @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId, boolean preventWrongSpawn) {
+        @NonNull ParkourBeat plugin, @NonNull Player player, @NonNull UUID levelId, boolean preventWrongSpawn) {
         CompletableFuture<Game> result = new CompletableFuture<>();
         LevelsManager levelsManager = plugin.get(LevelsManager.class);
         levelsManager.loadLevel(levelId, null).thenAccept(level -> {
@@ -100,7 +94,7 @@ public class Game {
 
         if (!particleController.isLoaded()) {
             particleController.loadParticleLocations(
-                    settings.getWorldSettings().getWaypoints());
+                settings.getWorldSettings().getWaypoints());
         }
 
         this.player.setGameMode(GameMode.ADVENTURE);
@@ -163,7 +157,7 @@ public class Game {
             this.player.hidePlayer(plugin, onlinePlayer);
         }
 
-        startUpdateBossBarTask();
+        createBossBar();
     }
 
     public void setCurrentState(@NonNull State newState) {
@@ -198,7 +192,7 @@ public class Game {
         );
 
         // Асинхронный таск для звукаов после телепортации
-        Bukkit.getScheduler().runTask(getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(getPlugin(), () -> {
             if (levelComplete) {
                 this.player.playSound(this.player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1, 1);
                 this.player.playSound(this.player.getLocation(), Sound.ENTITY_SILVERFISH_DEATH, 1, 1);
@@ -222,9 +216,7 @@ public class Game {
             this.player.showPlayer(plugin, onlinePlayer);
         }
 
-        if (bossBarTask != null && !bossBarTask.isCancelled()) {
-            bossBarTask.cancel();
-        }
+        removeBossBar();
     }
 
     public enum State {
@@ -233,24 +225,42 @@ public class Game {
         RUNNING,
     }
 
-    private void startUpdateBossBarTask() {
-        bossBarTask = Bukkit.getScheduler().runTaskTimer(getPlugin(), () -> {
-            double startPoint = this.level.getLevelSettings().getStartWaypoint()
-            double endPoint = this.level.getLevelSettings().getEndWaypoint()
-            double playerStartDistance = this.player.getLocation().distance(startPoint);
-            double totalDistance = endPoint - startPoint;
-            double progress = playerStartDistance / totalDistance; 
-            this.progress = playerStartDistance / totalDistance;
+    private void createBossBar() {
+        removeBossBar();
 
-            // updbb + view progress
-            String message = String.format("Прогресс: %.2f%%", progress * 100);
+        bossBar = Bukkit.createBossBar("Прогресс: 0%", BarColor.YELLOW, BarStyle.SOLID);
+        bossBar.addPlayer(player);
 
-            if (bossBar == null) {
-                bossBar = Bukkit.createBossBar(message, BarColor.YELLOW, BarStyle.SOLID);
-                bossBar.addPlayer(player);
-            } else {
-                bossBar.setTitle(message);
-                bossBar.setProgress(progress);
-            }
-        }, 0L, 20L); // rr every 1s
+        bossBarTask = Bukkit.getScheduler().runTaskTimer(getPlugin(), this::updateBossBar, 0L, 1L);
     }
+
+    private void removeBossBar() {
+        if (bossBarTask != null && !bossBarTask.isCancelled()) {
+            bossBarTask.cancel();
+            bossBarTask = null;
+        }
+
+        if (bossBar != null) {
+            bossBar.removeAll();
+            bossBar = null;
+        }
+    }
+
+    private void updateBossBar() {
+        Location startPoint = this.level.getLevelSettings().getStartWaypoint();
+        Location endPoint = this.level.getLevelSettings().getFinishWaypoint();
+
+        double playerCoordinate = this.level.getLevelSettings().getDirectionChecker().getCoordinateWithSign(player.getLocation());
+        double startCoordinate = this.level.getLevelSettings().getDirectionChecker().getCoordinateWithSign(startPoint);
+        double endCoordinate = this.level.getLevelSettings().getDirectionChecker().getCoordinateWithSign(endPoint);
+
+        double traveledDistance = startCoordinate + playerCoordinate;
+        double totalDistance = endCoordinate - startCoordinate;
+        double progress = Math.min(1, Math.max(0, traveledDistance / totalDistance));
+
+        String message = String.format("Прогресс: %d%%", Math.round(progress * 100));
+
+        bossBar.setTitle(message);
+        bossBar.setProgress(progress);
+    }
+}
