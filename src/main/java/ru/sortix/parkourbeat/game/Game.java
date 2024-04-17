@@ -222,7 +222,7 @@ public class Game {
     }
 
     private void startUpdateBossBarTask() {
-        Bukkit.getScheduler().runTaskTimer(getPlugin(), () -> {
+        bossBarTask = Bukkit.getScheduler().runTaskTimer(getPlugin(), () -> {
             double startPoint = this.level.getStartPoint();
             double endPoint = this.level.getEndPoint();
             double playerStartDistance = this.player.getLocation().distance(startPoint);
