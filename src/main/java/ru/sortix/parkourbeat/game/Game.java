@@ -37,28 +37,21 @@ public class Game {
     private @NonNull State currentState = State.PREPARING;
     private BossBar bossBar;
     private BukkitTask bossBarTask;
-    private double startPoint;
-    private double endPoint;
 
     public Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         this.levelsManager = plugin.get(LevelsManager.class);
         this.player = player;
         this.level = level;
         this.gameMoveHandler = new GameMoveHandler(this);
-
-        // Фиксированые начальной и конечной точки уровня
-        this.setStartPoint(player.getLocation().getX(), player.getLocation().getZ());
-        this.setEndPoint(level.getFinish().getX(), level.getFinish().getZ());
-
         this.prepareGame(plugin);
     }
 
-    private void setStartPoint(double x, double z) {
-        this.startPoint = x + z; // Примерная логика фиксации начальной точки
+    public double getStartPoint() {
+        return this.level.getStartPoint();
     }
 
-    private void setEndPoint(double x, double z) {
-        this.endPoint = x + z; // Примерная логика фиксации конечной точки
+    public double getEndPoint() {
+        return this.level.getEndPoint();
     }
 
     @NonNull
