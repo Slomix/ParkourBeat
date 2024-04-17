@@ -154,12 +154,6 @@ public class Game {
             this.player.hidePlayer(plugin, onlinePlayer);
         }
 
-        double startPoint = this.level.getStartPoint();
-        double endPoint = this.level.getEndPoint();
-        double playerStartDistance = this.player.getLocation().distance(startPoint);
-        double totalDistance = endPoint - startPoint;
-        this.progress = playerStartDistance / totalDistance;
-
         updateBossBar();
     }
 
@@ -223,7 +217,7 @@ public class Game {
         RUNNING,
     }
 
-    private void updateBossBar() {
+    private void startUpdateBossBarTask() {
         Bukkit.getScheduler().runTaskTimer(getPlugin(), () -> {
             double startPoint = this.level.getStartPoint();
             double endPoint = this.level.getEndPoint();
