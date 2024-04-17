@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -11,7 +12,9 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.Vector;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
@@ -94,6 +97,9 @@ public class GameMoveHandler {
             "Точность: " + String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f) + "%",
             NamedTextColor.GREEN
         ));
+
+        // Добваление точности в Scoreboard
+        updateScoreboard(player);
     }
 
     public void onRunningState(@NonNull PlayerToggleSprintEvent event) {
@@ -152,5 +158,33 @@ public class GameMoveHandler {
                 }
             }
         }.runTaskTimer(this.game.getPlugin(), 0, 2);
+    }
+
+    private void updateScoreboard(Player player) {
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        Objective objective = scoreboard.registerNewObjective("sidebar", "dummy", Component.text("Название: &eParkourBeat"));
+        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+        String accuracyPlaceholder = String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f);
+        Component accuracyComponent = Component.text("Точность: &e" + accuracyPlaceholder + "%", NamedTextColor.GREEN);
+
+        objective.displayName(Component.text("&eParkourBeat"));
+        objective.getScore(Component.text("&7------------------------------")).setScore(11);
+        objective.getScore(Component.text("&f Прогресс: &e0%")).setScore(10);
+        objective.getScore(Component.text("&f Время: &e00:00")).setScore(9);
+        objective.getScore(accuracyComponent).setScore(8);
+        objective.getScore(Component.text("&f Комбо: &ex0")).setScore(7);
+        objective.getScore(Component.text("&f Очков: &e0")).setScore(6);
+        objective.getScore(Component.text("&7------------------------------")).setScore(5);
+        objective.getScore(Component.text("&f Карта: " + player.getWorld().getName())).setScore(4);
+        objective.getScore(Component.text("&f Текущий Пинг: &a" + getPing(player))).setScore(3);
+        objective.getScore(Component.text("&f TPS сервера: &a20")).setScore(2);
+        objective.getScore(Component.text("&7------------------------------")).setScore(1);
+
+        player.setScoreboard(scoreboard);
+    }
+
+    private int getPing(Player player) {
+        return player.getPing();
     }
 }
