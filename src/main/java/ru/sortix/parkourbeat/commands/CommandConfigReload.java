@@ -25,6 +25,6 @@ public class CommandConfigReload {
     @Permission(COMMAND_PERMISSION + ".configreload")
     public void onCommand(@Context Player player) {
         plugin.reloadConfig();
-        sender.sendMessage("§d§l| §fКонфигурация плагина была успешно перезагружена");
+        player.sendMessage("§d§l| §fКонфигурация плагина была успешно перезагружена");
     }
 }
