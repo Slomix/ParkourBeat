@@ -7,7 +7,6 @@ import dev.rollczi.litecommands.annotations.permission.Permission;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
-import ru.sortix.parkourbeat.data.Settings;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
@@ -17,7 +16,7 @@ import static ru.sortix.parkourbeat.constant.PermissionConstants.COMMAND_PERMISS
     name = "lvlspawn",
     aliases = {"levelspawn"})
 @RequiredArgsConstructor
-public class CommandLvlSpawn {
+public class CommandLevelSpawn {
 
     private final ParkourBeat plugin;
 
@@ -26,9 +25,9 @@ public class CommandLvlSpawn {
     public void onCommand(@Context Player player) {
         Game game = plugin.getGame(player);
         if (game == null || game.getCurrentState() != Game.State.RUNNING) {
-            player.sendMessage("Вы не в редакторе!");
+            player.sendMessage("Ошибка: Вы не в редакторе уровня");
             return;
         }
-        TeleportUtils.teleportAsync(this.plugin, player, game.getLevel().getSpawn());
+        TeleportUtils.teleportAsync(this.plugin, player, game.getLevel().getLevelSettings().getWorldSettings().getSpawn());
     }
 }
