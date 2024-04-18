@@ -1,3 +1,3 @@
-## - [Русский язык](docs/DOCS_RU.MD)
+## - [🇷🇺 • Прочитать документацию на русском языке](docs/DOCS_RU.MD)
 
-## - [English language](docs/DOCS_EN.MD)
+## - [🇺🇸 • Read the documentation in Russian](docs/DOCS_EN.MD)
