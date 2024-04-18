@@ -257,6 +257,10 @@ public class Game {
 
         String message = String.format("%d%%", Math.round(progress * 100));
 
+        Component subtitle = Component.text("Прогресс: ")
+            .append(Component.text(String.valueOf(Math.round(progress * 100)), NamedTextColor.YELLOW))
+            .append(Component.text("%", NamedTextColor.WHITE))
+
         bossBar.setTitle(message);
         bossBar.setProgress(progress);
     }
