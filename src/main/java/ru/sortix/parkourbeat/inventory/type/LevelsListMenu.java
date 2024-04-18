@@ -149,14 +149,14 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
 
             List<Component> lore = new ArrayList<>();
             if (this.displayTechInfo) {
-                lore.add(Component.text("UUID: " + gameSettings.getUniqueId(), NamedTextColor.YELLOW));
+                lore.add(Component.text("UUID мира: " + gameSettings.getUniqueId(), NamedTextColor.YELLOW));
             }
             if (gameSettings.getUniqueName() == null) {
-                lore.add(Component.text("Номер для команд: " + gameSettings.getUniqueNumber(), NamedTextColor.YELLOW));
+                lore.add(Component.text("ID карты: " + gameSettings.getUniqueNumber(), NamedTextColor.YELLOW));
             } else {
                 lore.add(Component.text("Название для команд: " + gameSettings.getUniqueName(), NamedTextColor.YELLOW));
             }
-            lore.add(Component.text("Создатель: " + gameSettings.getOwnerName(), NamedTextColor.YELLOW));
+            lore.add(Component.text("Строитель: " + gameSettings.getOwnerName(), NamedTextColor.YELLOW));
             if (this.displayTechInfo) {
                 lore.add(Component.text("UUID создателя: " + gameSettings.getOwnerId(), NamedTextColor.YELLOW));
             }
@@ -166,10 +166,12 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
                 + (gameSettings.getMusicTrack() == null
                 ? "отсутствует"
                 : gameSettings.getMusicTrack().getName()), NamedTextColor.YELLOW));
+            lore.add(Component.text("", NamedTextColor.GOLD));
             lore.add(Component.text("ЛКМ, чтобы играть", NamedTextColor.GOLD));
             lore.add(Component.text("ПКМ, чтобы наблюдать", NamedTextColor.GOLD));
+            lore.add(Component.text("", NamedTextColor.GOLD));
             if (gameSettings.isOwner(this.viewer, true, false)) {
-                lore.add(Component.text("Шифт + ЛКМ, чтобы редактировать", NamedTextColor.GOLD));
+                lore.add(Component.text("Шифт + ЛКМ, чтобы редактировать", NamedTextColor.LIME));
             }
             if (this.displayTechInfo) {
                 lore.add(Component.text("Шифт + ПКМ, чтобы скопировать UUID", NamedTextColor.GOLD));
