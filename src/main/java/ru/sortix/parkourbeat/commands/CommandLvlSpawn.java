@@ -4,31 +4,36 @@ import dev.rollczi.litecommands.annotations.command.Command;
 import dev.rollczi.litecommands.annotations.context.Context;
 import dev.rollczi.litecommands.annotations.execute.Execute;
 import dev.rollczi.litecommands.annotations.permission.Permission;
-import lombok.RequiredArgsConstructor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
-import ru.sortix.parkourbeat.activity.type.EditActivity;
-import ru.sortix.parkourbeat.world.TeleportUtils;
+import ru.sortix.parkourbeat.activity.ActivityManager;
+import ru.sortix.parkourbeat.activity.type.UserActivity;
+import ru.sortix.parkourbeat.levels.Level;
+import ru.sortix.parkourbeat.levels.LevelsManager;
 
-import static ru.sortix.parkourbeat.constant.PermissionConstants.COMMAND_PERMISSION;
-
-@Command(
-    name = "lvlspawn",
-    aliases = {"levelspawn"})
-@RequiredArgsConstructor
+@Command(name = "lvlspawn")
 public class CommandLvlSpawn {
 
     private final ParkourBeat plugin;
 
-    @Execute
-    @Permission(COMMAND_PERMISSION + ".lvlspawn")
-    public void onCommand(@Context Player player) {
-        if (!(plugin.getActivityManager().getActivity(player) instanceof EditActivity)) {
-            player.sendMessage("Вы не в редакторе");
-            return;
-        }
+    public CommandLvlSpawn(ParkourBeat plugin) {
+        this.plugin = plugin;
+    }
 
-        EditActivity activity = (EditActivity) this.plugin.getActivityManager().getActivity(player);
-        TeleportUtils.teleportAsync(this.plugin, player, activity.getLevel().getLevelSettings().getWorldSettings().getSpawn());
+    @Execute
+    @Permission("command.lvlspawn")
+    public void onCommand(@Context Player player) {
+        ActivityManager activityManager = plugin.get(ActivityManager.class);
+        UserActivity activity = activityManager.getActivity(player);
+        
+        if (activity != null && activity instanceof EditActivity) {
+            Level level = activity.getLevel();
+            Location spawnLocation = level.getSpawn();
+            player.teleport(spawnLocation);
+            player.sendMessage("Вы телепортированы на спавн уровня");
+        } else {
+            player.sendMessage("Вы не в редакторе");
+        }
     }
 }
