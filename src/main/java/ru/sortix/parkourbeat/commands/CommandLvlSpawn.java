@@ -28,7 +28,7 @@ public class CommandLvlSpawn {
             return;
         }
 
-        EditActivity activity = (EditActivity) plugin.getActivityManager().getActivity(player);
+        EditActivity activity = (EditActivity) this.plugin.getActivityManager().getActivity(player);
         TeleportUtils.teleportAsync(this.plugin, player, activity.getLevel().getLevelSettings().getWorldSettings().getSpawn());
     }
 }
