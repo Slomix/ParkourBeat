@@ -171,7 +171,7 @@ public class LevelsListMenu extends PaginatedMenu<ParkourBeat, GameSettings> {
             lore.add(Component.text("ПКМ, чтобы наблюдать", NamedTextColor.GOLD));
             lore.add(Component.text("", NamedTextColor.GOLD));
             if (gameSettings.isOwner(this.viewer, true, false)) {
-                lore.add(Component.text("Шифт + ЛКМ, чтобы редактировать", NamedTextColor.LIME));
+                lore.add(Component.text("Шифт + ЛКМ, чтобы редактировать", NamedTextColor.GREEN));
             }
             if (this.displayTechInfo) {
                 lore.add(Component.text("Шифт + ПКМ, чтобы скопировать UUID", NamedTextColor.GOLD));
