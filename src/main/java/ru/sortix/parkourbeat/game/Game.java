@@ -225,7 +225,7 @@ public class Game {
     private void createBossBar() {
         removeBossBar();
 
-        bossBar = Bukkit.createBossBar("Прогресс", BarColor.YELLOW, BarStyle.SOLID);
+        bossBar = Bukkit.createBossBar("0%", BarColor.YELLOW, BarStyle.SOLID);
         bossBar.addPlayer(player);
 
         bossBarTask = Bukkit.getScheduler().runTaskTimer(getPlugin(), this::updateBossBar, 0L, 1L);
