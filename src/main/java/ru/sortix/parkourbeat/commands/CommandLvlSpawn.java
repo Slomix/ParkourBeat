@@ -7,13 +7,14 @@ import dev.rollczi.litecommands.annotations.permission.Permission;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.activity.type.EditActivity;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
 import static ru.sortix.parkourbeat.constant.PermissionConstants.COMMAND_PERMISSION;
 
 @Command(
     name = "lvlspawn",
-    aliases = {"lspawn", "levelspawn", "spawnlvl", "spawnlevel"})
+    aliases = {"levelspawn"})
 @RequiredArgsConstructor
 public class CommandLvlSpawn {
 
@@ -22,11 +23,12 @@ public class CommandLvlSpawn {
     @Execute
     @Permission(COMMAND_PERMISSION + ".lvlspawn")
     public void onCommand(@Context Player player) {
-        if (!plugin.isPlayerInEditActivity(player)) {
-            player.sendMessage("Ошибка: Вы не в редакторе");
+        if (!(plugin.getActivityManager().getActivity(player) instanceof EditActivity)) {
+            player.sendMessage("Вы не в редакторе");
             return;
         }
 
-        TeleportUtils.teleportAsync(this.plugin, player, plugin.getEditActivity(player).getLevel().getLevelSettings().getWorldSettings().getSpawn());
+        EditActivity activity = (EditActivity) plugin.getActivityManager().getActivity(player);
+        TeleportUtils.teleportAsync(this.plugin, player, activity.getLevel().getLevelSettings().getWorldSettings().getSpawn());
     }
 }
