@@ -17,7 +17,7 @@ import static ru.sortix.parkourbeat.constant.PermissionConstants.COMMAND_PERMISS
     name = "lvlspawn",
     aliases = {"levelspawn"})
 @RequiredArgsConstructor
-public class CommandLevelSpawn {
+public class CommandLvlSpawn {
 
     private final ParkourBeat plugin;
 
