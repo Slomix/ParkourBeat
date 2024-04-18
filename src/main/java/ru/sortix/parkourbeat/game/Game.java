@@ -259,7 +259,7 @@ public class Game {
 
         Component subtitle = Component.text("Прогресс: ")
             .append(Component.text(String.valueOf(Math.round(progress * 100)), NamedTextColor.YELLOW))
-            .append(Component.text("%", NamedTextColor.WHITE))
+            .append(Component.text("%")
 
         bossBar.setTitle(message);
         bossBar.setProgress(progress);
