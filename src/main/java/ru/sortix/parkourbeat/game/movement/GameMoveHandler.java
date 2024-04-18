@@ -163,11 +163,11 @@ public class GameMoveHandler {
 
     private void updateScoreboard(Player player) {
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        Objective objective = scoreboard.registerNewObjective("sidebar", "dummy", "&eParkourBeat");
+        Objective objective = scoreboard.registerNewObjective("sidebar", "dummy", "§eParkourBeat");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         String accuracyPlaceholder = String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f);
-        String accuracyString = "Точность: &e" + accuracyPlaceholder + "%";
+        String accuracyString = "Точность: §e" + accuracyPlaceholder + "%";
 
         objective.getScore("§7------------------------------").setScore(11);
         objective.getScore("§f Прогресс: §e0%").setScore(10);
