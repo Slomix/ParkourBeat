@@ -163,27 +163,27 @@ public class GameMoveHandler {
 
     private void updateScoreboard(Player player) {
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        Objective objective = scoreboard.registerNewObjective("sidebar", "dummy", Component.text("Название: &eParkourBeat"));
+        Objective objective = scoreboard.registerNewObjective("sidebar", "dummy", "&eParkourBeat");
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         String accuracyPlaceholder = String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f);
-        Component accuracyComponent = Component.text("Точность: &e" + accuracyPlaceholder + "%", NamedTextColor.GREEN);
+        String accuracyString = "Точность: &e" + accuracyPlaceholder + "%";
 
-        objective.displayName(Component.text("&eParkourBeat"));
-        objective.getScore(Component.text("&7------------------------------")).setScore(11);
-        objective.getScore(Component.text("&f Прогресс: &e0%")).setScore(10);
-        objective.getScore(Component.text("&f Время: &e00:00")).setScore(9);
-        objective.getScore(accuracyComponent).setScore(8);
-        objective.getScore(Component.text("&f Комбо: &ex0")).setScore(7);
-        objective.getScore(Component.text("&f Очков: &e0")).setScore(6);
-        objective.getScore(Component.text("&7------------------------------")).setScore(5);
-        objective.getScore(Component.text("&f Карта: " + player.getWorld().getName())).setScore(4);
-        objective.getScore(Component.text("&f Текущий Пинг: &a" + getPing(player))).setScore(3);
-        objective.getScore(Component.text("&f TPS сервера: &a20")).setScore(2);
-        objective.getScore(Component.text("&7------------------------------")).setScore(1);
+        objective.getScore("§7------------------------------").setScore(11);
+        objective.getScore("§f Прогресс: §e0%").setScore(10);
+        objective.getScore("§f Время: §e00:00").setScore(9);
+        objective.getScore(accuracyString).setScore(8);
+        objective.getScore("§f Комбо: §ex0").setScore(7);
+        objective.getScore("§f Очков: §e0").setScore(6);
+        objective.getScore("§7------------------------------").setScore(5);
+        objective.getScore("§f Карта: " + player.getWorld().getName()).setScore(4);
+        objective.getScore("§f Текущий Пинг: §a" + getPing(player)).setScore(3);
+        objective.getScore("§f TPS сервера: §a20").setScore(2);
+        objective.getScore("§7------------------------------").setScore(1);
 
         player.setScoreboard(scoreboard);
     }
+
 
     private int getPing(Player player) {
         return player.getPing();
