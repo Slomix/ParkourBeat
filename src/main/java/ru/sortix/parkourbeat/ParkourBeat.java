@@ -91,6 +91,8 @@ public class ParkourBeat extends JavaPlugin {
                 new CommandSpawn(this),
                 new CommandTest(this),
                 new CommandTpToWorld(this),
+                new CommandConfigReload(this),
+                new CommandHelp(this),
                 new CommandUpdateTrack(this)
                 // Alphabet order
             )
