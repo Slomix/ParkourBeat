@@ -163,27 +163,26 @@ public class GameMoveHandler {
 
     private void updateScoreboard(Player player) {
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        Objective objective = scoreboard.registerNewObjective("sidebar", "dummy", "§eParkourBeat");
+        Objective objective = scoreboard.registerNewObjective("sidebar", "dummy", Component.text("ParkourBeat").color(NamedTextColor.YELLOW));
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         String accuracyPlaceholder = String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f);
-        String accuracyString = "Точность: §e" + accuracyPlaceholder + "%";
+        String accuracyString = Component.text("Точность: ").append(Component.text(accuracyPlaceholder + "%").color(NamedTextColor.YELLOW));
 
-        objective.getScore("§7------------------------------").setScore(11);
-        objective.getScore("§f Прогресс: §e0%").setScore(10);
-        objective.getScore("§f Время: §e00:00").setScore(9);
+        objective.getScore(Component.text("------------------------------").color(NamedTextColor.GRAY)).setScore(11);
+        objective.getScore(Component.text(" Прогресс: ").color(NamedTextColor.WHITE).append(Component.text("0%").color(NamedTextColor.YELLOW))).setScore(10);
+        objective.getScore(Component.text(" Время: ").color(NamedTextColor.WHITE).append(Component.text("00:00").color(NamedTextColor.YELLOW))).setScore(9);
         objective.getScore(accuracyString).setScore(8);
-        objective.getScore("§f Комбо: §ex0").setScore(7);
-        objective.getScore("§f Очков: §e0").setScore(6);
-        objective.getScore("§7------------------------------").setScore(5);
-        objective.getScore("§f Карта: " + player.getWorld().getName()).setScore(4);
-        objective.getScore("§f Текущий Пинг: §a" + getPing(player)).setScore(3);
-        objective.getScore("§f TPS сервера: §a20").setScore(2);
-        objective.getScore("§7------------------------------").setScore(1);
+        objective.getScore(Component.text(" Комбо: ").color(NamedTextColor.WHITE).append(Component.text("x0").color(NamedTextColor.YELLOW))).setScore(7);
+        objective.getScore(Component.text(" Очков: ").color(NamedTextColor.WHITE).append(Component.text("0").color(NamedTextColor.YELLOW))).setScore(6);
+        objective.getScore(Component.text("------------------------------").color(NamedTextColor.GRAY)).setScore(5);
+        objective.getScore(Component.text(" Карта: ").color(NamedTextColor.WHITE).append(Component.text(player.getWorld().getName()))).setScore(4);
+        objective.getScore(Component.text(" Текущий Пинг: ").color(NamedTextColor.WHITE).append(Component.text(String.valueOf(getPing(player))).color(NamedTextColor.GREEN))).setScore(3);
+        objective.getScore(Component.text(" TPS сервера: ").color(NamedTextColor.WHITE).append(Component.text("20").color(NamedTextColor.GREEN))).setScore(2);
+        objective.getScore(Component.text("------------------------------").color(NamedTextColor.GRAY)).setScore(1);
 
         player.setScoreboard(scoreboard);
     }
-
 
     private int getPing(Player player) {
         return player.getPing();
