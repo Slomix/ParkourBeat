@@ -33,6 +33,6 @@ public class CommandConfigReload {
     public void onCommand(@Context Player player) {
         plugin.reloadConfig();
         Settings.load(plugin, worldsManager, levelsManager);
-        player.sendMessage("§d§l| §fКонфигурация плагина была успешно перезагружена");
+        player.sendMessage(Component.text("Конфигурация плагина успешно перезагружена.", NamedTextColor.YELLOW));
     }
 }
