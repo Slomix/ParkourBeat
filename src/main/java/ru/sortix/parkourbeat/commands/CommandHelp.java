@@ -6,6 +6,8 @@ import dev.rollczi.litecommands.annotations.context.Context;
 import dev.rollczi.litecommands.annotations.execute.Execute;
 import dev.rollczi.litecommands.annotations.permission.Permission;
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.CommandSender;
 import ru.sortix.parkourbeat.ParkourBeat;
 
@@ -19,19 +21,19 @@ public class CommandHelp {
 
     @Execute
     public void onCommand(@Context CommandSender sender) {
-        sender.sendMessage("");
-        sender.sendMessage("§d§lParkourBeat");
-        sender.sendMessage("§e/create §f- §e открывает меню для создания своего уровня");
-        sender.sendMessage("§e/edit §f- §eоткрывает меню для редактирования ваших уровней");
-        sender.sendMessage("§e/delete §f- §eудаляет ваш уровень");
-        sender.sendMessage("§e/play §f- §eоткрывает меню с списком игровых уровней");
-        sender.sendMessage("§e/tptoworld §f- §eнаблюдать за определенным уровнем");
-        sender.sendMessage("");
-        sender.sendMessage("§c§lАдминистративное");
-        sender.sendMessage("§c/physicsdebug §f- §cвключает отладку пользовательской физики");
-        sender.sendMessage("§c/convertdata §f- §cконвертирует дату старого уровня в новый формат");
-        sender.sendMessage("§c/test §f- §cвключает тестовые функции");
-        sender.sendMessage("§c/updatetrack §f- §cобновляет проблемный трек");
-        sender.sendMessage("");
+        sender.sendMessage(Component.empty());
+        sender.sendMessage(Component.text("ParkourBeat", NamedTextColor.LIGHT_PURPLE));
+        sender.sendMessage(Component.text("/create - открывает меню для создания своего уровня", NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text("/edit - открывает меню для редактирования ваших уровней", NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text("/delete - удаляет ваш уровень", NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text("/play - открывает меню с списком игровых уровней", NamedTextColor.YELLOW));
+        sender.sendMessage(Component.text("/tptoworld - наблюдать за определенным уровнем", NamedTextColor.YELLOW));
+        sender.sendMessage(Component.empty());
+        sender.sendMessage(Component.text("Административное", NamedTextColor.RED));
+        sender.sendMessage(Component.text("/physicsdebug - включает отладку пользовательской физики", NamedTextColor.RED));
+        sender.sendMessage(Component.text("/convertdata - конвертирует дату старого уровня в новый формат", NamedTextColor.RED));
+        sender.sendMessage(Component.text("/test - включает тестовые функции", NamedTextColor.RED));
+        sender.sendMessage(Component.text("/updatetrack - обновляет проблемный трек", NamedTextColor.RED));
+        sender.sendMessage(Component.empty());
     }
 }
