@@ -162,15 +162,14 @@ public class GameMoveHandler {
         }.runTaskTimer(this.game.getPlugin(), 0, 2);
     }
 
-    // Скорборд
     private void updateScoreboard(Player player) {
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
-        Objective objective = scoreboard.registerNewObjective("sidebar", "dummy", Component.text("ParkourBeat").color(NamedTextColor.GOLD));
+        Objective objective = scoreboard.registerNewObjective("sidebar", "dummy", Component.text("ParkourBeat").color(NamedTextColor.YELLOW));
         objective.setDisplaySlot(DisplaySlot.SIDEBAR);
 
         String accuracyPlaceholder = String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f);
-        Component accuracyComponent = Component.text("Точность: ")
-                .append(Component.text(accuracyPlaceholder + "%").color(NamedTextColor.YELLOW));
+        Component accuracyComponent = Component.text("Точность: ").color(NamedTextColor.WHITE)
+            .append(Component.text(accuracyPlaceholder + "%").color(NamedTextColor.YELLOW));
 
         objective.getScore(Component.text("---------------------------").color(NamedTextColor.GRAY)).setScore(11);
         objective.getScore(Component.text(" Прогресс: ").color(NamedTextColor.WHITE).append(Component.text("0%").color(NamedTextColor.YELLOW))).setScore(10);
@@ -179,13 +178,14 @@ public class GameMoveHandler {
         objective.getScore(Component.text(" Комбо: ").color(NamedTextColor.WHITE).append(Component.text("x0").color(NamedTextColor.YELLOW))).setScore(7);
         objective.getScore(Component.text(" Очков: ").color(NamedTextColor.WHITE).append(Component.text("0").color(NamedTextColor.YELLOW))).setScore(6);
         objective.getScore(Component.text("---------------------------").color(NamedTextColor.GRAY)).setScore(5);
-        objective.getScore(Component.text(" Карта: ").color(NamedTextColor.WHITE).append(Component.text(player.getWorld().name()).color(NamedTextColor.YELLOW))).setScore(4);
+        objective.getScore(Component.text(" Карта: ").color(NamedTextColor.WHITE).append(Component.text(player.getWorld().getName()).color(NamedTextColor.YELLOW))).setScore(4);
         objective.getScore(Component.text(" Текущий Пинг: ").color(NamedTextColor.WHITE).append(Component.text(getPing(player)).color(NamedTextColor.GREEN))).setScore(3);
         objective.getScore(Component.text(" TPS сервера: ").color(NamedTextColor.WHITE).append(Component.text("20").color(NamedTextColor.GREEN))).setScore(2);
         objective.getScore(Component.text("---------------------------").color(NamedTextColor.GRAY)).setScore(1);
 
         player.setScoreboard(scoreboard);
     }
+
 
     private int getPing(Player player) {
         return player.getPing();
