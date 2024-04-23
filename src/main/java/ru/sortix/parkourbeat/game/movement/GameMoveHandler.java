@@ -162,6 +162,7 @@ public class GameMoveHandler {
         }.runTaskTimer(this.game.getPlugin(), 0, 2);
     }
 
+    // Скорборд
     private void updateScoreboard(Player player) {
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
         Objective objective = scoreboard.registerNewObjective("sidebar", "dummy", Component.text("ParkourBeat").color(NamedTextColor.GOLD));
