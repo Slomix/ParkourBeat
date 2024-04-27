@@ -140,6 +140,7 @@ public class GameMoveHandler {
 
                     Component whiteComponent = Component.text("Прогресс: ", NamedTextColor.WHITE);
 
+                    // Commit with Game.java rabotay
                     Component yellowComponent = Component.text(String.format("%d%%", Math.round(progress * 100)), NamedTextColor.YELLOW);
 
                     Component dvaComponenta = whiteComponent.append(yellowComponent);
