@@ -225,11 +225,13 @@ public class Game {
     private void createBossBar() {
         removeBossBar();
 
-        bossBar = Bukkit.createBossBar("0%", BarColor.YELLOW, BarStyle.SOLID);
+        String worldName = player.getWorld().getName();
+        bossBar = Bukkit.createBossBar(worldName, BarColor.YELLOW, BarStyle.SOLID);
         bossBar.addPlayer(player);
 
         bossBarTask = Bukkit.getScheduler().runTaskTimer(getPlugin(), this::updateBossBar, 0L, 1L);
     }
+
 
     private void removeBossBar() {
         if (bossBarTask != null && !bossBarTask.isCancelled()) {
@@ -255,7 +257,7 @@ public class Game {
         double totalDistance = endCoordinate - startCoordinate;
         double progress = Math.min(1, Math.max(0, traveledDistance / totalDistance));
 
-        String message = String.format("%d%%", Math.round(progress * 100));
+        String message = String.format("%d%%", BarColor.YELLOW, BarStyle.SOLID, Math.round(progress * 100));
 
         bossBar.setTitle(message);
         bossBar.setProgress(progress);
