@@ -40,6 +40,11 @@ public class Game {
     private @NonNull State currentState = State.PREPARING;
     private BukkitTask bossBarTask;
     private BossBar bossBar;
+    private double progress;
+
+    public double getProgress() {
+        return this.progress;
+    }
 
     private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         this.levelsManager = plugin.get(LevelsManager.class);
@@ -256,7 +261,7 @@ public class Game {
 
         double traveledDistance = startCoordinate + playerCoordinate;
         double totalDistance = endCoordinate - startCoordinate;
-        double progress = Math.min(1, Math.max(0, traveledDistance / totalDistance));
+        this.progress = Math.min(1, Math.max(0, traveledDistance / totalDistance));
 
         String message = String.format("§e§l%d%%", Math.round(progress * 100));
 
