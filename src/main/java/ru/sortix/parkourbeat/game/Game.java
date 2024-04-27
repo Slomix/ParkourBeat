@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -226,7 +227,7 @@ public class Game {
         removeBossBar();
 
         String worldName = player.getWorld().getName();
-        bossBar = Bukkit.createBossBar(worldName, BarColor.YELLOW, BarStyle.SOLID);
+        bossBar = Bukkit.createBossBar(worldName, NamedTextColor.YELLOW, TextDecoration.BOLD, BarColor.YELLOW, BarStyle.SOLID);
         bossBar.addPlayer(player);
 
         bossBarTask = Bukkit.getScheduler().runTaskTimer(getPlugin(), this::updateBossBar, 0L, 1L);
@@ -257,7 +258,7 @@ public class Game {
         double totalDistance = endCoordinate - startCoordinate;
         double progress = Math.min(1, Math.max(0, traveledDistance / totalDistance));
 
-        String message = String.format("%d%%", BarColor.YELLOW, BarStyle.SOLID, Math.round(progress * 100));
+        String message = String.format("%d%%", BarColor.YELLOW, BarStyle.SOLID, NamedTextColor.YELLOW, TextDecoration.BOLD, Math.round(progress * 100));
 
         bossBar.setTitle(message);
         bossBar.setProgress(progress);
