@@ -136,12 +136,21 @@ public class GameMoveHandler {
                     game.failLevel(failReasonFirstLine, failReasonSecondLine);
                 } else {
                     levelFailed = false;
+                    double progress = game.getProgress();
+
+                    Component whiteComponent = Component.text("Прогресс: ", NamedTextColor.WHITE);
+
+                    Component yellowComponent = Component.text(String.format("%d%%", Math.round(progress * 100)), NamedTextColor.YELLOW);
+
+                    Component dvaComponenta = whiteComponent.append(yellowComponent);
+                    
+                    String progressSubtitle = String.format("%d%%", Math.round(progress * 100));
                     player.sendTitle(
                         warnReasonFirstLine == null ? "" : warnReasonFirstLine,
-                        warnReasonSecondLine == null ? "" : warnReasonSecondLine,
+                        warnReasonSecondLine == null ? "" : warnReasonSecondLine + " " + dvaComponenta,
                         0, 5, 5
-                    );
-                    if (player.getNoDamageTicks() <= 0) {
+                   );
+                   if (player.getNoDamageTicks() <= 0) {
                         player.setHealth(player.getHealth() - NOT_SPRINT_DAMAGE_PER_PERIOD);
                         player.setNoDamageTicks(NOT_SPRINT_DAMAGE_PERIOD_TICKS);
                     }
