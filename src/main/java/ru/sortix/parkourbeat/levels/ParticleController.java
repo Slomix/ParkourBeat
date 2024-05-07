@@ -124,6 +124,15 @@ public class ParticleController {
                 List<Location> curvedPath =
                     createCurvedPath(currentPoint.getLocation(), nextPoint.getLocation(), height);
                 this.particleLocations.addAll(curvedPath);
+
+                // 4 партикла вокруг прыжка ⁛
+                // https://discord.com/channels/1079842075853459526/1216842384592343050/1227248288965726269
+                if (i == 0 && height > 0) {
+                    for (int j = 0; j < 4; j++) {
+                        Location particleLocation = currentPoint.getLocation().clone().add(0.3 * Math.cos(j * Math.PI / 2), 0, 0.3 * Math.sin(j * Math.PI / 2));
+                        this.particleLocations.add(particleLocation);
+                    }
+                }
             }
         }
         this.isLoaded = true;
