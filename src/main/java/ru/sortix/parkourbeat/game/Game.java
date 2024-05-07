@@ -65,7 +65,7 @@ public class Game {
                 // TODO Отключить данную проверку для уровней, прошедших модерацию
                 if (!LocationUtils.isValidSpawnPoint(level.getSpawn(), level.getLevelSettings())) {
                     if (preventWrongSpawn) {
-                        player.sendMessage("Точка спауна установлена неверно. Невозможно начать игру");
+                        player.sendMessage("Игра не может быть начата, поскольку точка спауна установлена неверно.");
 
                         if (level.getWorld().getPlayers().isEmpty()) {
                             levelsManager.unloadLevelAsync(levelId, false);
@@ -80,7 +80,7 @@ public class Game {
 
                 result.complete(new Game(plugin, player, level));
             } catch (Exception e) {
-                plugin.getLogger().log(java.util.logging.Level.SEVERE, "Unable to prepare game", e);
+                plugin.getLogger().log(java.util.logging.Level.SEVERE, "\n| Невозможно начать игру\n", e);
                 result.complete(null);
                 // TODO Отгружать мир
             }
@@ -136,12 +136,12 @@ public class Game {
         this.setCurrentState(State.RUNNING);
 
         if (!this.player.isSprinting() || this.player.isSneaking()) {
-            this.failLevel("§cЗажмите бег!", null);
+            this.failLevel("§cНе отпускайте клавишу Ctrl", null);
             return;
         }
 
         if (!((LivingEntity) this.player).isOnGround()) {
-            this.failLevel(null, "§cНе прыгайте без нужды!");
+            this.failLevel(null, "§cНе начинайте уровень с прыжка!");
             return;
         }
 
@@ -172,7 +172,7 @@ public class Game {
     }
 
     public void completeLevel() {
-        this.resetLevelGame("§aВы прошли уровень", null, true);
+        this.resetLevelGame("§a§lУровень Пройден!", null, true);
         TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn());
     }
 
