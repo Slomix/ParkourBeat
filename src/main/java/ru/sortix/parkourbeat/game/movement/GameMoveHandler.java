@@ -57,8 +57,8 @@ public class GameMoveHandler {
             this.game.start();
             if ((this.task == null || this.task.isCancelled()) && !player.isSprinting()) {
                 this.startDamageTask(player,
-                    "§cНе переставайте бежать", null,
-                    "§cВы остановились", null
+                    "§cНе отпускайте клавишу Ctrl!", null,
+                    "§cВы проиграли =(", null
                 );
             }
         }
@@ -75,7 +75,7 @@ public class GameMoveHandler {
             if (DISPLAY_DEBUG_FAIL_REASONS) {
                 this.game.failLevel("§cНеверный угол поворота: ", String.valueOf(angle));
             } else {
-                this.game.failLevel("§cНельзя бежать назад", null);
+                this.game.failLevel("§cНельзя бежать назад!", null);
             }
             return;
         }
@@ -85,7 +85,7 @@ public class GameMoveHandler {
                 double toPos = settings.getDirectionChecker().getCoordinate(to);
                 this.game.failLevel("§cНеверные координаты: ", fromPos + " -> " + toPos);
             } else {
-                this.game.failLevel("§cНельзя бежать назад", null);
+                this.game.failLevel("§cНельзя бежать назад!", null);
             }
             return;
         }
@@ -100,8 +100,8 @@ public class GameMoveHandler {
         Player player = event.getPlayer();
         if (!event.isSprinting()) {
             this.startDamageTask(player,
-                "§cНе переставайте бежать", null,
-                "§cВы остановились", null
+                "§cНе отпускайте клавишу Ctrl!", null,
+                "§cВы проиграли =(", null
             );
         } else {
             if (this.task != null) {
