@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -64,7 +65,7 @@ public class Game {
                 // TODO Отключить данную проверку для уровней, прошедших модерацию
                 if (!LocationUtils.isValidSpawnPoint(level.getSpawn(), level.getLevelSettings())) {
                     if (preventWrongSpawn) {
-                        player.sendMessage("Точка спауна установлена неверно. Невозможно начать игру");
+                        player.sendMessage("Игра не может быть начата, поскольку точка спауна установлена неверно.");
 
                         if (level.getWorld().getPlayers().isEmpty()) {
                             levelsManager.unloadLevelAsync(levelId, false);
@@ -79,7 +80,7 @@ public class Game {
 
                 result.complete(new Game(plugin, player, level));
             } catch (Exception e) {
-                plugin.getLogger().log(java.util.logging.Level.SEVERE, "Unable to prepare game", e);
+                plugin.getLogger().log(java.util.logging.Level.SEVERE, "\n| Невозможно начать игру\n", e);
                 result.complete(null);
                 // TODO Отгружать мир
             }
@@ -135,12 +136,12 @@ public class Game {
         this.setCurrentState(State.RUNNING);
 
         if (!this.player.isSprinting() || this.player.isSneaking()) {
-            this.failLevel("§cЗажмите бег!", null);
+            this.failLevel("§cНе отпускайте клавишу Ctrl", null);
             return;
         }
 
         if (!((LivingEntity) this.player).isOnGround()) {
-            this.failLevel(null, "§cНе прыгайте без нужды!");
+            this.failLevel(null, "§cНе начинайте уровень с прыжка!");
             return;
         }
 
@@ -171,7 +172,7 @@ public class Game {
     }
 
     public void completeLevel() {
-        this.resetLevelGame("§aВы прошли уровень", null, true);
+        this.resetLevelGame("§a§lУровень Пройден!", null, true);
         TeleportUtils.teleportAsync(this.getPlugin(), this.player, this.level.getSpawn());
     }
 
@@ -225,11 +226,13 @@ public class Game {
     private void createBossBar() {
         removeBossBar();
 
-        bossBar = Bukkit.createBossBar("0%", BarColor.YELLOW, BarStyle.SOLID);
+        String worldName = "§e§l" + player.getWorld().getName();
+        bossBar = Bukkit.createBossBar(worldName, BarColor.YELLOW, BarStyle.SOLID);
         bossBar.addPlayer(player);
 
         bossBarTask = Bukkit.getScheduler().runTaskTimer(getPlugin(), this::updateBossBar, 0L, 1L);
     }
+
 
     private void removeBossBar() {
         if (bossBarTask != null && !bossBarTask.isCancelled()) {
@@ -255,7 +258,7 @@ public class Game {
         double totalDistance = endCoordinate - startCoordinate;
         double progress = Math.min(1, Math.max(0, traveledDistance / totalDistance));
 
-        String message = String.format("%d%%", Math.round(progress * 100));
+        String message = String.format("§e§l%d%%", Math.round(progress * 100));
 
         bossBar.setTitle(message);
         bossBar.setProgress(progress);
