@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 
 public class MusicTracksManager implements PluginManager {
     public static final boolean LEGACY_MODE = true; // Valid non-cached tracks not present in AMusic.getPlaylists() in AMusic v0.12
-    private static final String PLAYLIST_SONG_NAME = "track";
 
     private final @NonNull ParkourBeat plugin;
     private final AMusic aMusic;
@@ -71,8 +70,6 @@ public class MusicTracksManager implements PluginManager {
 
         List<MusicTrack> result = new ArrayList<>();
         for (String songPlaylist : this.aMusic.getPlaylists()) {
-            List<String> soundNames = this.aMusic.getPlaylistSoundnames(songPlaylist);
-            if (soundNames.size() != 1 || !soundNames.iterator().next().equals(PLAYLIST_SONG_NAME)) continue;
             result.add(new MusicTrack(songPlaylist));
         }
         return Collections.unmodifiableList(result);
@@ -80,7 +77,7 @@ public class MusicTracksManager implements PluginManager {
 
     public void playSongFromLoadedResourcepack(@NonNull Player player) {
         this.aMusic.setRepeatMode(player.getUniqueId(), null);
-        this.aMusic.playSound(player.getUniqueId(), PLAYLIST_SONG_NAME);
+        this.aMusic.playSound(player.getUniqueId(), "track");
     }
 
     public void stopSongFromLoadedResourcepack(@NonNull Player player) {
