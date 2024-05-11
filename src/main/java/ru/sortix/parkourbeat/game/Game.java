@@ -6,7 +6,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -17,6 +16,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
+import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.ParticleController;
@@ -244,20 +244,25 @@ public class Game {
     }
 
     private void updateBossBar() {
-        Location startPoint = this.level.getLevelSettings().getStartWaypoint();
-        Location endPoint = this.level.getLevelSettings().getFinishWaypoint();
+        double progress = this.getPassedProgress();
+        this.bossBar.setTitle(String.format("%d%%", Math.round(progress * 100)));
+        this.bossBar.setProgress(progress);
+    }
 
-        double playerCoordinate = this.level.getLevelSettings().getDirectionChecker().getCoordinateWithSign(player.getLocation());
-        double startCoordinate = this.level.getLevelSettings().getDirectionChecker().getCoordinateWithSign(startPoint);
-        double endCoordinate = this.level.getLevelSettings().getDirectionChecker().getCoordinateWithSign(endPoint);
+    /**
+     * @return Value between 0.0 and 1.0
+     */
+    private double getPassedProgress() {
+        LevelSettings levelSettings = this.level.getLevelSettings();
+        DirectionChecker directionChecker = levelSettings.getDirectionChecker();
 
-        double traveledDistance = startCoordinate + playerCoordinate;
-        double totalDistance = endCoordinate - startCoordinate;
-        double progress = Math.min(1, Math.max(0, traveledDistance / totalDistance));
+        double startCoordinate = directionChecker.getCoordinateWithSign(levelSettings.getStartWaypoint());
+        double playerCoordinate = directionChecker.getCoordinateWithSign(this.player.getLocation());
+        double endCoordinate = directionChecker.getCoordinateWithSign(levelSettings.getFinishWaypoint());
 
-        String message = String.format("%d%%", Math.round(progress * 100));
+        double passedDistance = startCoordinate + playerCoordinate;
+        double totalLevelDistance = endCoordinate - startCoordinate;
 
-        bossBar.setTitle(message);
-        bossBar.setProgress(progress);
+        return Math.min(1, Math.max(0, passedDistance / totalLevelDistance));
     }
 }
