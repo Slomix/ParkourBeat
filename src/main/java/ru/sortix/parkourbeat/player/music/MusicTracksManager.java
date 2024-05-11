@@ -49,9 +49,9 @@ public class MusicTracksManager implements PluginManager {
     private List<MusicTrack> loadAllTracksLegacy() {
         List<MusicTrack> result = new ArrayList<>();
         Path path = new File(JavaPlugin.getPlugin(AMusicBukkit.class).getDataFolder(), "Music").toPath();
-        try (Stream<Path> paths = Files.walk(path)) {
-            paths.filter(Files::isRegularFile).forEach(file -> {
-                String songUniqueId = file.getParent().getFileName().toString();
+        try (Stream<Path> paths = Files.list(path)) {
+            paths.filter(Files::isDirectory).forEach(file -> {
+                String songUniqueId = file.getFileName().toString();
                 result.add(new MusicTrack(songUniqueId));
             });
         } catch (Exception e) {
