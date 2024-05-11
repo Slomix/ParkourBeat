@@ -1,47 +1,29 @@
 package ru.sortix.parkourbeat.levels;
 
-import lombok.Getter;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
-@RequiredArgsConstructor
-@Getter
-public class DirectionChecker {
-    private final @NonNull Direction direction;
-
+public record DirectionChecker(@NonNull DirectionChecker.Direction direction) {
     public boolean isCorrectDirection(@NonNull Location behind, @NonNull Location to) {
-        switch (direction) {
-            case NEGATIVE_X:
-                return behind.getX() >= to.getX();
-            case POSITIVE_X:
-                return behind.getX() <= to.getX();
-            case NEGATIVE_Z:
-                return behind.getZ() >= to.getZ();
-            case POSITIVE_Z:
-                return behind.getZ() <= to.getZ();
-            default:
-                throw new IllegalArgumentException("Invalid direction: " + this.direction);
-        }
+        return switch (direction) {
+            case NEGATIVE_X -> behind.getX() >= to.getX();
+            case POSITIVE_X -> behind.getX() <= to.getX();
+            case NEGATIVE_Z -> behind.getZ() >= to.getZ();
+            case POSITIVE_Z -> behind.getZ() <= to.getZ();
+        };
     }
 
     public boolean isAheadDirection(@NonNull Location location, double coordinate) {
-        switch (direction) {
-            case NEGATIVE_X:
-                return location.getX() < coordinate;
-            case POSITIVE_X:
-                return location.getX() > coordinate;
-            case NEGATIVE_Z:
-                return location.getZ() < coordinate;
-            case POSITIVE_Z:
-                return location.getZ() > coordinate;
-            default:
-                throw new IllegalArgumentException("Invalid direction: " + this.direction);
-        }
+        return switch (direction) {
+            case NEGATIVE_X -> location.getX() < coordinate;
+            case POSITIVE_X -> location.getX() > coordinate;
+            case NEGATIVE_Z -> location.getZ() < coordinate;
+            case POSITIVE_Z -> location.getZ() > coordinate;
+        };
     }
 
-    public void add(Vector vector, double value) {
+    public void add(@NonNull Vector vector, double value) {
         switch (direction) {
             case NEGATIVE_X:
                 vector.setX(vector.getX() - value);
@@ -56,41 +38,34 @@ public class DirectionChecker {
                 vector.setZ(vector.getZ() + value);
                 break;
             default:
-                throw new IllegalArgumentException("Invalid direction: " + direction);
+                throw new IllegalArgumentException("Invalid direction: " + this.direction);
         }
     }
 
-    public void subtract(Vector vector, double value) {
-        add(vector, -value);
-    }
-
-    public double getCoordinate(Location location) {
+    public double getCoordinate(@NonNull Location location) {
         return getCoordinate(location.toVector());
     }
 
-    public double getCoordinate(Vector vector) {
-        switch (direction) {
-            case NEGATIVE_X:
-            case POSITIVE_X:
-                return vector.getX();
-            case NEGATIVE_Z:
-            case POSITIVE_Z:
-                return vector.getZ();
-            default:
-                throw new IllegalArgumentException("Invalid direction: " + direction);
-        }
+    public double getCoordinate(@NonNull Vector vector) {
+        return switch (this.direction) {
+            case NEGATIVE_X, POSITIVE_X -> vector.getX();
+            case NEGATIVE_Z, POSITIVE_Z -> vector.getZ();
+        };
     }
 
-    public double getCoordinateWithSign(Location location) {
+    public double getCoordinateWithSign(@NonNull Location location) {
         return getCoordinateWithSign(location.toVector());
     }
 
-    public double getCoordinateWithSign(Vector vector) {
+    public double getCoordinateWithSign(@NonNull Vector vector) {
         return (isNegative() ? -1 : 1) * getCoordinate(vector);
     }
 
     public boolean isNegative() {
-        return this.direction == Direction.NEGATIVE_X || this.direction == Direction.NEGATIVE_Z;
+        return switch (this.direction) {
+            case NEGATIVE_X, NEGATIVE_Z -> true;
+            case POSITIVE_X, POSITIVE_Z -> false;
+        };
     }
 
     public enum Direction {

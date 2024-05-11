@@ -89,7 +89,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
             FileConfiguration gameSettingsConfig = new YamlConfiguration();
             FileConfiguration worldSettingsConfig = new YamlConfiguration();
 
-            this.gameSettingsDAO.set(gameSettings, gameSettingsConfig);
+            this.gameSettingsDAO.write(gameSettings, gameSettingsConfig);
             this.worldSettingsDAO.write(worldSettings, worldSettingsConfig);
 
             saveConfig(gameSettingsConfig, getFile(levelId, "game_settings.yml"));
@@ -156,7 +156,7 @@ public class FileLevelSettingDAO implements LevelSettingDAO {
         }
         try {
             FileConfiguration gameConfig = YamlConfiguration.loadConfiguration(gameSettingsFile);
-            return this.gameSettingsDAO.load(levelId, gameConfig);
+            return this.gameSettingsDAO.read(levelId, gameConfig);
         } catch (Exception e) {
             this.plugin.getLogger().log(Level.SEVERE, "Unable to load game settings from " + gameSettingsFile, e);
             return null;

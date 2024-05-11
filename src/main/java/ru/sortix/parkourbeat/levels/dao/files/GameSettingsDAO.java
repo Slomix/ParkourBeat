@@ -7,8 +7,8 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.configuration.file.FileConfiguration;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.levels.settings.GameSettings;
-import ru.sortix.parkourbeat.player.music.MusicTracksManager;
 import ru.sortix.parkourbeat.player.music.MusicTrack;
+import ru.sortix.parkourbeat.player.music.MusicTracksManager;
 
 import java.util.UUID;
 
@@ -16,7 +16,7 @@ import java.util.UUID;
 public class GameSettingsDAO {
     private final @NonNull ParkourBeat plugin;
 
-    public void set(@NonNull GameSettings gameSettings, @NonNull FileConfiguration config) {
+    public void write(@NonNull GameSettings gameSettings, @NonNull FileConfiguration config) {
         config.set("unique_name", gameSettings.getUniqueName());
         config.set("unique_number", gameSettings.getUniqueNumber());
         config.set("owner_id", gameSettings.getOwnerId().toString());
@@ -33,7 +33,7 @@ public class GameSettingsDAO {
     }
 
     @NonNull
-    public GameSettings load(@NonNull UUID uniqueId, @NonNull FileConfiguration config) {
+    public GameSettings read(@NonNull UUID uniqueId, @NonNull FileConfiguration config) {
         String uniqueName = config.getString("unique_name", null);
 
         int uniqueNumber = config.getInt("unique_number", -1);

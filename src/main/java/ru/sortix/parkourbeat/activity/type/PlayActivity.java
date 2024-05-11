@@ -24,11 +24,12 @@ public class PlayActivity extends UserActivity {
     private final @NonNull Game game;
     private final boolean isEditorGame;
     private final CustomPhysicsManager physicsManager;
+
     private PlayActivity(@NonNull Game game, boolean isEditorGame) {
         super(game.getPlugin(), game.getPlayer(), game.getLevel());
         this.game = game;
         this.isEditorGame = isEditorGame;
-        this.physicsManager = plugin.get(CustomPhysicsManager.class);
+        this.physicsManager = this.plugin.get(CustomPhysicsManager.class);
     }
 
     @NonNull

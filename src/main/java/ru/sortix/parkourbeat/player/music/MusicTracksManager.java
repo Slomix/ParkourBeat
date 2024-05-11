@@ -66,7 +66,7 @@ public class MusicTracksManager implements PluginManager {
     }
 
     @NonNull
-    public List<MusicTrack> getAllTracksModern() {
+    public List<MusicTrack> getAllTracks() {
         if (LEGACY_MODE) return this.legacyCachedTracks;
 
         List<MusicTrack> result = new ArrayList<>();
