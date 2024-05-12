@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.inventory.type.editor;
 
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.inventory.ItemStack;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.inventory.Heads;
@@ -13,6 +14,7 @@ import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.player.music.MusicTrack;
 import ru.sortix.parkourbeat.player.music.MusicTracksManager;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
@@ -34,7 +36,17 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
 
     @Override
     protected @NonNull ItemStack createItemDisplay(@NonNull MusicTrack musicTrack) {
-        return ItemUtils.modifyMeta(NOTE_HEAD.clone(), meta -> meta.displayName(Component.text(musicTrack.getName())));
+        return this.createTrackItem(musicTrack.getName());
+    }
+
+    private @NonNull ItemStack createTrackItem(@NonNull String name) {
+        return ItemUtils.modifyMeta(NOTE_HEAD.clone(), meta -> {
+            meta.displayName(Component.text(name).colorIfAbsent(NamedTextColor.GOLD));
+            meta.lore(Arrays.asList(
+                Component.text("ЛКМ - Классический режим", NamedTextColor.YELLOW),
+                Component.text("ПКМ - По частям (тестовый режим)", NamedTextColor.YELLOW)
+            ));
+        });
     }
 
     @Override
@@ -44,12 +56,17 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
             .getPlayer()
             .closeInventory());
         this.setPreviousPageItem(6, 7);
+        this.setItem(6, 1, this.createTrackItem("Без музыки"), event -> {
+            this.level.getLevelSettings().getGameSettings().setMusicTrack(null);
+            event.getPlayer().sendMessage("Вы сбросили трек");
+            event.getPlayer().closeInventory();
+        });
     }
 
     @Override
     protected void onClick(@NonNull ClickEvent event, @NonNull MusicTrack musicTrack) {
         this.level.getLevelSettings().getGameSettings().setMusicTrack(musicTrack);
-        event.getPlayer().sendMessage("Вы успешно установили песню: " + musicTrack.getName());
+        event.getPlayer().sendMessage("Вы установили трек \"" + musicTrack.getName() + "\"");
         event.getPlayer().closeInventory();
     }
 }
