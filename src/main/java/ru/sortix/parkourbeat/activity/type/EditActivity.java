@@ -136,14 +136,16 @@ public class EditActivity extends UserActivity {
         this.player.getInventory().clear();
 
         this.level.getLevelSettings().getParticleController().stopSpawnParticles();
-        this.level.setEditing(false);
 
         this.player.sendMessage(Component.text("Редактор уровня \"", NamedTextColor.WHITE)
             .append(this.level.getDisplayName())
             .append(Component.text("\" успешно остановлен", NamedTextColor.WHITE))
         );
 
-        this.plugin.get(LevelsManager.class).saveLevelSettingsAndBlocks(this.level);
+        if (this.level.isEditing()) { // Prevent double saving after LevelsManager disabling
+            this.level.setEditing(false);
+            this.plugin.get(LevelsManager.class).saveLevelSettingsAndBlocks(this.level);
+        }
     }
 
     public void startTesting() {

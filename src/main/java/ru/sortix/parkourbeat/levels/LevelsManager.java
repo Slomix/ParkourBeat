@@ -436,8 +436,12 @@ public class LevelsManager implements PluginManager {
 
         Location spawn = Settings.getLobbySpawn();
         for (Map.Entry<World, Level> entry : this.loadedLevelsByWorld.entrySet()) {
-            World world = entry.getKey();
             Level level = entry.getValue();
+            if (!level.isEditing()) continue;
+
+            level.setEditing(false); // Prevent double saving in EditActivity
+
+            World world = entry.getKey();
             this.levelsSettings.saveWorldSettings(level.getUniqueId());
             this.worldsManager.unloadBukkitWorld(
                 world,
