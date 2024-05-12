@@ -95,8 +95,31 @@ public class MusicTracksManager implements PluginManager {
         this.aMusic.stopSound(player.getUniqueId());
     }
 
-    public void updateTrackFileInfo(@NonNull CommandSender sender, @NonNull String trackName) {
-        sender.sendMessage(Component.text(
+    public boolean updateTrackFileInfo(@Nullable CommandSender sender, @NonNull String trackName) {
+        if (trackName.equals("*")) {
+            List<MusicTrack> allTracks = this.plugin.get(MusicTracksManager.class).getAllTracks();
+            if (sender != null) sender.sendMessage(Component.text(
+                "Обновление всех треков (" + allTracks.size() + ")...", NamedTextColor.YELLOW));
+            List<MusicTrack> failedTracks = new ArrayList<>();
+            for (MusicTrack track : allTracks) {
+                trackName = track.getName();
+                if (trackName.equals("*") || !this.updateTrackFileInfo(null, trackName)) {
+                    failedTracks.add(track);
+                }
+            }
+            if (failedTracks.isEmpty()) {
+                if (sender != null) sender.sendMessage(Component.text(
+                    "Обновление всех треков успешно завершено", NamedTextColor.GREEN));
+            } else {
+                if (sender != null) sender.sendMessage(Component.text(
+                    "Не удалось обновить некоторые треки: "
+                        + failedTracks.stream().map(MusicTrack::getName).collect(Collectors.joining(";")),
+                    NamedTextColor.RED));
+            }
+            return true;
+        }
+
+        if (sender != null) sender.sendMessage(Component.text(
             "Обновление трека \"" + trackName + "\"...", NamedTextColor.YELLOW));
         try {
             this.aMusic.loadPack(null, trackName, true);
@@ -106,13 +129,15 @@ public class MusicTracksManager implements PluginManager {
                 this.aMusic.loadPack(player.getUniqueId(), trackName, false);
             }
             this.reloadAllTracks();
-            sender.sendMessage(Component.text(
+            if (sender != null) sender.sendMessage(Component.text(
                 "Файл трека \"" + trackName + "\" обновлён успешно", NamedTextColor.GREEN));
+            return true;
         } catch (Throwable t) {
-            sender.sendMessage(Component.text(
+            if (sender != null) sender.sendMessage(Component.text(
                 "Не удалось обновить трек \"" + trackName + "\": "
                     + t.getMessage() + ". Подробности в консоли", NamedTextColor.RED));
             this.plugin.getLogger().log(Level.SEVERE, "Unable to update file of track \"" + trackName + "\"", t);
+            return false;
         }
     }
 
