@@ -108,10 +108,6 @@ public class PlayActivity extends UserActivity {
         Game.State state = this.game.getCurrentState();
         GameMoveHandler gameMoveHandler = this.game.getGameMoveHandler();
 
-        if (false && event.getPlayer().getName().equals("Dymeth")) {
-            event.getPlayer().sendMessage("state=" + state);
-        }
-
         if (state == Game.State.PREPARING) {
             gameMoveHandler.onPreparingState(event);
         } else if (state == Game.State.READY) {
