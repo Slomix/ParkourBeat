@@ -20,5 +20,6 @@ public class ActivityListener implements Listener {
     @EventHandler
     public void on(PlayerQuitEvent event) {
         this.manager.switchActivity(event.getPlayer(), null, null);
+        this.manager.getPacketsAdapter().onPlayerQuit(event.getPlayer());
     }
 }

@@ -28,7 +28,7 @@ public class GameSettingsDAO {
 
         MusicTrack musicTrack = gameSettings.getMusicTrack();
         if (musicTrack != null) {
-            config.set("music_track_id", musicTrack.getUniqueId());
+            config.set("music_track_id", musicTrack.getId());
             if (gameSettings.isUseTrackPieces()) {
                 config.set("use_track_pieces", true);
             }
@@ -69,12 +69,12 @@ public class GameSettingsDAO {
         boolean customPhysicsEnabled = config.getBoolean("custom_physics_enabled", true);
 
         MusicTrack musicTrack = null;
-        String songUniqueId = config.getString("music_track_id");
-        if (songUniqueId != null) {
-            musicTrack = this.plugin.get(MusicTracksManager.class).createSongByUniqueId(songUniqueId);
+        String trackUniqueId = config.getString("music_track_id");
+        if (trackUniqueId != null) {
+            musicTrack = this.plugin.get(MusicTracksManager.class).getPlatform().getTrackById(trackUniqueId);
         }
 
-        boolean useTrackPieces = config.getBoolean("use_track_pieces", false);
+        boolean useTrackPieces = musicTrack != null && config.getBoolean("use_track_pieces", false);
 
         return new GameSettings(
             uniqueId,

@@ -1,8 +1,9 @@
 package ru.sortix.parkourbeat.activity;
 
+import com.comphenix.protocol.ProtocolLibrary;
+import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.Location;
-import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -15,22 +16,29 @@ import ru.sortix.parkourbeat.lifecycle.PluginManager;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ActivityManager implements PluginManager {
     private final ParkourBeat plugin;
     private final ActivityListener listener;
+    @Getter
+    private final ActivityPacketsAdapterImpl packetsAdapter;
     private final Map<Player, UserActivity> activities = new ConcurrentHashMap<>();
     private final BukkitTask movementController;
 
     public ActivityManager(@NonNull ParkourBeat plugin) {
         this.plugin = plugin;
         this.listener = new ActivityListener(this);
-        Server server = this.plugin.getServer();
-        server.getPluginManager().registerEvents(this.listener, this.plugin);
-        this.movementController = server.getScheduler()
+        this.packetsAdapter = new ActivityPacketsAdapterImpl(this.plugin);
+
+        this.plugin.getServer().getPluginManager().registerEvents(this.listener, this.plugin);
+        ProtocolLibrary.getProtocolManager().addPacketListener(this.packetsAdapter);
+        this.movementController = this.plugin.getServer().getScheduler()
             .runTaskTimer(
                 this.plugin,
                 () -> {
@@ -45,6 +53,7 @@ public class ActivityManager implements PluginManager {
     @Override
     public void disable() {
         this.movementController.cancel();
+        ProtocolLibrary.getProtocolManager().removePacketListener(this.packetsAdapter);
         HandlerList.unregisterAll(this.listener);
         for (Player player : new HashSet<>(this.activities.keySet())) {
             this.setActivity(player, null);
@@ -57,7 +66,9 @@ public class ActivityManager implements PluginManager {
     }
 
     @NonNull
-    public Collection<UserActivity> getAllActivities() { return this.activities.values(); }
+    public Collection<UserActivity> getAllActivities() {
+        return this.activities.values();
+    }
 
     private void setActivity(@NonNull Player player, @Nullable UserActivity newActivity) {
         UserActivity previousActivity = this.activities.get(player);

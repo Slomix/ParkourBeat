@@ -2,6 +2,7 @@ package ru.sortix.parkourbeat.game;
 
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -14,7 +15,10 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.ParkourBeat;
+import ru.sortix.parkourbeat.activity.ActivityManager;
+import ru.sortix.parkourbeat.activity.ActivityPacketsAdapter;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
@@ -31,22 +35,25 @@ import java.util.concurrent.CompletableFuture;
 
 @Getter
 public class Game {
-    public static final double BLOCKS_PER_SECOND = 5.612;
+    public static final double BLOCKS_PER_SECOND = 5.6123;
 
     private final @NonNull LevelsManager levelsManager;
     private final @NonNull MusicTracksManager musicTracksManager;
+    private final @NonNull ActivityPacketsAdapter packetsAdapter;
     private final @NonNull Player player;
     private final @NonNull Level level;
     private final @NonNull GameMoveHandler gameMoveHandler;
     private final @NonNull MusicMode musicMode;
+    @Setter
     private @NonNull State currentState = State.PREPARING;
     private BukkitTask bossBarTask;
     private BossBar bossBar;
-    private int lastTrackSectionNumber = 0;
+    private volatile int lastTrackPieceNumber = 0;
 
     private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         this.levelsManager = plugin.get(LevelsManager.class);
         this.musicTracksManager = plugin.get(MusicTracksManager.class);
+        this.packetsAdapter = plugin.get(ActivityManager.class).getPacketsAdapter();
         this.player = player;
         this.level = level;
         this.gameMoveHandler = new GameMoveHandler(this);
@@ -114,7 +121,7 @@ public class Game {
         MusicTrack musicTrack = settings.getGameSettings().getMusicTrack();
         if (musicTrack == null || musicTrack.isResourcepackCurrentlySet(this.player)) return;
 
-        if (!musicTrack.isAvailable()) {
+        if (!musicTrack.isStillAvailable()) {
             this.player.sendMessage("Трек \"" + musicTrack.getName() + "\" в данный момент недоступен для загрузки");
             return;
         }
@@ -122,7 +129,6 @@ public class Game {
         this.setCurrentState(State.PREPARING);
 
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-
             boolean startedSuccessfully = musicTrack.setResourcepackAsync(this.getPlugin(), this.player);
             if (startedSuccessfully) return;
 
@@ -157,10 +163,12 @@ public class Game {
         this.level.getLevelSettings().getParticleController().startSpawnParticles(this.player);
 
         if (this.musicMode == MusicMode.PIECES) {
-            this.musicTracksManager.prepareForPlaying(this.player);
+            this.packetsAdapter.setWatchingPosition(this.player, true);
+            this.musicTracksManager.getPlatform().disableRepeatMode(this.player);
+            this.musicTracksManager.setTrackPiecesSendingEnabled(this, true);
         } else if (this.musicMode == MusicMode.FULL_TRACK) {
-            this.musicTracksManager.prepareForPlaying(this.player);
-            this.musicTracksManager.startFullTrack(this.player);
+            this.musicTracksManager.getPlatform().disableRepeatMode(this.player);
+            this.musicTracksManager.getPlatform().startPlayingTrackFull(this.player);
         }
 
         Plugin plugin = this.levelsManager.getPlugin();
@@ -170,24 +178,19 @@ public class Game {
 
         createBossBar();
 
-        this.tick();
+        this.tryToSendTrackPiece();
     }
 
-    public void tick() {
-        if (this.currentState != State.RUNNING) return;
-        if (this.musicMode != MusicMode.PIECES) return;
-
-        double distance = this.getPassedDistance();
-        int positionSoundSectionNumber = (int) Math.floor(distance / BLOCKS_PER_SECOND) + 1;
-        if (positionSoundSectionNumber > this.lastTrackSectionNumber) {
-            this.musicTracksManager.startTrackPiece(this.player, positionSoundSectionNumber);
-        }
-        this.lastTrackSectionNumber = positionSoundSectionNumber;
+    public void tryToSendTrackPiece() {
+        double distance = this.getPassedDistance(true);
+        int trackSectionNumber = (int) Math.floor(distance / BLOCKS_PER_SECOND) + 1;
+        if (trackSectionNumber <= this.lastTrackPieceNumber) return;
+        this.lastTrackPieceNumber = trackSectionNumber;
+        this.sendTrackPiece(trackSectionNumber, distance);
     }
 
-    public void setCurrentState(@NonNull State newState) {
-        if (this.currentState == newState) return;
-        this.currentState = newState;
+    private void sendTrackPiece(int trackSectionNumber, double distance) {
+        this.musicTracksManager.getPlatform().startPlayingTrackPiece(this.player, trackSectionNumber);
     }
 
     public void failLevel(@Nullable String reasonFirstLine, @Nullable String reasonSecondLine) {
@@ -224,13 +227,20 @@ public class Game {
         }
 
         this.gameMoveHandler.getAccuracyChecker().reset();
-        this.lastTrackSectionNumber = 0;
     }
 
     public void forceStopLevelGame() {
         this.player.setHealth(20);
         this.player.setGameMode(GameMode.ADVENTURE);
-        this.getPlugin().get(MusicTracksManager.class).stopSongFromLoadedResourcepack(this.player);
+
+        if (this.musicMode == MusicMode.PIECES) {
+            this.musicTracksManager.setTrackPiecesSendingEnabled(this, false);
+            this.packetsAdapter.setWatchingPosition(this.player, false);
+            this.musicTracksManager.getPlatform().stopPlayingTrackPiece(this.player, this.lastTrackPieceNumber);
+            this.lastTrackPieceNumber = 0;
+        } else if (this.musicMode == MusicMode.FULL_TRACK) {
+            this.musicTracksManager.getPlatform().stopPlayingTrackFull(this.player);
+        }
 
         this.level.getLevelSettings().getParticleController().stopSpawnParticlesForPlayer(this.player);
 
@@ -280,18 +290,29 @@ public class Game {
      * @return Value between 0.0 and 1.0
      */
     private double getPassedProgress() {
-        double passedProgress = this.getPassedDistance() / this.level.getLevelSettings().getTotalLevelDistance();
+        double passedProgress = this.getPassedDistance(false) / this.level.getLevelSettings().getTotalLevelDistance();
         if (passedProgress >= 0 && passedProgress <= 1) return passedProgress;
         throw new IllegalArgumentException("Wrong passed progress: " + passedProgress);
     }
 
     /**
+     * @param realtime If true position can be accessed asynchronously at any time
      * @return Distance in blocks from 0.0 to level distance
      */
-    private double getPassedDistance() {
+    private double getPassedDistance(boolean realtime) {
         LevelSettings levelSettings = this.level.getLevelSettings();
 
-        double playerPos = levelSettings.getDirectionChecker().getCoordinate(this.player.getLocation());
+        double playerPos;
+        if (realtime) {
+            playerPos = levelSettings.getDirectionChecker().getCoordinate(this.player.getLocation());
+        } else {
+            Vector position = this.packetsAdapter.getPosition(this.player);
+            if (position == null) {
+                playerPos = levelSettings.getDirectionChecker().getCoordinate(this.player.getLocation());
+            } else {
+                playerPos = levelSettings.getDirectionChecker().getCoordinate(position);
+            }
+        }
         double startPos = levelSettings.getStartPosition();
 
         double passedDistance = playerPos < startPos

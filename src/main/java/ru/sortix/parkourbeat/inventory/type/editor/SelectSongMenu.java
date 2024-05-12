@@ -31,7 +31,7 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
 
     @Override
     protected @NonNull Collection<MusicTrack> getAllItems() {
-        return this.plugin.get(MusicTracksManager.class).getAllTracks();
+        return this.plugin.get(MusicTracksManager.class).getPlatform().getAllTracks();
     }
 
     @Override

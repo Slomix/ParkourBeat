@@ -20,6 +20,6 @@ public class CommandUpdateTrack {
     @Execute
     @Permission(COMMAND_PERMISSION + ".updatetrack")
     public void onCommand(@Context CommandSender sender, @Arg String... trackName) {
-        this.plugin.get(MusicTracksManager.class).updateTrackFileInfo(sender, String.join(" ", trackName));
+        this.plugin.get(MusicTracksManager.class).updateTrackArchive(sender, String.join(" ", trackName));
     }
 }

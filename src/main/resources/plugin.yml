@@ -3,4 +3,6 @@ main: ru.sortix.parkourbeat.ParkourBeat
 version: 0.5
 api-version: 1.13
 author: Sortix, Bomb
-depend: [ AMusic ]
+depend:
+  - AMusic
+  - ProtocolLib
