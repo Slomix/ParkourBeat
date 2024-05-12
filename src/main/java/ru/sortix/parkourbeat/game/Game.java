@@ -42,7 +42,7 @@ public class Game {
     private @NonNull State currentState = State.PREPARING;
     private BukkitTask bossBarTask;
     private BossBar bossBar;
-    private int lastTrackSectionNumber = -1;
+    private int lastTrackSectionNumber = 0;
 
     private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         this.levelsManager = plugin.get(LevelsManager.class);
@@ -169,6 +169,8 @@ public class Game {
         }
 
         createBossBar();
+
+        this.tick();
     }
 
     public void tick() {
@@ -176,7 +178,7 @@ public class Game {
         if (this.musicMode != MusicMode.PIECES) return;
 
         double distance = this.getPassedDistance();
-        int positionSoundSectionNumber = (int) Math.round(distance / BLOCKS_PER_SECOND);
+        int positionSoundSectionNumber = (int) Math.floor(distance / BLOCKS_PER_SECOND) + 1;
         if (positionSoundSectionNumber > this.lastTrackSectionNumber) {
             this.musicTracksManager.startTrackPiece(this.player, positionSoundSectionNumber);
         }
@@ -222,7 +224,7 @@ public class Game {
         }
 
         this.gameMoveHandler.getAccuracyChecker().reset();
-        this.lastTrackSectionNumber = -1;
+        this.lastTrackSectionNumber = 0;
     }
 
     public void forceStopLevelGame() {
