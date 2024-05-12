@@ -27,8 +27,8 @@ public class GameSettings {
 
     private final long createdAtMills;
     private @Setter boolean customPhysicsEnabled;
-    @Setter
     private @Nullable MusicTrack musicTrack;
+    private boolean useTrackPieces;
 
     @NonNull
     public Component getDisplayName() {
@@ -64,5 +64,11 @@ public class GameSettings {
             return false;
         }
         return sender instanceof ConsoleCommandSender;
+    }
+
+    public void setMusicTrack(@Nullable MusicTrack musicTrack, boolean useTrackPieces) {
+        if (musicTrack == null) useTrackPieces = false;
+        this.musicTrack = musicTrack;
+        this.useTrackPieces = useTrackPieces;
     }
 }

@@ -29,6 +29,9 @@ public class GameSettingsDAO {
         MusicTrack musicTrack = gameSettings.getMusicTrack();
         if (musicTrack != null) {
             config.set("music_track_id", musicTrack.getUniqueId());
+            if (gameSettings.isUseTrackPieces()) {
+                config.set("use_track_pieces", true);
+            }
         }
     }
 
@@ -71,7 +74,19 @@ public class GameSettingsDAO {
             musicTrack = this.plugin.get(MusicTracksManager.class).createSongByUniqueId(songUniqueId);
         }
 
+        boolean useTrackPieces = config.getBoolean("use_track_pieces", false);
+
         return new GameSettings(
-                    uniqueId, uniqueName, uniqueNumber, ownerId, ownerName, displayName, createdAtMills, customPhysicsEnabled, musicTrack);
+            uniqueId,
+            uniqueName,
+            uniqueNumber,
+            ownerId,
+            ownerName,
+            displayName,
+            createdAtMills,
+            customPhysicsEnabled,
+            musicTrack,
+            useTrackPieces
+        );
     }
 }

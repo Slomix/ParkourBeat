@@ -57,7 +57,7 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
             .closeInventory());
         this.setPreviousPageItem(6, 7);
         this.setItem(6, 1, this.createTrackItem("Без музыки"), event -> {
-            this.level.getLevelSettings().getGameSettings().setMusicTrack(null);
+            this.level.getLevelSettings().getGameSettings().setMusicTrack(null, false);
             event.getPlayer().sendMessage("Вы сбросили трек");
             event.getPlayer().closeInventory();
         });
@@ -65,7 +65,8 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
 
     @Override
     protected void onClick(@NonNull ClickEvent event, @NonNull MusicTrack musicTrack) {
-        this.level.getLevelSettings().getGameSettings().setMusicTrack(musicTrack);
+        boolean useTrackPieces = !event.isLeft();
+        this.level.getLevelSettings().getGameSettings().setMusicTrack(musicTrack, useTrackPieces);
         event.getPlayer().sendMessage("Вы установили трек \"" + musicTrack.getName() + "\"");
         event.getPlayer().closeInventory();
     }

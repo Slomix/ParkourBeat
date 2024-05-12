@@ -12,6 +12,7 @@ import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.inventory.type.editor.SelectSongMenu;
 import ru.sortix.parkourbeat.lifecycle.PluginManager;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class MusicTracksManager implements PluginManager {
@@ -75,9 +77,18 @@ public class MusicTracksManager implements PluginManager {
         return Collections.unmodifiableList(result);
     }
 
-    public void playSongFromLoadedResourcepack(@NonNull Player player) {
+    public void prepareForPlaying(@NonNull Player player) {
         this.aMusic.setRepeatMode(player.getUniqueId(), null);
+    }
+
+    public void startFullTrack(@NonNull Player player) {
+        this.aMusic.stopSound(player.getUniqueId());
         this.aMusic.playSound(player.getUniqueId(), "track");
+    }
+
+    public void startTrackPiece(@NonNull Player player, int trackPieceNumber) {
+        this.aMusic.stopSound(player.getUniqueId());
+        this.aMusic.playSound(player.getUniqueId(), String.valueOf(trackPieceNumber));
     }
 
     public void stopSongFromLoadedResourcepack(@NonNull Player player) {

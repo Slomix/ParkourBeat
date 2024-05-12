@@ -31,19 +31,30 @@ import java.util.concurrent.CompletableFuture;
 
 @Getter
 public class Game {
+    public static final double BLOCKS_PER_SECOND = 5.612;
+
     private final @NonNull LevelsManager levelsManager;
+    private final @NonNull MusicTracksManager musicTracksManager;
     private final @NonNull Player player;
     private final @NonNull Level level;
     private final @NonNull GameMoveHandler gameMoveHandler;
+    private final @NonNull MusicMode musicMode;
     private @NonNull State currentState = State.PREPARING;
     private BukkitTask bossBarTask;
     private BossBar bossBar;
+    private int lastTrackSectionNumber = -1;
 
     private Game(@NonNull ParkourBeat plugin, @NonNull Player player, @NonNull Level level) {
         this.levelsManager = plugin.get(LevelsManager.class);
+        this.musicTracksManager = plugin.get(MusicTracksManager.class);
         this.player = player;
         this.level = level;
         this.gameMoveHandler = new GameMoveHandler(this);
+        this.musicMode = level.getLevelSettings().getGameSettings().getMusicTrack() == null
+            ? MusicMode.DISABLED
+            : (level.getLevelSettings().getGameSettings().isUseTrackPieces()
+            ? MusicMode.PIECES
+            : MusicMode.FULL_TRACK);
         this.prepareGame(plugin);
     }
 
@@ -143,12 +154,13 @@ public class Game {
             return;
         }
 
-        LevelSettings settings = this.level.getLevelSettings();
-        settings.getParticleController().startSpawnParticles(this.player);
+        this.level.getLevelSettings().getParticleController().startSpawnParticles(this.player);
 
-        MusicTrack musicTrack = settings.getGameSettings().getMusicTrack();
-        if (musicTrack != null) {
-            this.getPlugin().get(MusicTracksManager.class).playSongFromLoadedResourcepack(this.player);
+        if (this.musicMode == MusicMode.PIECES) {
+            this.musicTracksManager.prepareForPlaying(this.player);
+        } else if (this.musicMode == MusicMode.FULL_TRACK) {
+            this.musicTracksManager.prepareForPlaying(this.player);
+            this.musicTracksManager.startFullTrack(this.player);
         }
 
         Plugin plugin = this.levelsManager.getPlugin();
@@ -157,6 +169,18 @@ public class Game {
         }
 
         createBossBar();
+    }
+
+    public void tick() {
+        if (this.currentState != State.RUNNING) return;
+        if (this.musicMode != MusicMode.PIECES) return;
+
+        double distance = this.getPassedDistance();
+        int positionSoundSectionNumber = (int) Math.round(distance / BLOCKS_PER_SECOND);
+        if (positionSoundSectionNumber > this.lastTrackSectionNumber) {
+            this.musicTracksManager.startTrackPiece(this.player, positionSoundSectionNumber);
+        }
+        this.lastTrackSectionNumber = positionSoundSectionNumber;
     }
 
     public void setCurrentState(@NonNull State newState) {
@@ -198,6 +222,7 @@ public class Game {
         }
 
         this.gameMoveHandler.getAccuracyChecker().reset();
+        this.lastTrackSectionNumber = -1;
     }
 
     public void forceStopLevelGame() {

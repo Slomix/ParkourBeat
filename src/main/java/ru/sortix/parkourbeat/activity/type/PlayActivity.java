@@ -123,6 +123,7 @@ public class PlayActivity extends UserActivity {
 
     @Override
     public void onTick() {
+        this.game.tick();
     }
 
     @Override
