@@ -18,8 +18,10 @@ public class LevelSettings {
     private final @NonNull GameSettings gameSettings;
     private final @NonNull ParticleController particleController;
     private final @NonNull DirectionChecker directionChecker;
-    private final @NonNull Location startWaypoint;
-    private final @NonNull Location finishWaypoint;
+    private final @NonNull Location startWaypoint, finishWaypoint;
+    private final double startPosition, finishPosition;
+    private final double minPosition, maxPosition;
+    private final double totalLevelDistance;
 
     public LevelSettings(@NonNull ParkourBeat plugin,
                          @NonNull World world,
@@ -29,10 +31,19 @@ public class LevelSettings {
         this.worldSettings = worldSettings;
         this.gameSettings = gameSettings;
         this.directionChecker = new DirectionChecker(worldSettings.getDirection());
-        this.particleController =
-            new ParticleController(plugin, world, this.directionChecker);
+        this.particleController = new ParticleController(plugin, world, this.directionChecker);
+
         this.startWaypoint = worldSettings.getStartWaypoint().toLocation(world);
         this.finishWaypoint = worldSettings.getFinishWaypoint().toLocation(world);
+
+        this.startPosition = this.directionChecker.getCoordinate(this.startWaypoint);
+        this.finishPosition = this.directionChecker.getCoordinate(this.finishWaypoint);
+
+        this.minPosition = Math.min(this.startPosition, this.finishPosition);
+        this.maxPosition = Math.max(this.startPosition, this.finishPosition);
+
+        this.totalLevelDistance = this.maxPosition - this.minPosition;
+
         // optional check is list sorted
         this.worldSettings.sortWaypoints(this.directionChecker);
     }

@@ -16,7 +16,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.game.movement.GameMoveHandler;
-import ru.sortix.parkourbeat.levels.DirectionChecker;
 import ru.sortix.parkourbeat.levels.Level;
 import ru.sortix.parkourbeat.levels.LevelsManager;
 import ru.sortix.parkourbeat.levels.ParticleController;
@@ -253,16 +252,24 @@ public class Game {
      * @return Value between 0.0 and 1.0
      */
     private double getPassedProgress() {
+        double passedProgress = this.getPassedDistance() / this.level.getLevelSettings().getTotalLevelDistance();
+        if (passedProgress >= 0 && passedProgress <= 1) return passedProgress;
+        throw new IllegalArgumentException("Wrong passed progress: " + passedProgress);
+    }
+
+    /**
+     * @return Distance in blocks from 0.0 to level distance
+     */
+    private double getPassedDistance() {
         LevelSettings levelSettings = this.level.getLevelSettings();
-        DirectionChecker directionChecker = levelSettings.getDirectionChecker();
 
-        double startCoordinate = directionChecker.getCoordinateWithSign(levelSettings.getStartWaypoint());
-        double playerCoordinate = directionChecker.getCoordinateWithSign(this.player.getLocation());
-        double endCoordinate = directionChecker.getCoordinateWithSign(levelSettings.getFinishWaypoint());
+        double playerPos = levelSettings.getDirectionChecker().getCoordinate(this.player.getLocation());
+        double startPos = levelSettings.getStartPosition();
 
-        double passedDistance = startCoordinate + playerCoordinate;
-        double totalLevelDistance = endCoordinate - startCoordinate;
+        double passedDistance = playerPos < startPos
+            ? startPos - playerPos
+            : playerPos - startPos;
 
-        return Math.min(1, Math.max(0, passedDistance / totalLevelDistance));
+        return Math.max(0, Math.min(levelSettings.getTotalLevelDistance(), passedDistance));
     }
 }

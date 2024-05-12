@@ -53,14 +53,6 @@ public record DirectionChecker(@NonNull DirectionChecker.Direction direction) {
         };
     }
 
-    public double getCoordinateWithSign(@NonNull Location location) {
-        return getCoordinateWithSign(location.toVector());
-    }
-
-    public double getCoordinateWithSign(@NonNull Vector vector) {
-        return (isNegative() ? -1 : 1) * getCoordinate(vector);
-    }
-
     public boolean isNegative() {
         return switch (this.direction) {
             case NEGATIVE_X, NEGATIVE_Z -> true;
