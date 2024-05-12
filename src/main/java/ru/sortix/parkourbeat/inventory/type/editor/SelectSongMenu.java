@@ -36,12 +36,8 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
 
     @Override
     protected @NonNull ItemStack createItemDisplay(@NonNull MusicTrack musicTrack) {
-        return this.createTrackItem(musicTrack.getName());
-    }
-
-    private @NonNull ItemStack createTrackItem(@NonNull String name) {
         return ItemUtils.modifyMeta(NOTE_HEAD.clone(), meta -> {
-            meta.displayName(Component.text(name).colorIfAbsent(NamedTextColor.GOLD));
+            meta.displayName(Component.text(musicTrack.getName()).colorIfAbsent(NamedTextColor.GOLD));
             meta.lore(Arrays.asList(
                 Component.text("ЛКМ - Классический режим", NamedTextColor.YELLOW),
                 Component.text("ПКМ - По частям (тестовый режим)", NamedTextColor.YELLOW)
@@ -56,11 +52,15 @@ public class SelectSongMenu extends PaginatedMenu<ParkourBeat, MusicTrack> {
             .getPlayer()
             .closeInventory());
         this.setPreviousPageItem(6, 7);
-        this.setItem(6, 1, this.createTrackItem("Без музыки"), event -> {
+        this.setItem(6, 1,
+            ItemUtils.modifyMeta(NOTE_HEAD.clone(),
+                meta -> meta.displayName(Component.text("Без музыки").colorIfAbsent(NamedTextColor.GOLD))),
+            event -> {
             this.level.getLevelSettings().getGameSettings().setMusicTrack(null, false);
             event.getPlayer().sendMessage("Вы сбросили трек");
             event.getPlayer().closeInventory();
-        });
+            }
+        );
     }
 
     @Override
