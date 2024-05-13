@@ -3,7 +3,9 @@ package ru.sortix.parkourbeat.game.movement;
 import lombok.Getter;
 import lombok.NonNull;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -12,6 +14,9 @@ import org.bukkit.event.player.PlayerToggleSprintEvent;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
+import org.bukkit.scoreboard.DisplaySlot;
+import org.bukkit.scoreboard.Objective;
+import org.bukkit.scoreboard.Scoreboard;
 import ru.sortix.parkourbeat.game.Game;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.levels.settings.WorldSettings;
@@ -94,6 +99,9 @@ public class GameMoveHandler {
             "Точность: " + String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f) + "%",
             NamedTextColor.GREEN
         ));
+
+        // Добваление точности в Scoreboard
+        updateScoreboard(player);
     }
 
     public void onRunningState(@NonNull PlayerToggleSprintEvent event) {
@@ -152,5 +160,35 @@ public class GameMoveHandler {
                 }
             }
         }.runTaskTimer(this.game.getPlugin(), 0, 2);
+    }
+
+    private void updateScoreboard(Player player) {
+        Scoreboard scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+        Objective objective = scoreboard.registerNewObjective("sidebar", "dummy", Component.text("ParkourBeat").color(NamedTextColor.YELLOW).asLegacyString());
+        objective.setDisplaySlot(DisplaySlot.SIDEBAR);
+
+        String accuracyPlaceholder = String.format("%.2f", this.accuracyChecker.getAccuracy() * 100f);
+        Component accuracyComponent = Component.text("Точность: ").color(NamedTextColor.WHITE)
+            .append(Component.text(accuracyPlaceholder + "%").color(NamedTextColor.YELLOW));
+
+        objective.getScore(Component.text("---------------------------").color(NamedTextColor.GRAY).asLegacyString()).setScore(11);
+        objective.getScore(Component.text(" Прогресс: ").color(NamedTextColor.WHITE).append(Component.text("0%").color(NamedTextColor.YELLOW)).asLegacyString()).setScore(10);
+        objective.getScore(Component.text(" Время: ").color(NamedTextColor.WHITE).append(Component.text("00:00").color(NamedTextColor.YELLOW)).asLegacyString()).setScore(9);
+        objective.getScore(accuracyComponent.asLegacyString()).setScore(8);
+        objective.getScore(Component.text(" Комбо: ").color(NamedTextColor.WHITE).append(Component.text("x0").color(NamedTextColor.YELLOW)).asLegacyString()).setScore(7);
+        objective.getScore(Component.text(" Очков: ").color(NamedTextColor.WHITE).append(Component.text("0").color(NamedTextColor.YELLOW)).asLegacyString()).setScore(6);
+        objective.getScore(Component.text("---------------------------").color(NamedTextColor.GRAY).asLegacyString()).setScore(5);
+        objective.getScore(Component.text(" Карта: ").color(NamedTextColor.WHITE).append(Component.text(player.getWorld().getName()).color(NamedTextColor.YELLOW)).asLegacyString()).setScore(4);
+        objective.getScore(Component.text(" Текущий Пинг: ").color(NamedTextColor.WHITE).append(Component.text(getPing(player)).color(NamedTextColor.GREEN)).asLegacyString()).setScore(3);
+        objective.getScore(Component.text(" TPS сервера: ").color(NamedTextColor.WHITE).append(Component.text("20").color(NamedTextColor.GREEN)).asLegacyString()).setScore(2);
+        objective.getScore(Component.text("---------------------------").color(NamedTextColor.GRAY).asLegacyString()).setScore(1);
+
+        player.setScoreboard(scoreboard);
+    }
+
+
+
+    private int getPing(Player player) {
+        return player.getPing();
     }
 }
