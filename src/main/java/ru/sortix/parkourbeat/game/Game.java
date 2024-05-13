@@ -15,7 +15,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.util.Vector;
 import ru.sortix.parkourbeat.ParkourBeat;
 import ru.sortix.parkourbeat.activity.ActivityManager;
 import ru.sortix.parkourbeat.activity.ActivityPacketsAdapter;
@@ -166,6 +165,7 @@ public class Game {
             this.packetsAdapter.setWatchingPosition(this.player, true);
             this.musicTracksManager.getPlatform().disableRepeatMode(this.player);
             this.musicTracksManager.setTrackPiecesSendingEnabled(this, true);
+            this.tryToSendTrackPiece();
         } else if (this.musicMode == MusicMode.FULL_TRACK) {
             this.musicTracksManager.getPlatform().disableRepeatMode(this.player);
             this.musicTracksManager.getPlatform().startPlayingTrackFull(this.player);
@@ -177,8 +177,6 @@ public class Game {
         }
 
         createBossBar();
-
-        this.tryToSendTrackPiece();
     }
 
     public void tryToSendTrackPiece() {
@@ -186,10 +184,10 @@ public class Game {
         int trackSectionNumber = (int) Math.floor(distance / BLOCKS_PER_SECOND) + 1;
         if (trackSectionNumber <= this.lastTrackPieceNumber) return;
         this.lastTrackPieceNumber = trackSectionNumber;
-        this.sendTrackPiece(trackSectionNumber, distance);
+        this.sendTrackPiece(trackSectionNumber);
     }
 
-    private void sendTrackPiece(int trackSectionNumber, double distance) {
+    private void sendTrackPiece(int trackSectionNumber) {
         this.musicTracksManager.getPlatform().startPlayingTrackPiece(this.player, trackSectionNumber);
     }
 
@@ -304,14 +302,9 @@ public class Game {
 
         double playerPos;
         if (realtime) {
-            playerPos = levelSettings.getDirectionChecker().getCoordinate(this.player.getLocation());
+            playerPos = levelSettings.getDirectionChecker().getCoordinate(this.packetsAdapter.getPosition(this.player));
         } else {
-            Vector position = this.packetsAdapter.getPosition(this.player);
-            if (position == null) {
-                playerPos = levelSettings.getDirectionChecker().getCoordinate(this.player.getLocation());
-            } else {
-                playerPos = levelSettings.getDirectionChecker().getCoordinate(position);
-            }
+            playerPos = levelSettings.getDirectionChecker().getCoordinate(this.player.getLocation());
         }
         double startPos = levelSettings.getStartPosition();
 

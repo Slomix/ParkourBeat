@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,7 +34,7 @@ public class ActivityPacketsAdapterImpl extends PacketAdapter implements Activit
     }
 
     @Override
-    @Nullable
+    @NonNull
     public Vector getPosition(@NonNull Player player) {
         Vector result = this.positions.get(player);
         if (result == null) {
