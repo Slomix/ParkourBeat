@@ -1,4 +1,4 @@
-![image](https://media.discordapp.net/attachments/1217570793936916546/1232448822274424863/parkourbeat_1.png)
+![image](https://private-user-images.githubusercontent.com/122743694/331800645-218ce2dc-a9e1-4c57-af10-3b185881877d.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MTYwMzY2MjUsIm5iZiI6MTcxNjAzNjMyNSwicGF0aCI6Ii8xMjI3NDM2OTQvMzMxODAwNjQ1LTIxOGNlMmRjLWE5ZTEtNGM1Ny1hZjEwLTNiMTg1ODgxODc3ZC5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjQwNTE4JTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI0MDUxOFQxMjQ1MjVaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT1iNTIwMjU0NjYwOTlmYzk4ZTdhOGRhOTZmODExNzY1MWE0ZDBiMmM1ZjRmYWFhM2I5YTJhNzExMTUzYWI2MGZmJlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCZhY3Rvcl9pZD0wJmtleV9pZD0wJnJlcG9faWQ9MCJ9.WnanFGJbXl0V18hs4AzMvuATklNuCFS2hf8YMeNyiVM)
 ## - [🇷🇺 • Прочитать документацию на русском языке](docs/DOCS_RU.MD)
 
 ## - [🇺🇸 • Read the documentation in English](docs/DOCS_EN.MD)
