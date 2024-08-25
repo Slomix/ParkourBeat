@@ -19,9 +19,11 @@ repositories {
     maven("https://repo.glaremasters.me/repository/concuncan")
     maven("https://repo.panda-lang.org/releases")
     maven("https://repo.dmulloy2.net/repository/public/") // ProtocolLib
+    maven("https://jitpack.io/") // CrossBundleLib
 }
 
 dependencies {
+    compileOnly(files("libs/paper-1.16.5.jar")) // TODO Support for other versions
     compileOnly("com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT")
     compileOnly("com.grinderwolf:slimeworldmanager-api:2.2.1")
     compileOnly("com.comphenix.protocol:ProtocolLib:5.1.0")
@@ -30,6 +32,14 @@ dependencies {
     shadow("dev.rollczi:litecommands-bukkit:3.4.0")
 
     annotationProcessor("org.projectlombok:lombok:1.18.30")
+
+    shadow("com.github.drupaldoesnotexists.crossbundlelib:bundlelib-core:1.2") {
+        exclude(group = "io.netty") // all modules
+    }
+    shadow("com.github.drupaldoesnotexists.crossbundlelib:bundlelib-adapter:1.2") {
+        exclude(group = "io.netty") // all modules
+    }
+    shadow("com.github.drupaldoesnotexists.crossbundlelib:bundlelib-v1_16:1.2")
 }
 
 configurations {
@@ -39,7 +49,7 @@ configurations {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_16
+    sourceCompatibility = JavaVersion.VERSION_17 // TODO Downgrade CrossBundleLib's Java version from 17 to 16
 }
 
 tasks {

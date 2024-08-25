@@ -27,6 +27,7 @@ import ru.sortix.parkourbeat.listeners.GamesListener;
 import ru.sortix.parkourbeat.physics.CustomPhysicsManager;
 import ru.sortix.parkourbeat.player.input.PlayersInputManager;
 import ru.sortix.parkourbeat.player.music.MusicTracksManager;
+import ru.sortix.parkourbeat.player.packet.bundle.PacketsManager;
 import ru.sortix.parkourbeat.world.WorldsListener;
 import ru.sortix.parkourbeat.world.WorldsManager;
 
@@ -63,6 +64,7 @@ public class ParkourBeat extends JavaPlugin {
         this.registerManager(LevelsManager::new);
         this.registerManager(PlayersInputManager::new);
         this.registerManager(CustomPhysicsManager::new);
+        this.registerManager(PacketsManager::new);
     }
 
     private void registerManager(@NonNull Function<ParkourBeat, PluginManager> commandConstructor) {

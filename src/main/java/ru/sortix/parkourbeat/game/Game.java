@@ -25,6 +25,8 @@ import ru.sortix.parkourbeat.levels.ParticleController;
 import ru.sortix.parkourbeat.levels.settings.LevelSettings;
 import ru.sortix.parkourbeat.player.music.MusicTrack;
 import ru.sortix.parkourbeat.player.music.MusicTracksManager;
+import ru.sortix.parkourbeat.player.packet.bundle.BundlePacketsSender;
+import ru.sortix.parkourbeat.player.packet.bundle.PacketsManager;
 import ru.sortix.parkourbeat.world.LocationUtils;
 import ru.sortix.parkourbeat.world.TeleportUtils;
 
@@ -35,6 +37,7 @@ import java.util.concurrent.CompletableFuture;
 @Getter
 public class Game {
     public static final double BLOCKS_PER_SECOND = 5.6123;
+    private static final boolean DEBUG_SOUND_SECTIONS = false;
 
     private final @NonNull LevelsManager levelsManager;
     private final @NonNull MusicTracksManager musicTracksManager;
@@ -43,6 +46,7 @@ public class Game {
     private final @NonNull Level level;
     private final @NonNull GameMoveHandler gameMoveHandler;
     private final @NonNull MusicMode musicMode;
+    private final @NonNull BundlePacketsSender bundlePacketsSender;
     @Setter
     private @NonNull State currentState = State.PREPARING;
     private BukkitTask bossBarTask;
@@ -61,6 +65,7 @@ public class Game {
             : (level.getLevelSettings().getGameSettings().isUseTrackPieces()
             ? MusicMode.PIECES
             : MusicMode.FULL_TRACK);
+        this.bundlePacketsSender = plugin.get(PacketsManager.class).getBundlePacketsSender();
         this.prepareGame(plugin);
     }
 
@@ -184,11 +189,28 @@ public class Game {
         int trackSectionNumber = (int) Math.floor(distance / BLOCKS_PER_SECOND) + 1;
         if (trackSectionNumber <= this.lastTrackPieceNumber) return;
         this.lastTrackPieceNumber = trackSectionNumber;
-        this.sendTrackPiece(trackSectionNumber);
+        this.sendTrackPiece(trackSectionNumber, distance);
     }
 
-    private void sendTrackPiece(int trackSectionNumber) {
+    private long sectionLastSentAtMills = System.currentTimeMillis();
+    private double previousDistance = 0;
+
+    private void sendTrackPiece(int trackSectionNumber, double distance) {
+        // TODO Disable watching if CrossBundleLib plugin isn't installed
+        this.packetsAdapter.startWatchingSoundPacketsBundle(this.player,
+            soundPackets -> this.bundlePacketsSender.sendPackets(this.player, soundPackets));
         this.musicTracksManager.getPlatform().startPlayingTrackPiece(this.player, trackSectionNumber);
+        if (DEBUG_SOUND_SECTIONS) {
+            long nowMills = System.currentTimeMillis();
+            this.player.sendMessage(
+                "[DEBUG] "
+                    + "section=" + trackSectionNumber + "; "
+                    + "time=" + (nowMills - this.sectionLastSentAtMills) + "; "
+                    + "distance=" + (distance - this.previousDistance)
+            );
+            this.sectionLastSentAtMills = nowMills;
+            this.previousDistance = distance;
+        }
     }
 
     public void failLevel(@Nullable String reasonFirstLine, @Nullable String reasonSecondLine) {
